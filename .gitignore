@@ -1,0 +1,7 @@
+# MacOS user ignore .DS_Store
+*.DS_Store
+
+# Agda
+*.agdai
+*.agda~
+MAlonzo/**
