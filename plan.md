@@ -1,16 +1,24 @@
 # Plan
 
-* PROJECT TITLE
-* YOUR NAME
-* STUDENT ID
-* SUPERVISOR NAME
+* Proving the Correctness of Rewrite Rules in LIFT’s Rewrite-Based System
+* Xueying Qin
+* 2335466
+* Supervisor: Michel Steuwer
 
 Week-by-week plan for the whole project. Update this as you go along.
 
 ## Winter semester
 
 * **Week 1**
+    * Attending introduction lecture
+    * Installing and configuring softwares
+    * Project repository setup
+    * Organsing references
+    * Summarising summer work
+    * Drafting project plan
 * **Week 2**
+    * Modifying and finalising project plan
+    * Start Implementation
 * **Week 3**
 * **Week 4**
 * **Week 5**
