@@ -10,10 +10,10 @@ Here's an overview of the structure as it stands:
 
 * `timelog.md` The time log for your project.
 * `plan.md` A skeleton week-by-week plan for the project. 
-* `data/` data you acquire during the project
 * `src/` source code for your project
 * `status_report/` the status report submitted in December
-* `meetings/` Records of the meetings you have during the project.
+* `docs/meetings/` Records of the meetings you have during the project.
+* `docs/proposal/` the project proposal
 * `dissertation/` source and for your project dissertation
 * `presentation/` your presentation
 
