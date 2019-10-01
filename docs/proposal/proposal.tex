@@ -1,0 +1,71 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+%
+% This is where the packages are declared
+
+\documentclass[]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1.5in,letterpaper]{geometry} % modify margins
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+
+\begin{document}
+
+%
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Proving the Correctness of Rewrite Rules in LIFT Rewite-Based System}
+\author{Xueying Qin - 2335466Q}
+\date{\small\today}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+\section{Introduction}
+The approach of LIFT is to provide high performance high-level programming with code portability. LIFT achieves this via a rewrite-based system to transform and optimise programs.
+
+\section{Description}
+The rewrite system of LIFT systematically transforms high-level algorithmic patterns into low-level high performance OpenCL code with equivalent functionality. During this process, a set of rewrite rules are applied. Ensuring the correctness of these rules is important for ensuring the functionality is not altered during the rewrite process. Currently, the correctness of these rules is only proven correct on paper and only for a subset of the used rules. Thus, in this project I will develop mechanical proofs using a proof assistant tool Agda to show the correctness of the rewrite rules used in LIFT code rewrite system.
+
+\section{LIFT Data Types and Semantics}
+\textbf{Source} \;idealised-opencl/src/main/scala/lift/core/semantics/Data.scala
+\begin{itemize}
+    \item \texttt{Data}
+    \begin{itemize}
+        \item \texttt{NatData}
+        \item \texttt{IndexData}
+        \item \texttt{ScalarData}
+        \begin{itemize}
+            \item \texttt{BoolData}
+            \item \texttt{IntData}
+            \item \texttt{FloatData}
+            \item \texttt{DoubleData}
+        \end{itemize}
+        \item \texttt{VectorData}
+        \item \texttt{ArrayData}
+        \item \texttt{TupleData}
+    \end{itemize}
+\end{itemize}
+
+\section{LIFT Primitives Types and Semantics}
+
+\section{Proving LIFT Rewrite Rules}
+
+\section{Look into ELEVATE Strategies as Extension}
+
+\section{Evaluation}
+
+% = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
+% % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\end{document}
