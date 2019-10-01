@@ -1,9 +1,9 @@
 # Timelog
 
-* PROJECT NAME
-* YOUR NAME
-* STUDENT_ID
-* SUPERVISOR NAME
+* Proving the Correctness of Rewrite Rules in LIFT’s Rewrite-Based System
+* Xueying Qin
+* 2335466
+* Supervisor: Michel Steuwer
 
 ## Guidance
 
@@ -14,13 +14,28 @@
 
 ## Week 1
 
-### 19 Oct 2019
-
-* *4 hours* Read the project guidance notes
-* *0.5 hour* Created GitLab repository and cloned the cookiecutter for the projects
-* *1 hour* Modified dissertation template, compiled  
-
-## 20 Oct 2019
-
+### 23 Sep 2019
 * *1 hour* meeting with supervisor
-* *2 hours* writing initial version of test harness
+* *2.5 hours* environment setup, installing Agda dependencies and configuring IDE spacemacs
+* *0.5 hours* reading project requirements and instructions
+* *1 hours* reading materials sent by supervior after meeting 
+
+### 24 Sep 2019
+* *4 hours* attending l4 project introduction lectures
+* *2 hours* organising references using Zotero
+
+### 25 Sep 2019
+* *2 hours* github repository setup
+* *2 hours* LIFT, ELEVATE and DPIA background reading
+
+### 26 Sep 2019
+* *1 hour* familiarising Agda key bindings in spacemacs
+* *2 hours* understanding LIFT source code, especially AST and primitives
+* *2 hours* background reading
+
+### 27 Sep 2019
+* *4 hours* gathering data types, primitives and rewrite rules from latest version of source code and papers
+
+## Week 2
+### 30 Sep 2019
+* *1 hour* documenting project plans and time log
