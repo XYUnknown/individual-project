@@ -10,5 +10,5 @@
 * stategies in ELEVATE
 
 ### TODOs (supervisor)
-* to decide communication tools [ ]
-* to provide latest source code [ ]
+* [ ] to decide communication tools 
+* [ ] to provide latest source code
