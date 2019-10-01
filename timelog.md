@@ -39,3 +39,9 @@
 ## Week 2
 ### 30 Sep 2019
 * *1 hour* documenting project plans and time log
+* *1 hour* background reading
+
+### 01 Oct 2019
+* *2 hours* drafting project proposal and gathering questions
+* *1 hour* meeting with supervisor
+* *0.5 hours* documenting information gethered from meeting
