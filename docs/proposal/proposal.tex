@@ -13,6 +13,9 @@
 \usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
 
+\usepackage{biblatex}
+\addbibresource{proposal.bib}
+
 \begin{document}
 
 %
@@ -58,14 +61,14 @@ in \texttt{ScalarData}.
 \subsection{LIFT Primitive Types and Semantics}
 There are a set of basic function declarations in LIFT, which define the high-level algorithmic patterns 
 of operations on arrays, such as \texttt{map}, \texttt{split}, \texttt{join}, \texttt{reduce}, \texttt{zip}, 
-etc. They are the primitives in LIFT that are used in both high-level and low-level expression. Preserving 
+etc. \cite{atkeydata} They are the primitives in LIFT that are used in both high-level and low-level expression. Preserving 
 their types to be identical after applying rewrite rules on high-level functions indicating the correctness 
 of rewrite rules. The types and semantics of them will be defined in Agda to assistant developing proofs.
 
 \subsection{Proving LIFT Rewrite Rules}
 The main aim of this project is to prove the correctness of six core algorithmic rules in LIFT, which are 
 iterate decomposition, reorder commutativity, split-join, reduction and partial reduction, simplification 
-rules and fussion rules. Other rules such as OpenCL-specific rules would be an extension to look into.
+rules and fussion rules \cite{steuwer2015patterns}. Other rules such as OpenCL-specific rules would be an extension to look into.
 
 \subsection{Proving ELEVATE Strategies as Extension}
 ELEVATE is a programming language that combines individual program transformations into programming 
@@ -81,6 +84,6 @@ to fix if there are issues.
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+\printbibliography
 
 \end{document}
