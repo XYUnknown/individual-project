@@ -8,7 +8,7 @@
 
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
-\usepackage[margin=1.5in,letterpaper]{geometry} % modify margins
+\usepackage[margin=1.2in,letterpaper]{geometry} % modify margins
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
@@ -30,38 +30,53 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 \section{Introduction}
-The approach of LIFT is to provide high performance high-level programming with code portability. LIFT achieves this via a rewrite-based system to transform and optimise programs.
+The approach of LIFT is to provide high performance high-level programming with code portability. 
+LIFT achieves this via a rewrite-based system to transform and optimise programs. The aim of this 
+project is using the proof assistant tool Agda to specify and verify a set of rewrite rules in LIFT 
+system.
 
-\section{Description}
-The rewrite system of LIFT systematically transforms high-level algorithmic patterns into low-level high performance OpenCL code with equivalent functionality. During this process, a set of rewrite rules are applied. Ensuring the correctness of these rules is important for ensuring the functionality is not altered during the rewrite process. Currently, the correctness of these rules is only proven correct on paper and only for a subset of the used rules. Thus, in this project I will develop mechanical proofs using a proof assistant tool Agda to show the correctness of the rewrite rules used in LIFT code rewrite system.
+\section{Motivation}
+The rewrite system of LIFT systematically transforms high-level algorithmic patterns into low-level 
+high performance OpenCL code with equivalent functionality. During this process, a set of rewrite 
+rules are applied. Ensuring the correctness of these rules is important for ensuring the functionality 
+is not altered during the rewrite process. Currently, the correctness of these rules is only proven 
+correct on paper and only for a subset of the used rules. Thus, in this project I will develop 
+mechanical proofs in Agda to show the correctness of the rewrite rules.
 
-\section{LIFT Data Types and Semantics}
-\textbf{Source} \;idealised-opencl/src/main/scala/lift/core/semantics/Data.scala
-\begin{itemize}
-    \item \texttt{Data}
-    \begin{itemize}
-        \item \texttt{NatData}
-        \item \texttt{IndexData}
-        \item \texttt{ScalarData}
-        \begin{itemize}
-            \item \texttt{BoolData}
-            \item \texttt{IntData}
-            \item \texttt{FloatData}
-            \item \texttt{DoubleData}
-        \end{itemize}
-        \item \texttt{VectorData}
-        \item \texttt{ArrayData}
-        \item \texttt{TupleData}
-    \end{itemize}
-\end{itemize}
+\section{Project Plan}
+Firstly, the data types and semantics of LIFT will be specified and a set of primitive types and semantics 
+will be defined. The core part of this project is then to prove the type of a function remains unchanged 
+after being rewritten by applying certain rewrite rule(s).
+\subsection{LIFT Data Types and Semantics}
+%\textbf{Source} \;idealised-opencl/src/main/scala/lift/core/semantics/Data.scala\\
+The six general data type in LIFT \texttt{NatData}, \texttt{IndexData}, \texttt{ScalarData}, 
+\texttt{VectorData}, \texttt{ArrayData} and \texttt{TupleData} are going to be sepcified. Specifically 
+for \texttt{ScalarData}, there are four sub-types which are \texttt{BoolData}, \texttt{IntData}, 
+\texttt{FloatData} and \texttt{DoubleData}. In this project we are not going distinguish those subtypes 
+in \texttt{ScalarData}.
 
-\section{LIFT Primitives Types and Semantics}
+\subsection{LIFT Primitive Types and Semantics}
+There are a set of basic function declarations in LIFT, which define the high-level algorithmic patterns 
+of operations on arrays, such as \texttt{map}, \texttt{split}, \texttt{join}, \texttt{reduce}, \texttt{zip}, 
+etc. They are the primitives in LIFT that are used in both high-level and low-level expression. Preserving 
+their types to be identical after applying rewrite rules on high-level functions indicating the correctness 
+of rewrite rules. The types and semantics of them will be defined in Agda to assistant developing proofs.
 
-\section{Proving LIFT Rewrite Rules}
+\subsection{Proving LIFT Rewrite Rules}
+The main aim of this project is to prove the correctness of six core algorithmic rules in LIFT, which are 
+iterate decomposition, reorder commutativity, split-join, reduction and partial reduction, simplification 
+rules and fussion rules. Other rules such as OpenCL-specific rules would be an extension to look into.
 
-\section{Look into ELEVATE Strategies as Extension}
+\subsection{Proving ELEVATE Strategies as Extension}
+ELEVATE is a programming language that combines individual program transformations into programming 
+optimisation strategies. As an extension, we would like to exam the correctness of ELEVATE strategies 
+of combining LIFT rewrite rules.
 
 \section{Evaluation}
+In this project, I would like to design effective semantics for simplification of developing proofs. 
+Moreover, developing effective lemmas to keep the modularity of proofs is also essential for this 
+project. Also, it is important to verify if the rules are correct and potentially propose strategies 
+to fix if there are issues.
 
 % = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
