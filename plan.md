@@ -20,6 +20,7 @@ Week-by-week plan for the whole project. Update this as you go along.
     * Modifying and finalising project plan
     * Start Implementation
 * **Week 3**
+    * Write proofs for identity rule and split-join rules
 * **Week 4**
 * **Week 5**
 * **Week 6**
