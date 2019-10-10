@@ -19,11 +19,17 @@ module lift.Primitives where
   zero-mul (suc m) = zero-mul m
 
   {- lemma 2 -}
-  empty-vec : (m : ℕ) → {t : Set} → Vec t (zero * m) ≡ Vec t zero
-  empty-vec zero {t} =  refl
-  empty-vec (suc m) {t} = empty-vec m {t}
+  empty-vecʳ : (m : ℕ) → {t : Set} → Vec t (zero * m) ≡ Vec t zero
+  empty-vecʳ zero {t} =  refl
+  empty-vecʳ (suc m) {t} = empty-vecʳ m {t}
+
+  {- lemma 3-}
+  empty-vecˡ : (m : ℕ) → {t : Set} → Vec t (m * zero) ≡ Vec t zero
+  empty-vecˡ zero {t} =  refl
+  empty-vecˡ (suc m) {t} =  empty-vecˡ m {t}
 
   split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
   split zero {zero} {t} [] = []
   split zero {suc m} {t} [] = [] ∷ (split zero {m} {t} [])
-  split (suc n) {m} {t} xs = {!!}
+  split (suc n) {zero} {t} _ = []
+  split (suc n) {suc m} {t} xs = {!!}
