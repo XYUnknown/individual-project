@@ -41,4 +41,4 @@ module lift.Primitives where
   {- primitive join -}
   join : {m n : ℕ} → {t : Set} → Vec (Vec t m) n → Vec t (n * m)
   join {m} {.0} {t} [] = []
-  join {m} {.(suc _)} {t} (xs ∷ xs₁) =  xs ++ join xs₁
+  join {m} {.(suc _)} {t} (xs ∷ xs₁) = xs ++ join xs₁
