@@ -6,10 +6,12 @@ module lift.Primitives where
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   open import Function using (_∘_)
 
+  {- primitive map -}
   map : {n : ℕ} -> {s : Set} -> {t : Set} -> (s -> t) -> Vec s n → Vec t n
   map {.0} {s} {t} f [] = []
   map {.(suc _)} {s} {t} f (x ∷ xs) = (f x) ∷ (map f xs)
 
+  {- primitive id -}
   id : {T : Set} → T → T
   id t = t
 
@@ -28,8 +30,15 @@ module lift.Primitives where
   empty-vecˡ zero {t} =  refl
   empty-vecˡ (suc m) {t} =  empty-vecˡ m {t}
 
+  {- primitive split -}
   split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
   split zero {zero} {t} [] = []
   split zero {suc m} {t} [] = [] ∷ (split zero {m} {t} [])
   split (suc n) {zero} {t} _ = []
+  -- TODO
   split (suc n) {suc m} {t} xs = {!!}
+
+  {- primitive join -}
+  join : {m n : ℕ} → {t : Set} → Vec (Vec t m) n → Vec t (n * m)
+  join {m} {.0} {t} [] = []
+  join {m} {.(suc _)} {t} (xs ∷ xs₁) =  xs ++ join xs₁
