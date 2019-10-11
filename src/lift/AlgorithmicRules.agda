@@ -24,7 +24,7 @@ module lift.AlgorithmicRules where
 
   {- identity rules -}
   identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (f ∘ Pm.map Pm.id) xs ≡ f xs
-  identity₁ {n} {s} {t} f xs =
+  identity₁ f xs =
     begin
       (f ∘ Pm.map Pm.id) xs
     ≡⟨⟩
