@@ -1,4 +1,4 @@
-{-# OPTIONS --allow-unsolved-metas #-} 
+{-# OPTIONS --allow-unsolved-metas #-}
 module lift.AlgorithmicRules where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym)
@@ -22,13 +22,23 @@ module lift.AlgorithmicRules where
       x ∷ xs
     ∎
 
-  {- identity rule -}
-  identity : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (f ∘ Pm.map Pm.id) xs ≡ f xs
-  identity {n} {s} {t} f xs =
+  {- identity rules -}
+  identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (f ∘ Pm.map Pm.id) xs ≡ f xs
+  identity₁ {n} {s} {t} f xs =
     begin
       (f ∘ Pm.map Pm.id) xs
     ≡⟨⟩
       f (Pm.map Pm.id xs)
     ≡⟨ cong f (map-id xs) ⟩
+      f xs
+    ∎
+
+  identity₂ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (Pm.map Pm.id ∘ f) xs ≡ f xs
+  identity₂ f xs =
+    begin
+      (Pm.map Pm.id ∘ f) xs
+    ≡⟨⟩
+      Pm.map Pm.id (f xs)
+    ≡⟨ map-id (f xs) ⟩
       f xs
     ∎
