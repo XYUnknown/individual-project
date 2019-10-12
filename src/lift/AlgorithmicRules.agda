@@ -1,4 +1,5 @@
 {-# OPTIONS --allow-unsolved-metas #-}
+{- TODO: remove the pragma when all the holes are filled -}
 module lift.AlgorithmicRules where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym)
@@ -9,10 +10,9 @@ module lift.AlgorithmicRules where
   import lift.Primitives as Pm
   open Pm
 
-
   {- lemmas -}
   map-id : {n : ℕ} → {s : Set} → (xs : Vec s n ) → Pm.map Pm.id xs ≡ xs
-  map-id [] =  refl
+  map-id [] = refl
   map-id (x ∷ xs) =
     begin
       Pm.map Pm.id (x ∷ xs)
@@ -42,3 +42,10 @@ module lift.AlgorithmicRules where
     ≡⟨ map-id (f xs) ⟩
       f xs
     ∎
+
+  {- split-join rule -}
+  splitJoin : {m : ℕ} → {s : Set} → {t : Set} →
+              (n : ℕ) → (f : s → t) → (xs : Vec s (n * m)) →
+              (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n) xs ≡ Pm.map f xs
+              -- Pm.map f xs ≡ Pm.map f xs
+  splitJoin = {!!}
