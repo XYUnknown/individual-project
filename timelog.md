@@ -45,3 +45,26 @@
 * *2 hours* drafting project proposal and gathering questions
 * *1 hour* meeting with supervisor
 * *0.5 hours* documenting information gethered from meeting
+
+### 02 Oct 2019
+* *2.5 hours* background reading on papers and source code
+
+### 03 Oct 2019
+* *2 hours* writing project proposal
+
+## Week 3
+### 07 Oct 2019
+* *2 hours* analysing primitive definition and paper proofs
+### 08 Oct 2019
+* *1 hour* meeting with supervisor
+* *0.5 hours* documenting information gethered from meeting
+### 09 Oct 2019
+* *2 hours* implementing primitives `id`, `split`, `join`
+### 10 Oct 2019
+* *3 hours* implementing primitives `id`, `split`, `join` and lemmas
+### 11 Oct 2019
+* *4 hours* Add proofs for 2 identity rules and worked on the split-join rule
+
+## Week 4
+### 14 Oct 2019
+* *0.5 hour* updating documents

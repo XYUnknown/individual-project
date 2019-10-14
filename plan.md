@@ -22,6 +22,8 @@ Week-by-week plan for the whole project. Update this as you go along.
 * **Week 3**
     * Write proofs for identity rule and split-join rules
 * **Week 4**
+    * Finish proof of split-join rules
+    * TBC
 * **Week 5**
 * **Week 6**
 * **Week 7**
