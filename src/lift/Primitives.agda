@@ -2,11 +2,11 @@
 {- TODO: remove the pragma when all the holes are filled -}
 module lift.Primitives where
   import Relation.Binary.PropositionalEquality as Eq
-  open Eq using (_≡_; refl; cong; sym)
+  open Eq using (_≡_; refl; cong; sym; subst)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
-  open import Data.Nat.Properties using (*-comm)
+  open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ)
   open import Function using (_∘_)
 
   {- lemmas -}
@@ -21,6 +21,18 @@ module lift.Primitives where
   empty-vecˡ : (m : ℕ) → {t : Set} → Vec t (m * zero) ≡ Vec t zero
   empty-vecˡ zero {t} = refl
   empty-vecˡ (suc m) {t} = empty-vecˡ m {t}
+
+  distrib-suc : (m : ℕ) → (n : ℕ) → n * (suc m) ≡ n + n * m
+  distrib-suc m n =
+    begin
+       n * (suc m)
+     ≡⟨⟩
+       n * (1 + m)
+     ≡⟨ *-distribˡ-+ n 1 m ⟩
+       n * 1 + n * m
+     ≡⟨ cong (_+ n * m) (*-identityʳ n)⟩
+       n + n * m
+     ∎
 
   {- primitive map -}
   map : {n : ℕ} -> {s : Set} -> {t : Set} -> (s -> t) -> Vec s n → Vec t n
@@ -45,4 +57,4 @@ module lift.Primitives where
   -- join (xs ∷ xs₁) = xs ++ join xs₁
   -- join {n} [] rewrite zero-mul n = []
   join {n} {zero} [] rewrite *-comm n zero = []
-  join {n} {suc m} (xs ∷ xs₁) = {! !}
+  join {n} {suc m} (xs ∷ xs₁) = {!!}

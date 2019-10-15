@@ -47,5 +47,4 @@ module lift.AlgorithmicRules where
   splitJoin : {m : ℕ} → {s : Set} → {t : Set} →
               (n : ℕ) → (f : s → t) → (xs : Vec s (n * m)) →
               (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n) xs ≡ Pm.map f xs
-              -- Pm.map f xs ≡ Pm.map f xs
   splitJoin = {!!}
