@@ -68,3 +68,4 @@
 ## Week 4
 ### 14 Oct 2019
 * *0.5 hour* updating documents
+* *2 hours* rewriting `join` with lemma
