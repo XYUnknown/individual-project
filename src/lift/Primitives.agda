@@ -46,8 +46,8 @@ module lift.Primitives where
   {- primitive split -}
   split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
   split zero {zero} [] = []
-  split zero {suc m} [] = [] ∷ (split zero {m} [])
-  split (suc n) {zero} _ = []
+  split zero {suc m} [] = [] ∷ split zero {m} []
+  split (suc n) {zero} xs = []
   -- TODO
   split (suc n) {suc m} xs = {!!}
 
