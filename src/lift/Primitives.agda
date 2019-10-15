@@ -57,4 +57,5 @@ module lift.Primitives where
   -- join (xs ∷ xs₁) = xs ++ join xs₁
   -- join {n} [] rewrite zero-mul n = []
   join {n} {zero} [] rewrite *-comm n zero = []
+  -- TODO
   join {n} {suc m} (xs ∷ xs₁) = {!!}

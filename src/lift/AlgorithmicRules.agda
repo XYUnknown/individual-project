@@ -22,6 +22,16 @@ module lift.AlgorithmicRules where
       x ∷ xs
     ∎
 
+  map-split : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
+              Pm.map (Pm.map f) (Pm.split n xs) ≡ Pm.split n ( Pm.map f xs)
+  -- TODO
+  map-split = {!!}
+
+  join-split : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
+               Pm.join (Pm.split n xs) ≡ xs
+  -- TODO
+  join-split = {!!}
+
   {- identity rules -}
   identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (f ∘ Pm.map Pm.id) xs ≡ f xs
   identity₁ f xs =
@@ -47,4 +57,13 @@ module lift.AlgorithmicRules where
   splitJoin : {m : ℕ} → {s : Set} → {t : Set} →
               (n : ℕ) → (f : s → t) → (xs : Vec s (n * m)) →
               (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n) xs ≡ Pm.map f xs
-  splitJoin = {!!}
+  splitJoin n f xs =
+    begin
+      (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n) xs
+    ≡⟨⟩
+      Pm.join (Pm.map (Pm.map f) (Pm.split n xs))
+    ≡⟨ cong Pm.join (map-split n f xs) ⟩
+      Pm.join (Pm.split n (Pm.map f xs))
+    ≡⟨ join-split n (Pm.map f xs) ⟩
+      Pm.map f xs
+    ∎
