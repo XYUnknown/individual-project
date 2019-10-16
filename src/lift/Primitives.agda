@@ -5,23 +5,12 @@ module lift.Primitives where
   open Eq using (_≡_; refl; cong; sym; subst)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
+  open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
-  open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ)
+  open import Data.Nat.Properties using (*-comm; *-distribʳ-+; *-distribˡ-+; *-identityʳ; *-identityˡ; +-assoc)
   open import Function using (_∘_)
 
   {- lemmas -}
-  zero-mul : ∀ (m : ℕ) → m * zero ≡ zero
-  zero-mul zero = refl
-  zero-mul (suc m) = zero-mul m
-
-  empty-vecʳ : (m : ℕ) → {t : Set} → Vec t (zero * m) ≡ Vec t zero
-  empty-vecʳ zero {t} = refl
-  empty-vecʳ (suc m) {t} = empty-vecʳ m {t}
-
-  empty-vecˡ : (m : ℕ) → {t : Set} → Vec t (m * zero) ≡ Vec t zero
-  empty-vecˡ zero {t} = refl
-  empty-vecˡ (suc m) {t} = empty-vecˡ m {t}
-
   distrib-suc : (m : ℕ) → (n : ℕ) → n * (suc m) ≡ n + n * m
   distrib-suc m n =
     begin
@@ -34,6 +23,12 @@ module lift.Primitives where
        n + n * m
      ∎
 
+  splitAt : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n + m)) →
+            ∃₂ λ (xs₁ : Vec t n) (xs₂ : Vec t m) → xs ≡ xs₁ ++ xs₂
+  splitAt zero xs =  ([] , xs , refl)
+  splitAt (suc n) (x ∷ xs)            with splitAt n xs
+  splitAt (suc n) (x ∷ .(xs₁ ++ xs₂)) | (xs₁ , xs₂ , refl) = ((x ∷ xs₁) , xs₂ , refl)
+
   {- primitive map -}
   map : {n : ℕ} -> {s : Set} -> {t : Set} -> (s -> t) -> Vec s n → Vec t n
   map {.0} {s} {t} f [] = []
@@ -43,13 +38,20 @@ module lift.Primitives where
   id : {T : Set} → T → T
   id t = t
 
+  {- primitive take -}
+  take : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
+  take n xs            with splitAt n xs
+  take n .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₁
+
+  {- primitive drop -}
+  drop : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t m
+  drop n xs            with splitAt n xs
+  drop n .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₂
+
   {- primitive split -}
   split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
-  split zero {zero} [] = []
-  split zero {suc m} [] = [] ∷ split zero {m} []
-  split (suc n) {zero} xs = []
-  -- TODO
-  split (suc n) {suc m} xs = {!!}
+  split n {zero} xs = []
+  split n {suc m} xs rewrite distrib-suc m n = take n xs ∷ split n (drop n xs)
 
   {- primitive join -}
   join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
