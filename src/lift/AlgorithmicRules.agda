@@ -30,7 +30,7 @@ module lift.AlgorithmicRules where
   join-split : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
                Pm.join (Pm.split n xs) ≡ xs
   -- TODO
-  join-split = {!!}
+  join-split n xs = {!!}
 
   {- identity rules -}
   identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (f ∘ Pm.map Pm.id) xs ≡ f xs
@@ -66,4 +66,34 @@ module lift.AlgorithmicRules where
       Pm.join (Pm.split n (Pm.map f xs))
     ≡⟨ join-split n (Pm.map f xs) ⟩
       Pm.map f xs
+    ∎
+
+  {- Fusion rules -}
+  fusion₁ : {n : ℕ} → {s : Set} → {t : Set} → {r : Set} → (f : t → r) → (g : s → t) → (xs : Vec s n) →
+            (Pm.map f ∘ Pm.map g) xs ≡ Pm.map (f ∘ g) xs
+  fusion₁ f g [] =
+    begin
+      (Pm.map f ∘ Pm.map g) []
+    ≡⟨⟩
+      Pm.map f (Pm.map g [])
+    ≡⟨⟩
+      Pm.map f []
+    ≡⟨⟩
+      []
+    ≡⟨⟩
+      Pm.map (f ∘ g) []
+    ∎
+  fusion₁ f g (x ∷ xs) =
+    begin
+      (Pm.map f ∘ Pm.map g) (x ∷ xs)
+    ≡⟨⟩
+      Pm.map f (Pm.map g (x ∷ xs))
+    ≡⟨⟩
+      Pm.map f (g x ∷ Pm.map g xs)
+    ≡⟨⟩
+      f (g x) ∷ Pm.map f (Pm.map g xs)
+    ≡⟨⟩
+      (f ∘ g) x ∷ Pm.map f (Pm.map g xs)
+    ≡⟨ cong ((f ∘ g) x ∷_ ) (fusion₁ f g xs) ⟩
+      (f ∘ g) x ∷ Pm.map (f ∘ g) xs
     ∎
