@@ -74,3 +74,8 @@
 * *2 hours* writing proofs for `spiltjoin`
 * *1 hour* meeting with supervisor
 * *3 hours* proving `split` (finally done)
+
+### 16 Oct 2019
+* *1 hour* writing proof for fusion rule option one
+* *1 hour* meeting and discussing about using `sust` in reasoning Vec size
+* *4.5 hours* proving lemmas for `splitJoin` 
