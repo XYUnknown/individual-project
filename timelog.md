@@ -69,3 +69,8 @@
 ### 14 Oct 2019
 * *0.5 hour* updating documents
 * *2 hours* rewriting `join` with lemma
+
+### 15 Oct 2019
+* *2 hours* writing proofs for `spiltjoin`
+* *1 hour* meeting with supervisor
+* *3 hours* proving `split` (finally done)
