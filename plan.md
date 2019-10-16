@@ -23,7 +23,8 @@ Week-by-week plan for the whole project. Update this as you go along.
     * Write proofs for identity rule and split-join rules
 * **Week 4**
     * Finish proof of split-join rules
-    * TBC
+    * Fusion rule option one
+    * Simplification rules
 * **Week 5**
 * **Week 6**
 * **Week 7**
