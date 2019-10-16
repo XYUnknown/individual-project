@@ -55,9 +55,6 @@ module lift.Primitives where
 
   {- primitive join -}
   join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
-  -- join [] = []
-  -- join (xs ∷ xs₁) = xs ++ join xs₁
-  -- join {n} [] rewrite zero-mul n = []
   join {n} {zero} [] rewrite *-comm n zero = []
-  -- TODO
-  join {n} {suc m} (xs ∷ xs₁) = {!!}
+  join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
+
