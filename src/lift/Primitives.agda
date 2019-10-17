@@ -23,12 +23,6 @@ module lift.Primitives where
        n + n * m
      ∎
 
-  splitAt : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n + m)) →
-            ∃₂ λ (xs₁ : Vec t n) (xs₂ : Vec t m) → xs ≡ xs₁ ++ xs₂
-  splitAt zero xs =  ([] , xs , refl)
-  splitAt (suc n) (x ∷ xs)            with splitAt n xs
-  splitAt (suc n) (x ∷ .(xs₁ ++ xs₂)) | (xs₁ , xs₂ , refl) = ((x ∷ xs₁) , xs₂ , refl)
-
   {- primitive map -}
   map : {n : ℕ} -> {s : Set} -> {t : Set} -> (s -> t) -> Vec s n → Vec t n
   map {.0} {s} {t} f [] = []
@@ -39,14 +33,14 @@ module lift.Primitives where
   id t = t
 
   {- primitive take -}
-  take : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
-  take n xs            with splitAt n xs
-  take n .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₁
+  take :  (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
+  take zero xs = []
+  take (suc n) (x ∷ xs) = x ∷ (take n xs)
 
   {- primitive drop -}
   drop : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t m
-  drop n xs            with splitAt n xs
-  drop n .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₂
+  drop zero xs = xs
+  drop (suc n) (x ∷ xs) = drop n xs
 
   {- primitive split -}
   split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
@@ -57,4 +51,20 @@ module lift.Primitives where
   join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
   join {n} {zero} [] rewrite *-comm n zero = []
   join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
+
+  {- unused and alternative definitions -}
+  {- alternative semantics for take and drop -}
+  splitAt : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n + m)) →
+            ∃₂ λ (xs₁ : Vec t n) (xs₂ : Vec t m) → xs ≡ xs₁ ++ xs₂
+  splitAt zero xs =  ([] , xs , refl)
+  splitAt (suc n) (x ∷ xs)            with splitAt n xs
+  splitAt (suc n) (x ∷ .(xs₁ ++ xs₂)) | (xs₁ , xs₂ , refl) = ((x ∷ xs₁) , xs₂ , refl)
+
+  take′ : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
+  take′ n xs            with splitAt n xs
+  take′ n .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₁
+
+  drop′ : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t m
+  drop′ n xs            with splitAt n xs
+  drop′ n .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₂
 
