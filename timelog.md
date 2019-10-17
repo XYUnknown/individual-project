@@ -79,3 +79,6 @@
 * *1 hour* writing proof for fusion rule option one
 * *1 hour* meeting and discussing about using `sust` in reasoning Vec size
 * *4.5 hours* proving lemmas for `splitJoin` 
+
+### 17 Oct 2019
+* *5 hours* prove lemma `map-split`, `map-drop` and `map-take`, restructured the semantics of `take` and `drop` to simplify the proof of lemmas and rewrite rules
