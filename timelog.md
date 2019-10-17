@@ -77,7 +77,7 @@
 
 ### 16 Oct 2019
 * *1 hour* writing proof for fusion rule option one
-* *1 hour* meeting and discussing about using `sust` in reasoning Vec size
+* *1 hour* meeting and discussing about using `subst` in reasoning Vec size
 * *4.5 hours* proving lemmas for `splitJoin` 
 
 ### 17 Oct 2019
