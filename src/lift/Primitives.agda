@@ -50,7 +50,8 @@ module lift.Primitives where
   {- primitive join -}
   join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
   join {n} {zero} [] rewrite *-comm n zero = []
-  join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
+  join {n} {suc m} {t} (xs ∷ xs₁) rewrite distrib-suc m n = xs ++ join xs₁
+  -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
 
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
