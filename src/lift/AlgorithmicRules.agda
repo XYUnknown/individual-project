@@ -52,7 +52,7 @@ module lift.AlgorithmicRules where
               Pm.map (Pm.map f) (Pm.split n xs) ≡ Pm.split n (Pm.map f xs)
 
   map-split n {zero} f xs = refl
-  map-split n {suc m} f xs rewrite distrib-suc m n =
+  map-split n {suc m} f xs rewrite Pm.distrib-suc n m =
     begin
       Pm.map f (Pm.take n xs) ∷ Pm.map (Pm.map f) (Pm.split n (Pm.drop n xs))
     ≡⟨ cong ( Pm.map f (Pm.take n xs) ∷_) (map-split n f (Pm.drop n xs)) ⟩
@@ -69,7 +69,8 @@ module lift.AlgorithmicRules where
 
   join-split : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
                Pm.join (Pm.split n xs) ≡ xs
-  join-split n {zero} {t} xs rewrite *-comm n zero =
+  -- join-split n xs = {!!}
+  join-split n {zero} xs rewrite *-comm n zero =
     begin
       []
     ≡⟨ sym (empty xs) ⟩
@@ -78,12 +79,13 @@ module lift.AlgorithmicRules where
 
   -- TODO
   -- the rewrite used in proving primitives makes this become difficult
-  join-split n {suc m} {t} xs =
-    begin
-      Pm.join (Pm.split n xs)
-    ≡⟨ {!!} ⟩
-      xs
-    ∎
+  -- Issue:
+  -- original join (split n xs | n * suc m | n + n * m)
+  -- the rewrite with distrib-suc failed
+  -- the type we have become join (split n xs | n * suc m | w)
+  -- the rewrite is not properly applied for some reason
+  join-split n {suc m} {t} xs with Pm.distrib-suc n m
+  ...                         | _ = {!!}
 
   {- identity rules -}
   identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (f ∘ Pm.map Pm.id) xs ≡ f xs

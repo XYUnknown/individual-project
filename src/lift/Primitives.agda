@@ -11,8 +11,8 @@ module lift.Primitives where
   open import Function using (_∘_)
 
   {- lemmas -}
-  distrib-suc : (m : ℕ) → (n : ℕ) → n * (suc m) ≡ n + n * m
-  distrib-suc m n =
+  distrib-suc : (n : ℕ) → (m : ℕ) → n * (suc m) ≡ n + n * m
+  distrib-suc n m =
     begin
        n * (suc m)
      ≡⟨⟩
@@ -45,12 +45,12 @@ module lift.Primitives where
   {- primitive split -}
   split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
   split n {zero} xs = []
-  split n {suc m} xs rewrite distrib-suc m n = take n xs ∷ split n (drop n xs)
+  split n {suc m} xs rewrite distrib-suc n m = take n xs ∷ split n (drop n xs)
 
   {- primitive join -}
   join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
   join {n} {zero} [] rewrite *-comm n zero = []
-  join {n} {suc m} {t} (xs ∷ xs₁) rewrite distrib-suc m n = xs ++ join xs₁
+  join {n} {suc m} {t} (xs ∷ xs₁) rewrite distrib-suc n m = xs ++ join xs₁
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
 
   {- unused and alternative definitions -}
