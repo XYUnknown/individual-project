@@ -24,22 +24,28 @@ module lift.AlgorithmicRules where
       x ∷ xs
     ∎
 
-  -- TODO
-  {- I assume this need to be proven -}
-  map-splitAt : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
-                ∃₂ λ (xs₁ : Vec s n) (xs₂ : Vec s m) → xs ≡ xs₁ ++ xs₂ → Pm.map f xs ≡ Pm.map f xs₁ ++ Pm.map f xs₂
-  map-splitAt zero f xs = {!!}
-  map-splitAt (suc n) f (x ∷ xs) = {!!}
+  map-++ : {n m : ℕ} → {s t : Set} → (f : s → t) → (xs₁ : Vec s n) → (xs₂ : Vec s m) →
+               Pm.map f (xs₁ ++ xs₂) ≡ Pm.map f xs₁ ++ Pm.map f xs₂
+  map-++ f [] xs₂ = refl
+  map-++ f (x ∷ xs₁) xs₂ =
+    begin
+      f x ∷ Pm.map f (xs₁ ++ xs₂)
+    ≡⟨ cong (f x  ∷_) (map-++ f xs₁ xs₂) ⟩
+      refl
 
-  --TODO
-  {- I assume proving map-take and map-drop reuires map-splitAt -}
   map-take : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
-             Pm.map f (Pm.take n xs) ≡ (Pm.take n (Pm.map f xs))
-  map-take n f xs = {!!}
+             Pm.map f (Pm.take n xs) ≡  (Pm.take n (Pm.map f xs))
+  map-take zero f xs = refl
+  map-take (suc n) f (x ∷ xs) =
+    begin
+      f x ∷ Pm.map f (Pm.take n xs)
+    ≡⟨ cong (f x ∷_) (map-take n f xs) ⟩
+      refl
 
   map-drop : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
              Pm.map f (Pm.drop n xs) ≡ (Pm.drop n (Pm.map f xs ))
-  map-drop n f xs = {!!}
+  map-drop zero f xs = refl
+  map-drop (suc n) f (x ∷ xs) = map-drop n f xs
 
   {- proving this lemma requires proving map-drop and map-take -}
   map-split : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
@@ -72,7 +78,12 @@ module lift.AlgorithmicRules where
 
   -- TODO
   -- the rewrite used in proving primitives makes this become difficult
-  join-split n {suc m} xs = {!!}
+  join-split n {suc m} {t} xs =
+    begin
+      Pm.join (Pm.split n xs)
+    ≡⟨ {!!} ⟩
+      xs
+    ∎
 
   {- identity rules -}
   identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (f ∘ Pm.map Pm.id) xs ≡ f xs
