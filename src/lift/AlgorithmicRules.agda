@@ -65,12 +65,11 @@ module lift.AlgorithmicRules where
   map-drop zero f xs = refl
   map-drop (suc n) f (x ∷ xs) = map-drop n f xs
 
-  {- proving this lemma requires proving map-drop and map-take -}
-  map-split : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
-              Pm.map (Pm.map f) (Pm.split n xs) ≡ Pm.split n (Pm.map f xs)
+  map-split : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n *′ m)) →
+              Pm.map (Pm.map f) (Pm.split n {m} xs) ≡ Pm.split n {m} (Pm.map f xs)
 
   map-split n {zero} f xs = refl
-  map-split n {suc m} f xs rewrite Pm.distrib-suc n m =
+  map-split n {suc m} f xs =
     begin
       Pm.map f (Pm.take n xs) ∷ Pm.map (Pm.map f) (Pm.split n (Pm.drop n xs))
     ≡⟨ cong ( Pm.map f (Pm.take n xs) ∷_) (map-split n f (Pm.drop n xs)) ⟩
@@ -81,32 +80,18 @@ module lift.AlgorithmicRules where
       Pm.take n (Pm.map f xs) ∷ Pm.split n (Pm.drop n (Pm.map f xs))
     ∎
 
-  {- this is weird, basically it required me explicitly reasoning about Vec t zero is [] -}
-  empty : {t : Set} → (xs : Vec t zero) → xs ≡ []
-  empty [] = refl
-
-  join-split : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
-               Pm.join (Pm.split n xs) ≡ xs
-  -- join-split n xs = {!!}
-  join-split n {zero} xs rewrite *-comm n zero =
+  take-drop : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n + m)) →
+              Pm.take n xs ++ Pm.drop n xs ≡ xs
+  take-drop zero xs = refl
+  take-drop (suc n) (x ∷ xs) =
     begin
-      []
-    ≡⟨ sym (empty xs) ⟩
-      xs
-    ∎
+      x ∷ Pm.take n xs ++ Pm.drop n xs
+    ≡⟨ cong (x ∷_) (take-drop n xs) ⟩
+      refl
 
-  -- TODO
-  -- the rewrite used in proving primitives makes this become difficult
-  -- Issue:
-  -- original join (split n xs | n * suc m | n + n * m)
-  -- the rewrite with distrib-suc failed
-  -- the type we have become join (split n xs | n * suc m | w)
-  -- the rewrite is not properly applied for some reason
-  join-split n {suc m} {t} xs with Pm.distrib-suc n m
-  ...                         | _ = {!!}
-
-  {- identity rules -}
-  identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (f ∘ Pm.map Pm.id) xs ≡ f xs
+  {- Identity rules -}
+  identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n → Vec t n) → (xs : Vec s n) →
+              (f ∘ Pm.map Pm.id) xs ≡ f xs
   identity₁ f xs =
     begin
       (f ∘ Pm.map Pm.id) xs
@@ -116,7 +101,8 @@ module lift.AlgorithmicRules where
       f xs
     ∎
 
-  identity₂ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n -> Vec t n) → (xs : Vec s n) → (Pm.map Pm.id ∘ f) xs ≡ f xs
+  identity₂ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n → Vec t n) → (xs : Vec s n) →
+              (Pm.map Pm.id ∘ f) xs ≡ f xs
   identity₂ f xs =
     begin
       (Pm.map Pm.id ∘ f) xs
@@ -124,21 +110,6 @@ module lift.AlgorithmicRules where
       Pm.map Pm.id (f xs)
     ≡⟨ map-id (f xs) ⟩
       f xs
-    ∎
-
-  {- Split-join rule -}
-  splitJoin : {m : ℕ} → {s : Set} → {t : Set} →
-              (n : ℕ) → (f : s → t) → (xs : Vec s (n * m)) →
-              (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n) xs ≡ Pm.map f xs
-  splitJoin n f xs =
-    begin
-      (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n) xs
-    ≡⟨⟩
-      Pm.join (Pm.map (Pm.map f) (Pm.split n xs))
-    ≡⟨ cong Pm.join (map-split n f xs) ⟩
-      Pm.join (Pm.split n (Pm.map f xs))
-    ≡⟨ join-split n (Pm.map f xs) ⟩
-      Pm.map f xs
     ∎
 
   {- Fusion rules -}
@@ -172,20 +143,21 @@ module lift.AlgorithmicRules where
     ∎
 
   {- Simplification rules -}
-  simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
-                    (Pm.join ∘ Pm.split n) xs ≡ xs
-  simplification₁ n xs =
+  simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n *′ m)) →
+                    (Pm.join ∘ Pm.split n {m}) xs ≡ xs
+  simplification₁ n {zero} [] = refl
+  simplification₁ n {suc m} xs =
     begin
-      (Pm.join ∘ Pm.split n) xs
-    ≡⟨⟩
-      Pm.join (Pm.split n xs)
-    ≡⟨ join-split n xs ⟩
-      refl
+      Pm.take n xs ++ Pm.join (Pm.split n {m} (Pm.drop n xs))
+    ≡⟨ cong (Pm.take n xs ++_) ( simplification₁ n {m} (Pm.drop n xs)) ⟩
+      Pm.take n xs ++ Pm.drop n xs
+    ≡⟨ take-drop n xs ⟩
+       refl
 
   simplification₂ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec (Vec t n) m) →
                     (Pm.split n ∘ Pm.join) xs ≡ xs
   simplification₂ n {zero} [] = refl
-  simplification₂ n {suc m} (xs ∷ xs₁) rewrite distrib-suc n m =
+  simplification₂ n {suc m} (xs ∷ xs₁) =
     begin
       Pm.take n (xs ++ Pm.join xs₁) ∷ Pm.split n (Pm.drop n (xs ++ Pm.join xs₁))
     ≡⟨ cong (_∷ Pm.split n (Pm.drop n (xs ++ Pm.join xs₁))) (take-++ n xs (Pm.join xs₁)) ⟩
@@ -194,3 +166,18 @@ module lift.AlgorithmicRules where
       xs ∷ Pm.split n (Pm.join xs₁)
     ≡⟨ cong (xs ∷_) (simplification₂ n xs₁) ⟩
       refl
+
+  {- Split-join rule -}
+  splitJoin : {m : ℕ} → {s : Set} → {t : Set} →
+              (n : ℕ) → (f : s → t) → (xs : Vec s (n *′ m)) →
+              (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n {m}) xs ≡ Pm.map f xs
+  splitJoin {m} n f xs =
+    begin
+      (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n {m} ) xs
+    ≡⟨⟩
+      Pm.join (Pm.map (Pm.map f) (Pm.split n {m} xs))
+    ≡⟨ cong Pm.join (map-split n {m} f xs) ⟩
+      Pm.join (Pm.split n {m} (Pm.map f xs))
+    ≡⟨ simplification₁ n {m} (Pm.map f xs) ⟩
+      Pm.map f xs
+    ∎
