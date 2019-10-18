@@ -36,9 +36,9 @@ module lift.Primitives where
       refl
 
   {- primitive map -}
-  map : {n : ℕ} -> {s : Set} -> {t : Set} -> (s -> t) -> Vec s n → Vec t n
-  map {.0} {s} {t} f [] = []
-  map {.(suc _)} {s} {t} f (x ∷ xs) = (f x) ∷ (map f xs)
+  map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
+  map f [] = []
+  map f (x ∷ xs) = (f x) ∷ (map f xs)
 
   {- primitive id -}
   id : {T : Set} → T → T
@@ -61,8 +61,8 @@ module lift.Primitives where
 
   {- primitive join -}
   join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n *′ m)
-  join {n} {zero} [] = []
-  join {n} {suc m} {t} (xs ∷ xs₁) = xs ++ join xs₁
+  join [] = []
+  join (xs ∷ xs₁) = xs ++ join xs₁
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
 
   {- unused and alternative definitions -}
