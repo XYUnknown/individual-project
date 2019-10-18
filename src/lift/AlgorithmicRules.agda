@@ -108,7 +108,7 @@ module lift.AlgorithmicRules where
       f xs
     ∎
 
-  {- split-join rule -}
+  {- Split-join rule -}
   splitJoin : {m : ℕ} → {s : Set} → {t : Set} →
               (n : ℕ) → (f : s → t) → (xs : Vec s (n * m)) →
               (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n) xs ≡ Pm.map f xs
@@ -152,3 +152,18 @@ module lift.AlgorithmicRules where
     ≡⟨ cong ((f ∘ g) x ∷_ ) (fusion₁ f g xs) ⟩
       (f ∘ g) x ∷ Pm.map (f ∘ g) xs
     ∎
+
+  {- Simplification rules -}
+  simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
+                    (Pm.join ∘ Pm.split n) xs ≡ xs
+  simplification₁ n xs =
+    begin
+      (Pm.join ∘ Pm.split n) xs
+    ≡⟨⟩
+      Pm.join (Pm.split n xs)
+    ≡⟨ join-split n xs ⟩
+      refl
+
+  simplification₂ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec (Vec t n) m) →
+                    (Pm.split n ∘ Pm.join) xs ≡ xs
+  simplification₂ n xs = ?
