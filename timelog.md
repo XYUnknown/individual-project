@@ -81,4 +81,7 @@
 * *4.5 hours* proving lemmas for `splitJoin` 
 
 ### 17 Oct 2019
-* *5 hours* prove lemma `map-split`, `map-drop` and `map-take`, restructured the semantics of `take` and `drop` to simplify the proof of lemmas and rewrite rules
+* *5 hours* proving lemma `map-split`, `map-drop` and `map-take`, restructuring the semantics of `take` and `drop` to simplify the proof of lemmas and rewrite rules
+
+### 17 Oct 2019
+* *0.5 hours* proving the second simplification rule
