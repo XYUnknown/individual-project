@@ -71,7 +71,7 @@
 * *2 hours* rewriting `join` with lemma
 
 ### 15 Oct 2019
-* *2 hours* writing proofs for `spiltjoin`
+* *2 hours* writing proofs for `spiltJoin`
 * *1 hour* meeting with supervisor
 * *3 hours* proving `split` (finally done)
 
@@ -85,3 +85,4 @@
 
 ### 17 Oct 2019
 * *0.5 hours* proving the second simplification rule
+* *1.5 hours* refining the semantics of primitives, proving the first simplification rule and refining the proof for split-join rule
