@@ -33,6 +33,24 @@ module lift.AlgorithmicRules where
     ≡⟨ cong (f x  ∷_) (map-++ f xs₁ xs₂) ⟩
       refl
 
+  take-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t n) → (xs₁ : Vec t m) →
+            Pm.take n (xs ++ xs₁) ≡ xs
+  take-++ zero [] xs₁ = refl
+  take-++ (suc n) (x ∷ xs) xs₁ =
+    begin
+      x ∷ Pm.take n (xs ++ xs₁)
+    ≡⟨ cong ( x ∷_) (take-++ n xs xs₁) ⟩
+      refl
+
+  drop-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t n) → (xs₁ : Vec t m) →
+            Pm.drop n (xs ++ xs₁) ≡ xs₁
+  drop-++ zero [] xs₁ = refl
+  drop-++ (suc n) (x ∷ xs) xs₁ =
+    begin
+      Pm.drop n (xs ++ xs₁)
+    ≡⟨ drop-++ n xs xs₁ ⟩
+      refl
+
   map-take : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
              Pm.map f (Pm.take n xs) ≡  (Pm.take n (Pm.map f xs))
   map-take zero f xs = refl
@@ -166,4 +184,13 @@ module lift.AlgorithmicRules where
 
   simplification₂ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec (Vec t n) m) →
                     (Pm.split n ∘ Pm.join) xs ≡ xs
-  simplification₂ n xs = ?
+  simplification₂ n {zero} [] = refl
+  simplification₂ n {suc m} (xs ∷ xs₁) rewrite distrib-suc n m =
+    begin
+      Pm.take n (xs ++ Pm.join xs₁) ∷ Pm.split n (Pm.drop n (xs ++ Pm.join xs₁))
+    ≡⟨ cong (_∷ Pm.split n (Pm.drop n (xs ++ Pm.join xs₁))) (take-++ n xs (Pm.join xs₁)) ⟩
+      xs ∷ Pm.split n (Pm.drop n (xs ++ Pm.join xs₁))
+    ≡⟨ cong (xs ∷_) (cong (Pm.split n) (drop-++ n xs (Pm.join xs₁))) ⟩
+      xs ∷ Pm.split n (Pm.join xs₁)
+    ≡⟨ cong (xs ∷_) (simplification₂ n xs₁) ⟩
+      refl
