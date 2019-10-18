@@ -7,7 +7,6 @@ module lift.AlgorithmicRules where
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
-  open import Data.Nat.Properties using (*-comm; *-distribʳ-+; *-distribˡ-+; *-identityʳ; *-identityˡ; +-assoc)
   open import Function using (_∘_)
   import lift.Primitives as Pm
   open Pm
