@@ -7,7 +7,7 @@ module lift.Primitives where
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
-  open import Data.Nat.Properties using (*-comm; *-distribʳ-+; *-distribˡ-+; *-identityʳ; *-identityˡ; +-assoc)
+  open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ)
   open import Function using (_∘_)
 
   {- operators -}
@@ -17,18 +17,24 @@ module lift.Primitives where
   n *′ zero = zero
   n *′ suc m = n + n *′ m
 
-  {- lemmas -}
-  distrib-suc : (n : ℕ) → (m : ℕ) → n * (suc m) ≡ n + n * m
-  distrib-suc n m =
+  -- A proof of the equality of customised operator *′ and *
+  *≡*′ : (n : ℕ) → (m : ℕ) →
+    n * m ≡ n *′ m
+  *≡*′ n zero =
     begin
-       n * (suc m)
-     ≡⟨⟩
-       n * (1 + m)
-     ≡⟨ *-distribˡ-+ n 1 m ⟩
-       n * 1 + n * m
-     ≡⟨ cong (_+ n * m) (*-identityʳ n)⟩
-       n + n * m
-     ∎
+      n * zero
+    ≡⟨ *-comm n zero ⟩
+      refl
+  *≡*′ n (suc m) =
+    begin
+      n * suc m
+    ≡⟨ *-distribˡ-+ n 1 m ⟩
+     n * 1 + n * m
+    ≡⟨ cong (_+ n * m) (*-identityʳ n) ⟩
+      n + n * m
+    ≡⟨ cong (n +_) (*≡*′ n m) ⟩
+      refl
+
   {- primitive map -}
   map : {n : ℕ} -> {s : Set} -> {t : Set} -> (s -> t) -> Vec s n → Vec t n
   map {.0} {s} {t} f [] = []
