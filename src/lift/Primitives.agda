@@ -1,14 +1,21 @@
-{-# OPTIONS --allow-unsolved-metas #-} 
+{-# OPTIONS --allow-unsolved-metas #-}
 {- TODO: remove the pragma when all the holes are filled -}
 module lift.Primitives where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym; subst)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
-  open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
+  open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   open import Data.Nat.Properties using (*-comm; *-distribʳ-+; *-distribˡ-+; *-identityʳ; *-identityˡ; +-assoc)
   open import Function using (_∘_)
+
+  {- operators -}
+  -- To avoid the rewrites in primitive definitions causing difficulties in writing proofs for rewrite rules
+  -- We define * in a nicer way
+  _*′_ : ℕ → ℕ → ℕ
+  n *′ zero = zero
+  n *′ suc m = n + n *′ m
 
   {- lemmas -}
   distrib-suc : (n : ℕ) → (m : ℕ) → n * (suc m) ≡ n + n * m
@@ -22,7 +29,6 @@ module lift.Primitives where
      ≡⟨ cong (_+ n * m) (*-identityʳ n)⟩
        n + n * m
      ∎
-
   {- primitive map -}
   map : {n : ℕ} -> {s : Set} -> {t : Set} -> (s -> t) -> Vec s n → Vec t n
   map {.0} {s} {t} f [] = []
@@ -43,14 +49,14 @@ module lift.Primitives where
   drop (suc n) (x ∷ xs) = drop n xs
 
   {- primitive split -}
-  split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
+  split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n *′ m) → Vec (Vec t n) m
   split n {zero} xs = []
-  split n {suc m} xs rewrite distrib-suc n m = take n xs ∷ split n (drop n xs)
+  split n {suc m} xs = take n xs ∷ split n (drop n xs)
 
   {- primitive join -}
-  join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
-  join {n} {zero} [] rewrite *-comm n zero = []
-  join {n} {suc m} {t} (xs ∷ xs₁) rewrite distrib-suc n m = xs ++ join xs₁
+  join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n *′ m)
+  join {n} {zero} [] = []
+  join {n} {suc m} {t} (xs ∷ xs₁) = xs ++ join xs₁
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
 
   {- unused and alternative definitions -}
