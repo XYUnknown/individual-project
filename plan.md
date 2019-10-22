@@ -26,6 +26,9 @@ Week-by-week plan for the whole project. Update this as you go along.
     * Fusion rule option one
     * Simplification rules
 * **Week 5**
+    * Finish primitive `reduce` and `slide`
+    * Look into/prove rewrite rules involving `reduce`
+    * Look into/prove tiling rule
 * **Week 6**
 * **Week 7**
 * **Week 8**

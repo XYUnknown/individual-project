@@ -83,6 +83,14 @@
 ### 17 Oct 2019
 * *5 hours* proving lemma `map-split`, `map-drop` and `map-take`, restructuring the semantics of `take` and `drop` to simplify the proof of lemmas and rewrite rules
 
-### 17 Oct 2019
+### 18 Oct 2019
 * *0.5 hours* proving the second simplification rule
 * *1.5 hours* refining the semantics of primitives, proving the first simplification rule and refining the proof for split-join rule
+
+## Week 5
+### 21 Oct 2019
+* *1 hour* reading about the tiling rule and writing definitions of `slide` and `reduce`
+
+### 22 Oct 2019
+* *1 hour* meeting with supervisor
+* *0.5 hours* documenting issues discussed in meeting
