@@ -4,7 +4,7 @@ module lift.Primitives where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym; subst)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
-  open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
+  open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ)
@@ -65,6 +65,15 @@ module lift.Primitives where
   join (xs ∷ xs₁) = xs ++ join xs₁
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
 
+  {- primitive slide -}
+  slide : {n : ℕ} → (sz sp : ℕ) → {t : Set} → Vec t (sz + sp *′ n ∸ sp) → Vec (Vec t sz) n
+  slide {zero} sz sp xs = []
+  slide {suc n} sz sp xs = {!take sz xs!}
+
+  {- primitive reduce -}
+  reduce : {n : ℕ} → {t : Set} → (t → t → t) → t → Vec t n → t
+  reduce = {!!}
+
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
   splitAt : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n + m)) →
@@ -80,4 +89,3 @@ module lift.Primitives where
   drop′ : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t m
   drop′ n xs            with splitAt n xs
   drop′ n .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₂
-
