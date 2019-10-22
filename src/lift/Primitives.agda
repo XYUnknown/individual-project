@@ -68,11 +68,15 @@ module lift.Primitives where
   {- primitive slide -}
   slide : {n : ℕ} → (sz sp : ℕ) → {t : Set} → Vec t (sz + sp *′ n ∸ sp) → Vec (Vec t sz) n
   slide {zero} sz sp xs = []
-  slide {suc n} sz sp xs = {!take sz xs!}
+  slide {suc n} sz sp xs = {!take sz xs ∷ slide {n} sz sp (drop sp xs)!}
 
   {- primitive reduce -}
+  reduceSeq : {n : ℕ} → {s t : Set} → (s → t → t) → t → Vec s n → t
+  reduceSeq f init [] = init
+  reduceSeq f init (x ∷ xs) = reduceSeq f (f x init) xs
+
   reduce : {n : ℕ} → {t : Set} → (t → t → t) → t → Vec t n → t
-  reduce = {!!}
+  reduce f init xs = reduceSeq f init xs
 
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
