@@ -2,9 +2,9 @@
 {- TODO: remove the pragma when all the holes are filled -}
 module lift.Primitives where
   import Relation.Binary.PropositionalEquality as Eq
-  open Eq using (_≡_; refl; cong; sym; subst)
+  open Eq using (_≡_; _≢_; refl; cong; sym; subst)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
-  open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
+  open import Data.Nat using (ℕ; zero; suc; pred; _+_; _*_; _∸_)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ)
@@ -55,6 +55,7 @@ module lift.Primitives where
   drop (suc n) (x ∷ xs) = drop n xs
 
   {- primitive split -}
+  {- split as slide with (step ≡ size) ? -}
   split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n *′ m) → Vec (Vec t n) m
   split n {zero} xs = []
   split n {suc m} xs = take n xs ∷ split n (drop n xs)
@@ -66,9 +67,12 @@ module lift.Primitives where
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
 
   {- primitive slide -}
-  slide : {n : ℕ} → (sz sp : ℕ) → {t : Set} → Vec t (sz + sp *′ n ∸ sp) → Vec (Vec t sz) n
-  slide {zero} sz sp xs = []
-  slide {suc n} sz sp xs = {!take sz xs ∷ slide {n} sz sp (drop sp xs)!}
+  -- sp > 0
+  -- n > 0
+  slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (n * (suc sp) + sz) →
+          Vec (Vec t sz) (suc n)
+  slide {zero} sz sp xs = [ xs ]
+  slide {suc n} sz sp xs = {!!}
 
   {- primitive reduce -}
   reduceSeq : {n : ℕ} → {s t : Set} → (s → t → t) → t → Vec s n → t
