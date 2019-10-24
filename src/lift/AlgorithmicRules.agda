@@ -141,6 +141,11 @@ module lift.AlgorithmicRules where
       (f ∘ g) x ∷ Pm.map (f ∘ g) xs
     ∎
 
+  fusion₂ : {n : ℕ} → {s : Set} → {t : Set} → {r : Set} →
+            (f : s → t) → (bf : t → r → r) → (init : r) → (xs : Vec s n) →
+            (Pm.reduceSeq bf init ∘ map f) xs ≡ Pm.reduceSeq  (λ (a : r) (b : s) → (bf (f b) a)) init xs
+  fusion₂ = ?
+
   {- Simplification rules -}
   simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n *′ m)) →
                     (Pm.join ∘ Pm.split n {m}) xs ≡ xs
