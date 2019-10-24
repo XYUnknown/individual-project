@@ -143,8 +143,15 @@ module lift.AlgorithmicRules where
 
   fusion₂ : {n : ℕ} → {s : Set} → {t : Set} → {r : Set} →
             (f : s → t) → (bf : t → r → r) → (init : r) → (xs : Vec s n) →
-            (Pm.reduceSeq bf init ∘ map f) xs ≡ Pm.reduceSeq  (λ (a : r) (b : s) → (bf (f b) a)) init xs
-  fusion₂ = ?
+            (Pm.reduceSeq bf init ∘ Pm.map f) xs ≡ Pm.reduceSeq (λ (b : s) (a : r) → (bf (f b) a)) init xs
+  fusion₂ f bf init [] = refl
+  fusion₂ f bf init (x ∷ xs) =
+    begin
+      Pm.reduceSeq bf init (Pm.map f (x ∷ xs))
+    ≡⟨⟩
+      Pm.reduceSeq bf (bf (f x) init) (Pm.map f xs)
+    ≡⟨⟩
+      {!!}
 
   {- Simplification rules -}
   simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n *′ m)) →
