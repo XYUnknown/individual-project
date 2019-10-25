@@ -1,5 +1,6 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 {- TODO: remove the pragma when all the holes are filled -}
+{-# OPTIONS --rewriting --prop #-}
 module lift.AlgorithmicRules where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym; subst)
@@ -143,16 +144,16 @@ module lift.AlgorithmicRules where
 
   fusion₂ : {n : ℕ} → {s : Set} → {t : Set} → {r : Set} →
             (f : s → t) → (bf : t → r → r) → (init : r) → (xs : Vec s n) →
-            (Pm.reduceSeq bf init ∘ Pm.map f) xs ≡ Pm.reduceSeq (λ (b : s) (a : r) → (bf (f b) a)) init xs
+            Pm.reduceSeq (λ (a : s) (b : r) → (bf (f a) b)) init xs ≡ (Pm.reduceSeq bf init ∘ Pm.map f) xs
   fusion₂ f bf init [] = refl
   fusion₂ f bf init (x ∷ xs) =
     begin
-      Pm.reduceSeq bf init (Pm.map f (x ∷ xs))
-    ≡⟨⟩
+      Pm.reduceSeq (λ a → bf (f a)) (bf (f x) init) xs
+    ≡⟨ fusion₂ f bf (bf (f x) init) xs ⟩
       Pm.reduceSeq bf (bf (f x) init) (Pm.map f xs)
     ≡⟨⟩
-      {!!}
-
+      (Pm.reduceSeq bf init ∘ Pm.map f) (x ∷ xs)
+    ∎
   {- Simplification rules -}
   simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n *′ m)) →
                     (Pm.join ∘ Pm.split n {m}) xs ≡ xs
