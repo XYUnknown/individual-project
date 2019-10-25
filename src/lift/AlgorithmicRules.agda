@@ -39,7 +39,7 @@ module lift.AlgorithmicRules where
   take-++ (suc n) (x ∷ xs) xs₁ =
     begin
       x ∷ Pm.take n (xs ++ xs₁)
-    ≡⟨ cong ( x ∷_) (take-++ n xs xs₁) ⟩
+    ≡⟨ cong (x ∷_) (take-++ n xs xs₁) ⟩
       refl
 
   drop-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t n) → (xs₁ : Vec t m) →
@@ -61,7 +61,7 @@ module lift.AlgorithmicRules where
       refl
 
   map-drop : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
-             Pm.map f (Pm.drop n xs) ≡ (Pm.drop n (Pm.map f xs ))
+             Pm.map f (Pm.drop n xs) ≡ (Pm.drop n (Pm.map f xs))
   map-drop zero f xs = refl
   map-drop (suc n) f (x ∷ xs) = map-drop n f xs
 
@@ -72,7 +72,7 @@ module lift.AlgorithmicRules where
   map-split n {suc m} f xs =
     begin
       Pm.map f (Pm.take n xs) ∷ Pm.map (Pm.map f) (Pm.split n (Pm.drop n xs))
-    ≡⟨ cong ( Pm.map f (Pm.take n xs) ∷_) (map-split n f (Pm.drop n xs)) ⟩
+    ≡⟨ cong (Pm.map f (Pm.take n xs) ∷_) (map-split n f (Pm.drop n xs)) ⟩
       Pm.map f (Pm.take n xs) ∷ Pm.split n (Pm.map f (Pm.drop n xs))
     ≡⟨ cong (_∷ Pm.split n (Pm.map f (Pm.drop n xs))) (map-take n f xs) ⟩
       Pm.take n (Pm.map f xs) ∷ Pm.split n (Pm.map f (Pm.drop n xs))
@@ -154,6 +154,7 @@ module lift.AlgorithmicRules where
     ≡⟨⟩
       (Pm.reduceSeq bf init ∘ Pm.map f) (x ∷ xs)
     ∎
+
   {- Simplification rules -}
   simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n *′ m)) →
                     (Pm.join ∘ Pm.split n {m}) xs ≡ xs
@@ -185,7 +186,7 @@ module lift.AlgorithmicRules where
               (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n {m}) xs ≡ Pm.map f xs
   splitJoin {m} n f xs =
     begin
-      (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n {m} ) xs
+      (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n {m}) xs
     ≡⟨⟩
       Pm.join (Pm.map (Pm.map f) (Pm.split n {m} xs))
     ≡⟨ cong Pm.join (map-split n {m} f xs) ⟩
