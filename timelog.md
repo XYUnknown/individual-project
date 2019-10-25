@@ -93,4 +93,11 @@
 
 ### 22 Oct 2019
 * *1 hour* meeting with supervisor
-* *0.5 hours* documenting issues discussed in meeting
+* *0.5 hours* documenting issues discussed in meeting and implemented `reduceSeq` and `reduce`
+
+### 23 Oct 2019
+* *2 hours* reading and implementing `slide`
+
+### 24 Oct 2019
+* *3 hours* proving the second fusion rule, fixing the type issue of the lambda function in paper proof
+* *1 hour* trying agda `REWRITE` pragma, protentially it can be used for simplifying the semantics of the primitives
