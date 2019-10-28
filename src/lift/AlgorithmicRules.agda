@@ -162,10 +162,10 @@ module lift.AlgorithmicRules where
   simplification₁ n {suc m} xs =
     begin
       Pm.take n xs ++ Pm.join (Pm.split n {m} (Pm.drop n xs))
-    ≡⟨ cong (Pm.take n xs ++_) ( simplification₁ n {m} (Pm.drop n xs)) ⟩
+    ≡⟨ cong (Pm.take n xs ++_) (simplification₁ n {m} (Pm.drop n xs)) ⟩
       Pm.take n xs ++ Pm.drop n xs
     ≡⟨ take-drop n xs ⟩
-       refl
+      refl
 
   simplification₂ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec (Vec t n) m) →
                     (Pm.split n ∘ Pm.join) xs ≡ xs

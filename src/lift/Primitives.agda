@@ -1,5 +1,6 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 {- TODO: remove the pragma when all the holes are filled -}
+{-# OPTIONS --rewriting --prop #-}
 module lift.Primitives where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; _≢_; refl; cong; sym; subst)
@@ -7,8 +8,9 @@ module lift.Primitives where
   open import Data.Nat using (ℕ; zero; suc; pred; _+_; _*_; _∸_)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
-  open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ)
+  open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ; +-comm)
   open import Function using (_∘_)
+  open import Agda.Builtin.Equality.Rewrite
 
   {- operators -}
   -- To avoid the rewrites in primitive definitions causing difficulties in writing proofs for rewrite rules
@@ -69,10 +71,15 @@ module lift.Primitives where
   {- primitive slide -}
   -- sp > 0
   -- n > 0
-  slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (n * (suc sp) + sz) →
+  lemma : {n : ℕ} → (sz : ℕ) → (sp : ℕ) →
+         sz + suc (sp + (suc sp *′ n)) ≡ sp + suc (sz + (suc sp *′ n))
+  lemma sz sp = ?
+
+  slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t ((suc sp) *′ n + sz) →
           Vec (Vec t sz) (suc n)
   slide {zero} sz sp xs = [ xs ]
-  slide {suc n} sz sp xs = {!!}
+  slide {suc n} sz sp {t} xs rewrite +-comm (suc (sp + (suc sp *′ n))) sz =
+    take sz xs ∷ ?
 
   {- primitive reduce -}
   reduceSeq : {n : ℕ} → {s t : Set} → (s → t → t) → t → Vec s n → t
