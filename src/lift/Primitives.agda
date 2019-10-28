@@ -8,9 +8,32 @@ module lift.Primitives where
   open import Data.Nat using (ℕ; zero; suc; pred; _+_; _*_; _∸_)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
-  open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ; +-comm)
+  open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ; +-comm; +-assoc)
   open import Function using (_∘_)
   open import Agda.Builtin.Equality.Rewrite
+
+  {- rewrites -}
+  *zero : {m : ℕ} → m * zero ≡ zero
+  *zero {zero} = refl
+  *zero {suc m} = *zero {m}
+
+  *suc : {m n : ℕ} → m * (suc n) ≡ m + m * n
+  *suc {m} {n} =
+    begin
+      m * suc n
+    ≡⟨ *-distribˡ-+ m 1 n ⟩
+      m * 1 + m * n
+    ≡⟨ cong (_+ m * n) (*-identityʳ m) ⟩
+      refl
+
+  -- TODO potentially to deal with _+_
+  +zero : {m : ℕ} → m + zero ≡ m
+  +zero {m = zero}  = refl
+  +zero {m = suc m} = cong suc +zero
+  postulate +suc : {m n : ℕ} → m + (suc n) ≡ suc (m + n)
+  -- +suc = {!!}
+
+  {-# REWRITE *zero *suc #-}
 
   {- operators -}
   -- To avoid the rewrites in primitive definitions causing difficulties in writing proofs for rewrite rules
@@ -58,12 +81,12 @@ module lift.Primitives where
 
   {- primitive split -}
   {- split as slide with (step ≡ size) ? -}
-  split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n *′ m) → Vec (Vec t n) m
+  split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
   split n {zero} xs = []
   split n {suc m} xs = take n xs ∷ split n (drop n xs)
 
   {- primitive join -}
-  join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n *′ m)
+  join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
   join [] = []
   join (xs ∷ xs₁) = xs ++ join xs₁
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
@@ -71,15 +94,10 @@ module lift.Primitives where
   {- primitive slide -}
   -- sp > 0
   -- n > 0
-  lemma : {n : ℕ} → (sz : ℕ) → (sp : ℕ) →
-         sz + suc (sp + (suc sp *′ n)) ≡ sp + suc (sz + (suc sp *′ n))
-  lemma sz sp = ?
-
-  slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t ((suc sp) *′ n + sz) →
+  slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (n * (suc sp) + sz) →
           Vec (Vec t sz) (suc n)
   slide {zero} sz sp xs = [ xs ]
-  slide {suc n} sz sp {t} xs rewrite +-comm (suc (sp + (suc sp *′ n))) sz =
-    take sz xs ∷ ?
+  slide {suc n} sz sp xs = take sz {(suc n)* (suc sp)} {!!} ∷ slide {n} sz sp (drop sp {!!})
 
   {- primitive reduce -}
   reduceSeq : {n : ℕ} → {s t : Set} → (s → t → t) → t → Vec s n → t

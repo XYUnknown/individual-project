@@ -65,7 +65,7 @@ module lift.AlgorithmicRules where
   map-drop zero f xs = refl
   map-drop (suc n) f (x ∷ xs) = map-drop n f xs
 
-  map-split : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n *′ m)) →
+  map-split : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
               Pm.map (Pm.map f) (Pm.split n {m} xs) ≡ Pm.split n {m} (Pm.map f xs)
 
   map-split n {zero} f xs = refl
@@ -156,7 +156,7 @@ module lift.AlgorithmicRules where
     ∎
 
   {- Simplification rules -}
-  simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n *′ m)) →
+  simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
                     (Pm.join ∘ Pm.split n {m}) xs ≡ xs
   simplification₁ n {zero} [] = refl
   simplification₁ n {suc m} xs =
@@ -182,7 +182,7 @@ module lift.AlgorithmicRules where
 
   {- Split-join rule -}
   splitJoin : {m : ℕ} → {s : Set} → {t : Set} →
-              (n : ℕ) → (f : s → t) → (xs : Vec s (n *′ m)) →
+              (n : ℕ) → (f : s → t) → (xs : Vec s (n * m)) →
               (Pm.join ∘ Pm.map (Pm.map f) ∘ Pm.split n {m}) xs ≡ Pm.map f xs
   splitJoin {m} n f xs =
     begin
