@@ -28,12 +28,19 @@ module lift.Primitives where
 
   -- TODO potentially to deal with _+_
   +zero : {m : ℕ} → m + zero ≡ m
-  +zero {m = zero}  = refl
-  +zero {m = suc m} = cong suc +zero
-  postulate +suc : {m n : ℕ} → m + (suc n) ≡ suc (m + n)
-  -- +suc = {!!}
+  +zero {zero}  = refl
+  +zero {suc m} = cong suc +zero
 
-  {-# REWRITE *zero *suc #-}
+  +suc : {m n : ℕ} → m + (suc n) ≡ suc (m + n)
+  +suc {m} {n} =
+    begin
+      m + (1 + n)
+    ≡⟨ sym (+-assoc m 1 n) ⟩
+      m + 1 + n
+    ≡⟨ cong (_+ n) (+-comm m 1) ⟩
+      refl
+
+  {-# REWRITE *zero *suc +zero +suc #-}
 
   {- operators -}
   -- To avoid the rewrites in primitive definitions causing difficulties in writing proofs for rewrite rules
@@ -72,7 +79,7 @@ module lift.Primitives where
   {- primitive take -}
   take :  (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
   take zero xs = []
-  take (suc n) (x ∷ xs) = x ∷ (take n xs)
+  take (suc n) {m} (x ∷ xs) = x ∷ (take n {m} xs)
 
   {- primitive drop -}
   drop : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t m
@@ -83,7 +90,7 @@ module lift.Primitives where
   {- split as slide with (step ≡ size) ? -}
   split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
   split n {zero} xs = []
-  split n {suc m} xs = take n xs ∷ split n (drop n xs)
+  split n {suc m} xs = take n {n * m} xs ∷ split n (drop n xs)
 
   {- primitive join -}
   join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
@@ -94,10 +101,10 @@ module lift.Primitives where
   {- primitive slide -}
   -- sp > 0
   -- n > 0
-  slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (n * (suc sp) + sz) →
+  slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (sz + (suc sp) * n) →
           Vec (Vec t sz) (suc n)
   slide {zero} sz sp xs = [ xs ]
-  slide {suc n} sz sp xs = take sz {(suc n)* (suc sp)} {!!} ∷ slide {n} sz sp (drop sp {!!})
+  slide {suc n} sz sp xs = take sz {(suc sp) * (suc n)} xs ∷ slide {n} sz sp (?)
 
   {- primitive reduce -}
   reduceSeq : {n : ℕ} → {s t : Set} → (s → t → t) → t → Vec s n → t
@@ -112,13 +119,14 @@ module lift.Primitives where
   splitAt : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n + m)) →
             ∃₂ λ (xs₁ : Vec t n) (xs₂ : Vec t m) → xs ≡ xs₁ ++ xs₂
   splitAt zero xs =  ([] , xs , refl)
-  splitAt (suc n) (x ∷ xs)            with splitAt n xs
-  splitAt (suc n) (x ∷ .(xs₁ ++ xs₂)) | (xs₁ , xs₂ , refl) = ((x ∷ xs₁) , xs₂ , refl)
+  splitAt (suc n) {m} (x ∷ xs)            with splitAt n {m} xs
+  -- splitAt (suc n) (x ∷ .(xs₁ ++ xs₂)) | (xs₁ , xs₂ , refl) = ((x ∷ xs₁) , xs₂ , refl)
+  splitAt (suc n) {m} (x ∷ .(xs₁ ++ xs₂)) | (xs₁ , xs₂ , refl) = ((x ∷ xs₁) , xs₂ , refl)
 
   take′ : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
-  take′ n xs            with splitAt n xs
-  take′ n .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₁
+  take′ n {m} xs            with splitAt n {m} xs
+  take′ n {m} .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₁
 
   drop′ : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t m
-  drop′ n xs            with splitAt n xs
-  drop′ n .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₂
+  drop′ n {m} xs            with splitAt n {m} xs
+  drop′ n {m} .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₂
