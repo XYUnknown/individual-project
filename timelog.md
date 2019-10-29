@@ -101,3 +101,10 @@
 ### 24 Oct 2019
 * *3 hours* proving the second fusion rule, fixing the type issue of the lambda function in paper proof
 * *1 hour* trying agda `REWRITE` pragma, protentially it can be used for simplifying the semantics of the primitives
+
+### 25 Oct 2019
+* *1 hour* finished proving the second fusion rule and clean up code
+
+## Week 6
+### 28 Oct 2019
+* *2.5 hours* refining proofs with `REWRITE` pragma
