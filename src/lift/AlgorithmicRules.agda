@@ -34,12 +34,12 @@ module lift.AlgorithmicRules where
       refl
 
   take-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t n) → (xs₁ : Vec t m) →
-            Pm.take n (xs ++ xs₁) ≡ xs
+            Pm.take n {m} (xs ++ xs₁) ≡ xs
   take-++ zero [] xs₁ = refl
-  take-++ (suc n) (x ∷ xs) xs₁ =
+  take-++ (suc n) {m} (x ∷ xs) xs₁ =
     begin
-      x ∷ Pm.take n (xs ++ xs₁)
-    ≡⟨ cong (x ∷_) (take-++ n xs xs₁) ⟩
+      x ∷ Pm.take n {m} (xs ++ xs₁)
+    ≡⟨ cong (x ∷_) (take-++ n {m} xs xs₁) ⟩
       refl
 
   drop-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t n) → (xs₁ : Vec t m) →
@@ -52,16 +52,16 @@ module lift.AlgorithmicRules where
       refl
 
   map-take : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
-             Pm.map f (Pm.take n xs) ≡  (Pm.take n (Pm.map f xs))
+             Pm.map f (Pm.take n {m} xs) ≡  (Pm.take n {m} (Pm.map f xs))
   map-take zero f xs = refl
-  map-take (suc n) f (x ∷ xs) =
+  map-take (suc n) {m} f (x ∷ xs) =
     begin
-      f x ∷ Pm.map f (Pm.take n xs)
-    ≡⟨ cong (f x ∷_) (map-take n f xs) ⟩
+      f x ∷ Pm.map f (Pm.take n {m} xs)
+    ≡⟨ cong (f x ∷_) (map-take n {m} f xs) ⟩
       refl
 
   map-drop : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
-             Pm.map f (Pm.drop n xs) ≡ (Pm.drop n (Pm.map f xs))
+             Pm.map f (Pm.drop n {m} xs) ≡ (Pm.drop n {m} (Pm.map f xs))
   map-drop zero f xs = refl
   map-drop (suc n) f (x ∷ xs) = map-drop n f xs
 
@@ -81,7 +81,7 @@ module lift.AlgorithmicRules where
     ∎
 
   take-drop : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n + m)) →
-              Pm.take n xs ++ Pm.drop n xs ≡ xs
+              Pm.take n {m} xs ++ Pm.drop n {m} xs ≡ xs
   take-drop zero xs = refl
   take-drop (suc n) (x ∷ xs) =
     begin
