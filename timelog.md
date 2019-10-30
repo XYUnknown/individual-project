@@ -108,3 +108,7 @@
 ## Week 6
 ### 28 Oct 2019
 * *2.5 hours* refining proofs with `REWRITE` pragma
+
+### 29 Oct 2019
+* *2 hours* refining `_+_`, finished definition for `slide`, cleaning up proofs
+* *1 hour* supervisor meeting

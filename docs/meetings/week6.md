@@ -6,7 +6,7 @@
 ## Status
 * defined primitives `reduceSeq`, `reduce`
 * finished proof `fusion₂`
-* mde use of `REWRITE` pragma to simplify primitives' semantics
+* made use of `REWRITE` pragma to simplify primitives' semantics
 
 ## Discussion
 * It would be interesting to look into `mapLastFission`
