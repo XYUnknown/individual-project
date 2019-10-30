@@ -194,3 +194,16 @@ module lift.AlgorithmicRules where
     ≡⟨ simplification₁ n {m} (Pm.map f xs) ⟩
       Pm.map f xs
     ∎
+
+  {- Tiling -}
+  map-join : {s : Set} → {t : Set} → {m n : ℕ} →
+             (f : s → t) → (xs : Vec (Vec s n) m) →
+             Pm.map f (Pm.join xs) ≡ Pm.join (Pm.map (Pm.map f) xs)
+  map-join f [] = refl
+  map-join f (xs ∷ xs₁) =
+    begin
+      Pm.map f (xs ++ Pm.join (xs₁))
+    ≡⟨ map-++ f xs (Pm.join xs₁) ⟩
+      Pm.map f xs ++ Pm.map f (Pm.join xs₁)
+    ≡⟨ cong (Pm.map f xs ++_) (map-join f xs₁) ⟩
+      refl
