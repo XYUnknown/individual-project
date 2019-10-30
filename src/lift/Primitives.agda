@@ -26,7 +26,6 @@ module lift.Primitives where
     ≡⟨ cong (_+ m * n) (*-identityʳ m) ⟩
       refl
 
-  -- TODO potentially to deal with _+_
   +zero : {m : ℕ} → m + zero ≡ m
   +zero {zero}  = refl
   +zero {suc m} = cong suc +zero
@@ -39,6 +38,9 @@ module lift.Primitives where
       m + 1 + n
     ≡⟨ cong (_+ n) (+-comm m 1) ⟩
       refl
+
+  -- TODO : can we put this in REWRITE to aviod using subst and lemma in definition of slide?
+  postulate +suc-com : (m n o : ℕ) → suc (m + (n + o)) ≡ suc (n + (m + o))
 
   {-# REWRITE *zero *suc +zero +suc #-}
 
@@ -77,7 +79,7 @@ module lift.Primitives where
   id t = t
 
   {- primitive take -}
-  take :  (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
+  take : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
   take zero xs = []
   take (suc n) {m} (x ∷ xs) = x ∷ (take n {m} xs)
 
@@ -99,12 +101,24 @@ module lift.Primitives where
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
 
   {- primitive slide -}
-  -- sp > 0
-  -- n > 0
-  slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (sz + (suc sp) * n) →
+  -- lemma
+  suc-com : (m n o : ℕ) → suc (m + (n + o))  ≡ suc (n + (m + o))
+  suc-com m n o =
+    begin
+      suc (m + (n + o))
+    ≡⟨ cong suc (sym (+-assoc m n o )) ⟩
+      suc (m + n + o)
+    ≡⟨ cong suc (cong (_+ o) (+-comm m n)) ⟩
+      suc (n + m + o)
+    ≡⟨ cong suc (+-assoc n m o) ⟩
+      refl
+
+  -- (suc sp) and (suc n), to ensure step > 0
+  slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (sz + n * (suc sp)) →
           Vec (Vec t sz) (suc n)
   slide {zero} sz sp xs = [ xs ]
-  slide {suc n} sz sp xs = take sz {(suc sp) * (suc n)} xs ∷ slide {n} sz sp (?)
+  slide {suc n} sz sp {t} xs =
+    take sz {(suc n) * (suc sp)} xs ∷ slide {n} sz sp (drop (suc sp) (subst (Vec t) (suc-com sz sp (n + n * sp)) xs))
 
   {- primitive reduce -}
   reduceSeq : {n : ℕ} → {s t : Set} → (s → t → t) → t → Vec s n → t
@@ -120,7 +134,6 @@ module lift.Primitives where
             ∃₂ λ (xs₁ : Vec t n) (xs₂ : Vec t m) → xs ≡ xs₁ ++ xs₂
   splitAt zero xs =  ([] , xs , refl)
   splitAt (suc n) {m} (x ∷ xs)            with splitAt n {m} xs
-  -- splitAt (suc n) (x ∷ .(xs₁ ++ xs₂)) | (xs₁ , xs₂ , refl) = ((x ∷ xs₁) , xs₂ , refl)
   splitAt (suc n) {m} (x ∷ .(xs₁ ++ xs₂)) | (xs₁ , xs₂ , refl) = ((x ∷ xs₁) , xs₂ , refl)
 
   take′ : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
