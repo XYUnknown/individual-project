@@ -128,6 +128,11 @@ module lift.Primitives where
   reduce : {n : ℕ} → {t : Set} → (t → t → t) → t → Vec t n → t
   reduce f init xs = reduceSeq f init xs
 
+  {- primitive partRed-}
+  partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (t → t → t) → t → Vec t (n + m) → Vec t m
+  partRed zero f init xs = xs
+  partRed (suc n) f init (x ∷ xs) = partRed n f (f x init) xs
+
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
   splitAt : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n + m)) →
