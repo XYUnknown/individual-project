@@ -44,31 +44,6 @@ module lift.Primitives where
 
   {-# REWRITE *zero *suc +zero +suc #-}
 
-  {- operators -}
-  -- To avoid the rewrites in primitive definitions causing difficulties in writing proofs for rewrite rules
-  -- We define * in a nicer way
-  _*′_ : ℕ → ℕ → ℕ
-  n *′ zero = zero
-  n *′ suc m = n + n *′ m
-
-  -- A proof of the equality of customised operator *′ and *
-  *≡*′ : (n : ℕ) → (m : ℕ) →
-    n * m ≡ n *′ m
-  *≡*′ n zero =
-    begin
-      n * zero
-    ≡⟨ *-comm n zero ⟩
-      refl
-  *≡*′ n (suc m) =
-    begin
-      n * suc m
-    ≡⟨ *-distribˡ-+ n 1 m ⟩
-     n * 1 + n * m
-    ≡⟨ cong (_+ n * m) (*-identityʳ n) ⟩
-      n + n * m
-    ≡⟨ cong (n +_) (*≡*′ n m) ⟩
-      refl
-
   {- primitive map -}
   map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
   map f [] = []
@@ -129,9 +104,10 @@ module lift.Primitives where
   reduce f init xs = reduceSeq f init xs
 
   {- primitive partRed-}
-  partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (t → t → t) → t → Vec t (n + m) → Vec t m
-  partRed zero f init xs = xs
-  partRed (suc n) f init (x ∷ xs) = partRed n f (f x init) xs
+  partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (t → t → t) → t → Vec t (m * (suc n)) → Vec t m
+  partRed n {zero} f init xs = []
+  partRed n {suc m} f init xs =
+    [ reduce f init (take (suc n) {(m + m * n)} xs) ] ++ partRed n {m} f init (drop (suc n) xs)
 
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
@@ -148,3 +124,28 @@ module lift.Primitives where
   drop′ : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t m
   drop′ n {m} xs            with splitAt n {m} xs
   drop′ n {m} .(xs₁ ++ xs₂) | (xs₁ , xs₂ , refl) = xs₂
+
+  {- operators -}
+  -- To avoid the rewrites in primitive definitions causing difficulties in writing proofs for rewrite rules
+  -- We define * in a nicer way
+  _*′_ : ℕ → ℕ → ℕ
+  n *′ zero = zero
+  n *′ suc m = n + n *′ m
+
+  -- A proof of the equality of customised operator *′ and *
+  *≡*′ : (n : ℕ) → (m : ℕ) →
+    n * m ≡ n *′ m
+  *≡*′ n zero =
+    begin
+      n * zero
+    ≡⟨ *-comm n zero ⟩
+      refl
+  *≡*′ n (suc m) =
+    begin
+      n * suc m
+    ≡⟨ *-distribˡ-+ n 1 m ⟩
+      n * 1 + n * m
+    ≡⟨ cong (_+ n * m) (*-identityʳ n) ⟩
+      n + n * m
+    ≡⟨ cong (n +_) (*≡*′ n m) ⟩
+      refl
