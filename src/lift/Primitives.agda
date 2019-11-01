@@ -108,12 +108,12 @@ module lift.Primitives where
   head (x ∷ xs) = x
 
   reduce′ : {n : ℕ} → {t : Set} → (t → t → t) → Vec t (suc n) → t
-  reduce′ f xs = reduceSeq f (head xs) xs
+  reduce′ f (x ∷ xs) = reduceSeq f x xs
 
   partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (t → t → t) → Vec t (m * (suc n)) → Vec t m
   partRed n {zero} f [] = []
   partRed n {suc m} f xs =
-    [ reduce′ f (take (suc n) {(m + m * n)} xs) ] ++ partRed n {m} f (drop (suc n) xs)
+    reduce′ f (take (suc n) {(m + m * n)} xs) ∷ partRed n {m} f (drop (suc n) xs)
 
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
