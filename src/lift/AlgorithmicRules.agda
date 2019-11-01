@@ -3,7 +3,7 @@
 {-# OPTIONS --rewriting --prop #-}
 module lift.AlgorithmicRules where
   import Relation.Binary.PropositionalEquality as Eq
-  open Eq using (_≡_; refl; cong; sym; subst)
+  open Eq using (_≡_; refl; cong; sym; subst; cong₂)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
   open import Data.Product using (∃₂; _,_)
@@ -25,7 +25,7 @@ module lift.AlgorithmicRules where
     ∎
 
   map-++ : {n m : ℕ} → {s t : Set} → (f : s → t) → (xs₁ : Vec s n) → (xs₂ : Vec s m) →
-               Pm.map f (xs₁ ++ xs₂) ≡ Pm.map f xs₁ ++ Pm.map f xs₂
+           Pm.map f (xs₁ ++ xs₂) ≡ Pm.map f xs₁ ++ Pm.map f xs₂
   map-++ f [] xs₂ = refl
   map-++ f (x ∷ xs₁) xs₂ =
     begin
@@ -194,6 +194,60 @@ module lift.AlgorithmicRules where
     ≡⟨ simplification₁ n {m} (Pm.map f xs) ⟩
       Pm.map f xs
     ∎
+
+  {- Reduction -}
+  -- f is associative and commutative
+  -- declare as postulate for now
+  -- TODO: how to declare this abstract binary operator with cerntain properties?
+  postulate ≡-reduce′ : {n : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (x : t) → (xs : Vec t (suc n)) →
+              f (Pm.reduce′ f (x ∷ xs)) init ≡ f (Pm.reduce′ f xs) (f x init)
+
+  reduce≡reduce′ : {n : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (xs : Vec t (suc n)) →
+                   Pm.reduce f init xs ≡ f (Pm.reduce′ f xs) init
+  reduce≡reduce′ f init (x ∷ []) = refl
+  reduce≡reduce′ f init (x ∷ x₁ ∷ xs) =
+    begin
+      Pm.reduce f (f x init) (x₁ ∷ xs)
+    ≡⟨ reduce≡reduce′ f (f x init) (x₁ ∷ xs) ⟩
+      f (Pm.reduce′ f (x₁ ∷ xs)) (f x init)
+    ≡⟨ sym (≡-reduce′ f init x (x₁ ∷ xs)) ⟩
+      refl
+
+  reduce-++ : {n m : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (xs₁ : Vec t n) → (xs₂ : Vec t m) →
+              Pm.reduce f init (xs₁ ++ xs₂) ≡ Pm.reduce f (Pm.reduce f init xs₁) xs₂
+  reduce-++ f init [] xs₂ = refl
+  reduce-++ f init (x ∷ xs₁) xs₂ =
+    begin
+      Pm.reduce f (f x init) (xs₁ ++ xs₂)
+    ≡⟨ reduce-++ f (f x init) xs₁ xs₂ ⟩
+      refl
+
+  reduce-take-drop : (n : ℕ) → {m : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (xs : Vec t (suc n + m)) →
+    Pm.reduce f init xs ≡ Pm.reduce f (f (Pm.reduce′ f (Pm.take (suc n) {m} xs)) init) (Pm.drop (suc n) {m} xs)
+  reduce-take-drop n {m} f init xs =
+    begin
+      Pm.reduce f init xs
+    ≡⟨ cong (Pm.reduce f init) (sym (take-drop (suc n) {m} xs)) ⟩
+      Pm.reduce f init (Pm.take (suc n) {m} xs ++ Pm.drop (suc n) xs)
+    ≡⟨ reduce-++ f init (Pm.take (suc n) {m} xs) (Pm.drop (suc n) xs) ⟩
+      Pm.reduce f (Pm.reduce f init (Pm.take (suc n) {m} xs)) (Pm.drop (suc n) {m} xs)
+    ≡⟨ cong (λ ys → Pm.reduce f ys (Pm.drop (suc n) {m} xs)) (reduce≡reduce′ f init (Pm.take (suc n) {m} xs)) ⟩
+      Pm.reduce f (f (Pm.reduce′ f (Pm.take (suc n) {m} xs)) init) (Pm.drop (suc n) {m} xs)
+    ∎
+
+  -- The reduction rule
+  reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (f : t → t → t) → (init : t) → (xs : Vec t (m * (suc n))) →
+              (Pm.reduce f init ∘ Pm.partRed n {m} f) xs ≡ Pm.reduce f init xs
+  reduction {zero} n f init [] = refl
+  reduction {suc m} n f init xs =
+    begin
+      Pm.reduce f init ((Pm.reduce′ f (Pm.take (suc n) {(m + m * n)} xs)) ∷ Pm.partRed n {m} f (Pm.drop (suc n) xs))
+    ≡⟨⟩
+      Pm.reduce f (f (Pm.reduce′ f (Pm.take (suc n) {(m + m * n)} xs)) init) (Pm.partRed n {m} f (Pm.drop (suc n) xs))
+    ≡⟨ reduction {m} n f (f (Pm.reduce′ f (Pm.take (suc n) {(m + m * n)} xs)) init) ((Pm.drop (suc n) xs)) ⟩
+      Pm.reduce f (f (Pm.reduce′ f (Pm.take (suc n) {(m + m * n)} xs)) init) (Pm.drop (suc n) {(m + m * n)} xs)
+    ≡⟨ sym (reduce-take-drop n {m + m * n} f init xs) ⟩
+      refl
 
   {- Tiling -}
   map-join : {s : Set} → {t : Set} → {m n : ℕ} →
