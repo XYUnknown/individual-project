@@ -30,6 +30,8 @@ Week-by-week plan for the whole project. Update this as you go along.
     * Look into/prove rewrite rules involving `reduce`
     * Look into/prove tiling rule
 * **Week 6**
+    * Finish defining the rest of primitives
+    * Proving reduction and partial reduction
 * **Week 7**
 * **Week 8**
 * **Week 9**
