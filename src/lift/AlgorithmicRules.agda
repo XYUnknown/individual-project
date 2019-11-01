@@ -199,7 +199,7 @@ module lift.AlgorithmicRules where
   -- f is associative and commutative
   -- declare as postulate for now
   -- TODO: how to declare this abstract binary operator with cerntain properties?
-  postulate ≡-reduce′ : {n : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (x : t) → (xs : Vec t (suc n)) →
+  postulate reduce′-assoc : {n : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (x : t) → (xs : Vec t (suc n)) →
               f (Pm.reduce′ f (x ∷ xs)) init ≡ f (Pm.reduce′ f xs) (f x init)
 
   reduce≡reduce′ : {n : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (xs : Vec t (suc n)) →
@@ -210,7 +210,7 @@ module lift.AlgorithmicRules where
       Pm.reduce f (f x init) (x₁ ∷ xs)
     ≡⟨ reduce≡reduce′ f (f x init) (x₁ ∷ xs) ⟩
       f (Pm.reduce′ f (x₁ ∷ xs)) (f x init)
-    ≡⟨ sym (≡-reduce′ f init x (x₁ ∷ xs)) ⟩
+    ≡⟨ sym (reduce′-assoc f init x (x₁ ∷ xs)) ⟩
       refl
 
   reduce-++ : {n m : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (xs₁ : Vec t n) → (xs₂ : Vec t m) →
