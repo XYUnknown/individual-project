@@ -112,3 +112,10 @@
 ### 29 Oct 2019
 * *2 hours* refining `_+_`, finished definition for `slide`, cleaning up proofs
 * *1 hour* supervisor meeting
+
+### 30 Oct 2019
+* *0.5 hours* adding proof for sub rules of `tiling`, documenting notes
+
+### 31 Oct 2019
+* *2 hours* adding definition for `partRed`
+* *3 hours* proving the reduction rule
