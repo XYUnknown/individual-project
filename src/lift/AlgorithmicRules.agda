@@ -280,6 +280,10 @@ module lift.AlgorithmicRules where
     ≡⟨ sym (reduce-take-drop n {m + m * n} init xs) ⟩
       refl
 
+  -- a test that the redution rule is working
+  _ : (Pm.reduce _+_ 1 ∘ Pm.partRed 1 {2} _+_) (1 ∷ 1 ∷ 2 ∷ 2 ∷ []) ≡ Pm.reduce _+_ 1 (1 ∷ 1 ∷ 2 ∷ 2 ∷ [])
+  _ = refl
+
   {- Tiling -}
   map-join : {s : Set} → {t : Set} → {m n : ℕ} →
              (f : s → t) → (xs : Vec (Vec s n) m) →
