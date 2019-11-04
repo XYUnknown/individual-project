@@ -196,21 +196,54 @@ module lift.AlgorithmicRules where
     ∎
 
   {- Reduction -}
-  -- f is associative and commutative
-  -- declare as postulate for now
-  -- TODO: how to declare this abstract binary operator with cerntain properties?
-  postulate reduce′-assoc : {n : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (x : t) → (xs : Vec t (suc n)) →
-              f (Pm.reduce′ f (x ∷ xs)) init ≡ f (Pm.reduce′ f xs) (f x init)
+  -- TODO: better way to declare this abstract binary operator with cerntain properties?
+  {-
+  record AssocCommBinOp {t : Set} : Set where
+    field
+      _⊕_ : t → t → t
+      comm : ∀ x y → x ⊕ y ≡ y ⊕ x
+      assoc : ∀ x y z → (x ⊕ y) ⊕ z ≡ x ⊕ (y ⊕ z)
+    infixl 6 _⊕_
+  open AssocCommBinOp
+  -}
 
-  reduce≡reduce′ : {n : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (xs : Vec t (suc n)) →
-                   Pm.reduce f init xs ≡ f (Pm.reduce′ f xs) init
-  reduce≡reduce′ f init (x ∷ []) = refl
-  reduce≡reduce′ f init (x ∷ x₁ ∷ xs) =
+  -- an arbitrary operator which is associative and commutative
+  postulate _⊕_ : {t : Set} → t → t → t
+  postulate ⊕-comm : {t : Set} → ∀ (x y : t) → x ⊕ y ≡ y ⊕ x
+  postulate ⊕-assoc : {t : Set} → ∀ (x y z : t) → (x ⊕ y) ⊕ z ≡ x ⊕ (y ⊕ z)
+
+  reduce′-assoc : {n : ℕ} → {t : Set} → (init : t) → (x : t) → (xs : Vec t (suc n)) →
+    (Pm.reduce′ _⊕_ (x ∷ xs)) ⊕ init ≡ (Pm.reduce′ _⊕_ xs) ⊕ (x ⊕ init)
+  reduce′-assoc init x (x₁ ∷ []) =
     begin
-      Pm.reduce f (f x init) (x₁ ∷ xs)
-    ≡⟨ reduce≡reduce′ f (f x init) (x₁ ∷ xs) ⟩
-      f (Pm.reduce′ f (x₁ ∷ xs)) (f x init)
-    ≡⟨ sym (reduce′-assoc f init x (x₁ ∷ xs)) ⟩
+      Pm.reduce′ _⊕_ (x ∷ x₁ ∷ []) ⊕ init
+    ≡⟨⟩
+      Pm.reduceSeq _⊕_ (x₁ ⊕ x) [] ⊕ init
+    ≡⟨⟩
+      (x₁ ⊕ x) ⊕ init
+    ≡⟨ ⊕-assoc x₁ x init ⟩
+      x₁ ⊕ (x ⊕ init)
+    ≡⟨⟩
+      refl
+  reduce′-assoc init x (x₁ ∷ x₂ ∷ xs) =
+    begin
+      Pm.reduceSeq _⊕_ (x₁ ⊕ x) (x₂ ∷ xs) ⊕ init
+    ≡⟨ reduce′-assoc init (x₁ ⊕ x) (x₂ ∷ xs) ⟩
+      Pm.reduce′ _⊕_ (x₂ ∷ xs) ⊕ ((x₁ ⊕ x) ⊕ init)
+    ≡⟨ cong (Pm.reduce′ _⊕_ (x₂ ∷ xs) ⊕_) (⊕-assoc x₁ x init) ⟩
+      Pm.reduce′ _⊕_ (x₂ ∷ xs) ⊕ (x₁ ⊕ (x ⊕ init))
+    ≡⟨ sym (reduce′-assoc (x ⊕ init) x₁ (x₂ ∷ xs)) ⟩
+      refl
+
+  reduce≡reduce′ : {n : ℕ} → {t : Set} → (init : t) → (xs : Vec t (suc n)) →
+                 Pm.reduce _⊕_ init xs ≡ _⊕_ (Pm.reduce′ _⊕_ xs) init
+  reduce≡reduce′ init (x ∷ []) = refl
+  reduce≡reduce′ init (x ∷ x₁ ∷ xs) =
+    begin
+      Pm.reduce _⊕_ (x ⊕ init) (x₁ ∷ xs)
+    ≡⟨ reduce≡reduce′ (x ⊕ init) (x₁ ∷ xs) ⟩
+      (Pm.reduce′ _⊕_ (x₁ ∷ xs)) ⊕ (x ⊕ init)
+    ≡⟨ sym (reduce′-assoc init x (x₁ ∷ xs)) ⟩
       refl
 
   reduce-++ : {n m : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (xs₁ : Vec t n) → (xs₂ : Vec t m) →
@@ -222,31 +255,29 @@ module lift.AlgorithmicRules where
     ≡⟨ reduce-++ f (f x init) xs₁ xs₂ ⟩
       refl
 
-  reduce-take-drop : (n : ℕ) → {m : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (xs : Vec t (suc n + m)) →
-    Pm.reduce f init xs ≡ Pm.reduce f (f (Pm.reduce′ f (Pm.take (suc n) {m} xs)) init) (Pm.drop (suc n) {m} xs)
-  reduce-take-drop n {m} f init xs =
+  reduce-take-drop : (n : ℕ) → {m : ℕ} → {t : Set} → (init : t) → (xs : Vec t (suc n + m)) →
+    Pm.reduce _⊕_ init xs ≡ Pm.reduce  _⊕_ (_⊕_ (Pm.reduce′ _⊕_ (Pm.take (suc n) {m} xs)) init) (Pm.drop (suc n) {m} xs)
+  reduce-take-drop n {m} init xs =
     begin
-      Pm.reduce f init xs
-    ≡⟨ cong (Pm.reduce f init) (sym (take-drop (suc n) {m} xs)) ⟩
-      Pm.reduce f init (Pm.take (suc n) {m} xs ++ Pm.drop (suc n) xs)
-    ≡⟨ reduce-++ f init (Pm.take (suc n) {m} xs) (Pm.drop (suc n) xs) ⟩
-      Pm.reduce f (Pm.reduce f init (Pm.take (suc n) {m} xs)) (Pm.drop (suc n) {m} xs)
-    ≡⟨ cong (λ ys → Pm.reduce f ys (Pm.drop (suc n) {m} xs)) (reduce≡reduce′ f init (Pm.take (suc n) {m} xs)) ⟩
-      Pm.reduce f (f (Pm.reduce′ f (Pm.take (suc n) {m} xs)) init) (Pm.drop (suc n) {m} xs)
+      Pm.reduce _⊕_ init xs
+    ≡⟨ cong (Pm.reduce _⊕_ init) (sym (take-drop (suc n) {m} xs)) ⟩
+      Pm.reduce _⊕_ init (Pm.take (suc n) {m} xs ++ Pm.drop (suc n) xs)
+    ≡⟨ reduce-++ _⊕_ init (Pm.take (suc n) {m} xs) (Pm.drop (suc n) xs) ⟩
+      Pm.reduce _⊕_ (Pm.reduce _⊕_ init (Pm.take (suc n) {m} xs)) (Pm.drop (suc n) {m} xs)
+    ≡⟨ cong (λ ys → Pm.reduce _⊕_ ys (Pm.drop (suc n) {m} xs)) (reduce≡reduce′ init (Pm.take (suc n) {m} xs)) ⟩
+      Pm.reduce _⊕_ (_⊕_ (Pm.reduce′ _⊕_ (Pm.take (suc n) {m} xs)) init) (Pm.drop (suc n) {m} xs)
     ∎
 
   -- The reduction rule
-  reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (f : t → t → t) → (init : t) → (xs : Vec t (m * (suc n))) →
-              (Pm.reduce f init ∘ Pm.partRed n {m} f) xs ≡ Pm.reduce f init xs
-  reduction {zero} n f init [] = refl
-  reduction {suc m} n f init xs =
+  reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (init : t) → (xs : Vec t (m * (suc n))) →
+               (Pm.reduce _⊕_ init ∘ Pm.partRed n {m} _⊕_) xs ≡ Pm.reduce _⊕_ init xs
+  reduction {zero} n init [] = refl
+  reduction {suc m} n init xs =
     begin
-      Pm.reduce f init ((Pm.reduce′ f (Pm.take (suc n) {(m + m * n)} xs)) ∷ Pm.partRed n {m} f (Pm.drop (suc n) xs))
-    ≡⟨⟩
-      Pm.reduce f (f (Pm.reduce′ f (Pm.take (suc n) {(m + m * n)} xs)) init) (Pm.partRed n {m} f (Pm.drop (suc n) xs))
-    ≡⟨ reduction {m} n f (f (Pm.reduce′ f (Pm.take (suc n) {(m + m * n)} xs)) init) ((Pm.drop (suc n) xs)) ⟩
-      Pm.reduce f (f (Pm.reduce′ f (Pm.take (suc n) {(m + m * n)} xs)) init) (Pm.drop (suc n) {(m + m * n)} xs)
-    ≡⟨ sym (reduce-take-drop n {m + m * n} f init xs) ⟩
+      Pm.reduce _⊕_ init ((Pm.reduce′ _⊕_ (Pm.take (suc n) {(m + m * n)} xs)) ∷ Pm.partRed n {m} _⊕_ (Pm.drop (suc n) xs))
+    ≡⟨ reduction {m} n (_⊕_ (Pm.reduce′ _⊕_ (Pm.take (suc n) {(m + m * n)} xs)) init) ((Pm.drop (suc n) xs)) ⟩
+      Pm.reduce _⊕_ (_⊕_ (Pm.reduce′ _⊕_ (Pm.take (suc n) {(m + m * n)} xs)) init) (Pm.drop (suc n) {(m + m * n)} xs)
+    ≡⟨ sym (reduce-take-drop n {m + m * n} init xs) ⟩
       refl
 
   {- Tiling -}
