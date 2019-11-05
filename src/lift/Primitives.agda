@@ -8,7 +8,7 @@ module lift.Primitives where
   open import Data.Nat using (ℕ; zero; suc; pred; _+_; _*_; _∸_)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
-  open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-identityʳ; +-comm; +-assoc)
+  open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-distribʳ-+; *-identityʳ; +-comm; +-assoc)
   open import Function using (_∘_)
   open import Agda.Builtin.Equality.Rewrite
 
@@ -39,10 +39,59 @@ module lift.Primitives where
     ≡⟨ cong (_+ n) (+-comm m 1) ⟩
       refl
 
+  *suc′ : {m n : ℕ} →  m + n * m ≡ m + m * n
+  *suc′ {m} {n} =
+    begin
+      m + n * m
+    ≡⟨ cong (m +_) (*-comm n m) ⟩
+     refl
+
+  *+distrib : {m n o : ℕ} →  m + o + (m + o) * n ≡ m * suc n + o * suc n
+  *+distrib {m} {n} {o} =
+    begin
+      m + o + (m + o) * n
+    ≡⟨ cong (m + o +_) (*-distribʳ-+ n m o)⟩
+      m + o + (m * n + o * n)
+    ≡⟨ (sym (+-assoc (m + o) (m * n) (o * n)))⟩
+      m + o + m * n + o * n
+    ≡⟨ cong (_+ o * n) (+-assoc m o (m * n)) ⟩
+      m + (o + m * n) + o * n
+    ≡⟨ cong (λ x → m + x + o * n) (+-comm o (m * n))⟩
+      m + (m * n + o) + o * n
+    ≡⟨ cong (_+ o * n) (sym (+-assoc m (m * n) o)) ⟩
+      m + m * n + o + o * n
+    ≡⟨ cong (λ x → x + o + o * n) (sym (*suc {m} {n})) ⟩
+      m * suc n + o + o * n
+    ≡⟨ +-assoc (m * suc n) o (o * n) ⟩
+      m * suc n + (o + o * n)
+    ≡⟨ cong (m * suc n +_) (sym (*suc {o} {n})) ⟩
+      refl
+
+  *+suc-distrib : {m n o : ℕ} → suc (n + (m + m * n) + (o + o * n)) ≡ suc (n + (m + o + (m + o) * n))
+  *+suc-distrib {m} {n} {o} =
+    begin
+      suc (n + (m + m * n) + (o + o * n))
+    ≡⟨ cong (λ x → suc (n + x + (o + o * n))) (sym (*suc {m} {n})) ⟩
+      suc (n + m * suc n + (o + o * n))
+    ≡⟨ cong (λ x → suc (n + m * suc n + x )) (sym (*suc {o} {n})) ⟩
+      suc (n + m * suc n + o * suc n)
+    ≡⟨ cong suc (+-assoc n (m * suc n) (o * suc n)) ⟩
+      suc (n + (m * suc n + o * suc n))
+    ≡⟨ cong (λ x → suc (n + x)) (sym (*+distrib {m} {n} {o})) ⟩
+      refl
+
+  +assoc : {m n o : ℕ} → m + (n + o) ≡ m + n + o
+  +assoc {m} {n} {o} =
+    begin
+      m + (n + o)
+    ≡⟨ sym (+-assoc m n o) ⟩
+      refl
+
+
   -- TODO : can we put this in REWRITE to aviod using subst and lemma in definition of slide?
   postulate +suc-com : (m n o : ℕ) → suc (m + (n + o)) ≡ suc (n + (m + o))
 
-  {-# REWRITE *zero *suc +zero +suc #-}
+  {-# REWRITE *zero *suc +zero +suc *suc′ *+distrib *+suc-distrib +assoc #-}
 
   {- primitive map -}
   map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
@@ -112,8 +161,7 @@ module lift.Primitives where
 
   partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (t → t → t) → Vec t (m * (suc n)) → Vec t m
   partRed n {zero} f [] = []
-  partRed n {suc m} f xs =
-    reduce′ f (take (suc n) {(m + m * n)} xs) ∷ partRed n {m} f (drop (suc n) xs)
+  partRed n {suc m} f xs = reduce′ f (take (suc n) {(m + m * n)} xs) ∷ partRed n {m} f (drop (suc n) xs)
 
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
