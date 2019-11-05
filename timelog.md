@@ -119,3 +119,10 @@
 ### 31 Oct 2019
 * *2 hours* adding definition for `partRed`
 * *3 hours* proving the reduction rule
+
+## Week 7
+### 4 Nov 2019
+* *8 hours* defined abstract binary operator, refined the proof of reduction rule, added pattern matching rewrites, add proof for second partial reduction rule
+
+### 5 Nov 2019
+* *2 hours* added proofs for rewrites, cleaned up code
