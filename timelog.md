@@ -126,3 +126,4 @@
 
 ### 5 Nov 2019
 * *2 hours* added proofs for rewrites, cleaned up code
+* *1 hour* supervisor meeting
