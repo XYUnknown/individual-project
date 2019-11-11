@@ -12,6 +12,9 @@ module lift.AlgorithmicRules where
   open import Function using (_∘_)
   import lift.Primitives as Pm
   open Pm
+  open import lift.Operators using (CommAssocMonoid)
+  open CommAssocMonoid
+
 
   {- lemmas -}
   map-id : {n : ℕ} → {s : Set} → (xs : Vec s n ) → Pm.map Pm.id xs ≡ xs
@@ -197,101 +200,112 @@ module lift.AlgorithmicRules where
     ∎
 
   {- Reduction -}
-  -- TODO: better way to declare this abstract binary operator with cerntain properties?
-  {-
-  record AssocCommBinOp {t : Set} : Set where
-    field
-      _⊕_ : t → t → t
-      comm : ∀ x y → x ⊕ y ≡ y ⊕ x
-      assoc : ∀ x y z → (x ⊕ y) ⊕ z ≡ x ⊕ (y ⊕ z)
-    infixl 6 _⊕_
-  open AssocCommBinOp
-  -}
-
-  -- an arbitrary operator which is associative and commutative
-  postulate _⊕_ : {t : Set} → t → t → t
-  postulate ⊕-comm : {t : Set} → ∀ (x y : t) → x ⊕ y ≡ y ⊕ x
-  postulate ⊕-assoc : {t : Set} → ∀ (x y z : t) → (x ⊕ y) ⊕ z ≡ x ⊕ (y ⊕ z)
-
-  reduce′-assoc : {n : ℕ} → {t : Set} → (init : t) → (x : t) → (xs : Vec t (suc n)) →
-                  (Pm.reduce′ _⊕_ (x ∷ xs)) ⊕ init ≡ (Pm.reduce′ _⊕_ xs) ⊕ (x ⊕ init)
-  reduce′-assoc init x (x₁ ∷ []) =
+  reduceSeq-reduce : {n : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (x : t) → (xs : Vec t n) →
+          let _⊕_ = _⊕_ M in
+          x ⊕ Pm.reduce M xs ≡ Pm.reduceSeq _⊕_ x xs
+  reduceSeq-reduce M x [] = let ε = ε M; _⊕_ = _⊕_ M in
     begin
-      Pm.reduce′ _⊕_ (x ∷ x₁ ∷ []) ⊕ init
+      x ⊕ ε
+    ≡⟨ idʳ M x ⟩
+      refl
+  reduceSeq-reduce M x (x₁ ∷ xs) =  let ε = ε M; _⊕_ = _⊕_ M in
+    begin
+      x ⊕ Pm.reduceSeq _⊕_ (x₁ ⊕ ε) xs
+    ≡⟨ cong (λ y → x ⊕ (Pm.reduceSeq _⊕_ y xs)) (idʳ M x₁) ⟩
+      x ⊕ Pm.reduceSeq _⊕_ x₁ xs
+    ≡⟨ cong (x ⊕_) (sym (reduceSeq-reduce M x₁ xs)) ⟩
+      x ⊕ (x₁ ⊕ Pm.reduce M xs)
+    ≡⟨ sym (assoc M x x₁ (Pm.reduce M xs)) ⟩
+      (x ⊕ x₁) ⊕ Pm.reduce M xs
+    ≡⟨ cong (_⊕ Pm.reduce M xs) (comm M x x₁) ⟩
+      (x₁ ⊕ x) ⊕ Pm.reduce M xs
+    ≡⟨ reduceSeq-reduce M (x₁ ⊕ x) xs ⟩
+      refl
+
+  reduce-++ : {n m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs₁ : Vec t n) → (xs₂ : Vec t m) →
+              let _⊕_ = _⊕_ M in
+              Pm.reduce M xs₁ ⊕ Pm.reduce M xs₂ ≡ Pm.reduce M (xs₁ ++ xs₂)
+  reduce-++ M [] xs₂ = let _⊕_ = _⊕_ M; ε = ε M in
+    begin
+      Pm.reduce M [] ⊕ Pm.reduce M xs₂
     ≡⟨⟩
-      Pm.reduceSeq _⊕_ (x₁ ⊕ x) [] ⊕ init
+      ε ⊕ Pm.reduce M xs₂
+    ≡⟨ idˡ M (Pm.reduce M xs₂) ⟩
+      refl
+  reduce-++ M (x ∷ xs₁) xs₂ = let _⊕_ = _⊕_ M; ε = ε M in
+    begin
+      Pm.reduce M (x ∷ xs₁) ⊕ Pm.reduce M xs₂
     ≡⟨⟩
-      (x₁ ⊕ x) ⊕ init
-    ≡⟨ ⊕-assoc x₁ x init ⟩
-      x₁ ⊕ (x ⊕ init)
-    ≡⟨⟩
-      refl
-  reduce′-assoc init x (x₁ ∷ x₂ ∷ xs) =
-    begin
-      Pm.reduceSeq _⊕_ (x₁ ⊕ x) (x₂ ∷ xs) ⊕ init
-    ≡⟨ reduce′-assoc init (x₁ ⊕ x) (x₂ ∷ xs) ⟩
-      Pm.reduce′ _⊕_ (x₂ ∷ xs) ⊕ ((x₁ ⊕ x) ⊕ init)
-    ≡⟨ cong (Pm.reduce′ _⊕_ (x₂ ∷ xs) ⊕_) (⊕-assoc x₁ x init) ⟩
-      Pm.reduce′ _⊕_ (x₂ ∷ xs) ⊕ (x₁ ⊕ (x ⊕ init))
-    ≡⟨ sym (reduce′-assoc (x ⊕ init) x₁ (x₂ ∷ xs)) ⟩
-      refl
-
-  reduce≡reduce′ : {n : ℕ} → {t : Set} → (init : t) → (xs : Vec t (suc n)) →
-                   Pm.reduce _⊕_ init xs ≡ _⊕_ (Pm.reduce′ _⊕_ xs) init
-  reduce≡reduce′ init (x ∷ []) = refl
-  reduce≡reduce′ init (x ∷ x₁ ∷ xs) =
-    begin
-      Pm.reduce _⊕_ (x ⊕ init) (x₁ ∷ xs)
-    ≡⟨ reduce≡reduce′ (x ⊕ init) (x₁ ∷ xs) ⟩
-      (Pm.reduce′ _⊕_ (x₁ ∷ xs)) ⊕ (x ⊕ init)
-    ≡⟨ sym (reduce′-assoc init x (x₁ ∷ xs)) ⟩
+      Pm.reduceSeq _⊕_ (x ⊕ ε) xs₁ ⊕ Pm.reduce M xs₂
+    ≡⟨ cong (λ y → Pm.reduceSeq _⊕_ y xs₁ ⊕ Pm.reduce M xs₂) (idʳ M x) ⟩
+      Pm.reduceSeq _⊕_ x xs₁ ⊕ Pm.reduce M xs₂
+    ≡⟨ cong (_⊕ Pm.reduce M xs₂) (sym (reduceSeq-reduce M x xs₁)) ⟩
+      (x ⊕ Pm.reduce M xs₁) ⊕ Pm.reduce M xs₂
+    ≡⟨ assoc M x (Pm.reduce M xs₁) (Pm.reduce M xs₂) ⟩
+      x ⊕ (Pm.reduce M xs₁ ⊕ Pm.reduce M xs₂)
+    ≡⟨ cong (x ⊕_) (reduce-++ M xs₁ xs₂) ⟩
+      x ⊕ Pm.reduce M (xs₁ ++ xs₂)
+    ≡⟨ reduceSeq-reduce M x (xs₁ ++ xs₂) ⟩
+      Pm.reduceSeq _⊕_ x (xs₁ ++ xs₂)
+    ≡⟨ cong (λ y → Pm.reduceSeq _⊕_ y (xs₁ ++ xs₂)) (sym (idʳ M x)) ⟩
       refl
 
-  reduce-++ : {n m : ℕ} → {t : Set} → (f : t → t → t) → (init : t) → (xs₁ : Vec t n) → (xs₂ : Vec t m) →
-              Pm.reduce f init (xs₁ ++ xs₂) ≡ Pm.reduce f (Pm.reduce f init xs₁) xs₂
-  reduce-++ f init [] xs₂ = refl
-  reduce-++ f init (x ∷ xs₁) xs₂ =
+  reduce-take-drop : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs : Vec t (n + m)) →
+                     let _⊕_ = _⊕_ M in
+                     Pm.reduce M xs ≡ Pm.reduce M (Pm.take n {m} xs) ⊕ Pm.reduce M (Pm.drop n {m} xs)
+  reduce-take-drop n {m} M xs =
     begin
-      Pm.reduce f (f x init) (xs₁ ++ xs₂)
-    ≡⟨ reduce-++ f (f x init) xs₁ xs₂ ⟩
+      Pm.reduce M xs
+    ≡⟨ cong (Pm.reduce M) (sym (take-drop n {m} xs)) ⟩
+      Pm.reduce M (Pm.take n {m} xs ++ Pm.drop n xs)
+    ≡⟨ sym (reduce-++ M (Pm.take n {m} xs) (Pm.drop n xs)) ⟩
       refl
-
-  reduce-take-drop : (n : ℕ) → {m : ℕ} → {t : Set} → (init : t) → (xs : Vec t (suc n + m)) →
-    Pm.reduce _⊕_ init xs ≡ Pm.reduce  _⊕_ (_⊕_ (Pm.reduce′ _⊕_ (Pm.take (suc n) {m} xs)) init) (Pm.drop (suc n) {m} xs)
-  reduce-take-drop n {m} init xs =
-    begin
-      Pm.reduce _⊕_ init xs
-    ≡⟨ cong (Pm.reduce _⊕_ init) (sym (take-drop (suc n) {m} xs)) ⟩
-      Pm.reduce _⊕_ init (Pm.take (suc n) {m} xs ++ Pm.drop (suc n) xs)
-    ≡⟨ reduce-++ _⊕_ init (Pm.take (suc n) {m} xs) (Pm.drop (suc n) xs) ⟩
-      Pm.reduce _⊕_ (Pm.reduce _⊕_ init (Pm.take (suc n) {m} xs)) (Pm.drop (suc n) {m} xs)
-    ≡⟨ cong (λ ys → Pm.reduce _⊕_ ys (Pm.drop (suc n) {m} xs)) (reduce≡reduce′ init (Pm.take (suc n) {m} xs)) ⟩
-      Pm.reduce _⊕_ (_⊕_ (Pm.reduce′ _⊕_ (Pm.take (suc n) {m} xs)) init) (Pm.drop (suc n) {m} xs)
-    ∎
 
   -- The reduction rule
-  reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (init : t) → (xs : Vec t (m * (suc n))) →
-              (Pm.reduce _⊕_ init ∘ Pm.partRed n {m} _⊕_) xs ≡ Pm.reduce _⊕_ init xs
-  reduction {zero} n init [] = refl
-  reduction {suc m} n init xs =
+  reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
+              (Pm.reduce M ∘ Pm.partRed n {m} M) xs ≡ Pm.reduce M xs
+  reduction {zero} zero M [] = let _⊕_ = _⊕_ M; ε = ε M in
     begin
-      Pm.reduce _⊕_ init ((Pm.reduce′ _⊕_ (Pm.take (suc n) {(m + m * n)} xs)) ∷ Pm.partRed n {m} _⊕_ (Pm.drop (suc n) xs))
-    ≡⟨ reduction {m} n (_⊕_ (Pm.reduce′ _⊕_ (Pm.take (suc n) {(m + m * n)} xs)) init) ((Pm.drop (suc n) xs)) ⟩
-      Pm.reduce _⊕_ (_⊕_ (Pm.reduce′ _⊕_ (Pm.take (suc n) {(m + m * n)} xs)) init) (Pm.drop (suc n) {(m + m * n)} xs)
-    ≡⟨ sym (reduce-take-drop n {m + m * n} init xs) ⟩
+      Pm.reduce M [ ε ]
+    ≡⟨⟩
+      ε ⊕ ε
+    ≡⟨ idʳ M ε ⟩
+      refl
+  reduction {zero} (suc n) M xs = let _⊕_ = _⊕_ M; ε = ε M in
+    begin
+      Pm.reduce M [ Pm.reduce M xs ]
+    ≡⟨⟩
+      (Pm.reduce M xs) ⊕ ε
+    ≡⟨ idʳ M (Pm.reduce M xs) ⟩
+      refl
+  reduction {suc m} zero M [] = let _⊕_ = _⊕_ M; ε = ε M in
+    begin
+      Pm.reduce M (ε ∷ Pm.partRed zero {m} M [])
+    ≡⟨⟩
+      Pm.reduceSeq _⊕_ (ε ⊕ ε) (Pm.partRed zero {m} M [])
+    ≡⟨ cong (λ y → Pm.reduceSeq _⊕_ y (Pm.partRed zero {m} M [])) (idʳ M ε) ⟩
+      Pm.reduce M (Pm.partRed zero {m} M [])
+    ≡⟨ reduction {m} zero M [] ⟩
+      refl
+  reduction {suc m} (suc n) M xs = let _⊕_ = _⊕_ M; ε = ε M in
+    begin
+      Pm.reduce M ([ Pm.reduce M (take (suc n) {suc (n + m + m * n)} xs) ] ++ Pm.partRed (suc n) {m} M (Pm.drop (suc n) xs))
+    ≡⟨ sym (reduce-++ M [ Pm.reduce M (take (suc n) {suc (n + m + m * n)} xs) ] (Pm.partRed (suc n) {m} M (Pm.drop (suc n) xs))) ⟩
+      Pm.reduce M [ Pm.reduce M (take (suc n) {suc (n + m + m * n)} xs) ] ⊕ Pm.reduce M (Pm.partRed (suc n) {m} M (Pm.drop (suc n) xs))
+    ≡⟨ cong (_⊕ Pm.reduce M (Pm.partRed (suc n) {m} M (Pm.drop (suc n) xs))) (idʳ M (Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} xs))) ⟩
+      Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} xs) ⊕ Pm.reduce M (Pm.partRed (suc n) {m} M (Pm.drop (suc n) xs))
+    ≡⟨ cong (Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} xs) ⊕_) (reduction {m} (suc n) M (Pm.drop (suc n) xs)) ⟩
+      Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} xs) ⊕ Pm.reduce M (Pm.drop (suc n) {suc (n + m + m * n)} xs)
+    ≡⟨ sym (reduce-take-drop (suc n) {suc (n + m + m * n)} M xs) ⟩
       refl
 
-  -- a test that the redution rule is working
-  _ : (Pm.reduce _+_ 1 ∘ Pm.partRed 1 {2} _+_) (1 ∷ 1 ∷ 2 ∷ 2 ∷ []) ≡ Pm.reduce _+_ 1 (1 ∷ 1 ∷ 2 ∷ 2 ∷ [])
-  _ = refl
-
   {- Partial Reduction -}
-  -- I think they might be not equal...
-  partialReduction₁ : {t : Set} → (n : ℕ) → (init : t) → (xs : Vec t (suc n))  →
-                      Pm.partRed n _⊕_ xs ≡ [ Pm.reduce _⊕_ init xs ]
-  partialReduction₁ zero init (x ∷ []) = {!!}
-  partialReduction₁ (suc n) init (x ∷ xs) = {!!}
+  partialReduction₁ : {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t n)  →
+                      Pm.partRed n M xs ≡ [ Pm.reduce M xs ]
+  partialReduction₁ zero M [] = refl
+  partialReduction₁ (suc n) M xs = refl
 
+  {-
   take-++′ : (n : ℕ) → {m o : ℕ} → {t : Set} → (xs : Vec t (n + m)) → (xs₁ : Vec t o) →
              Pm.take n {m} xs ≡ Pm.take n {m + o} (xs ++ xs₁)
   take-++′ zero {m} {o} xs xs₁ = refl
@@ -347,7 +361,7 @@ module lift.AlgorithmicRules where
       Pm.partRed n {1} f (Pm.take (suc n) {(m + m * n)} xs) ++ Pm.partRed n {m} f (Pm.drop (suc n) xs)
     ≡⟨ partRed-take-drop {m} n f xs ⟩
       refl
-
+  -}
   {- Tiling -}
   map-join : {s : Set} → {t : Set} → {m n : ℕ} →
              (f : s → t) → (xs : Vec (Vec s n) m) →
