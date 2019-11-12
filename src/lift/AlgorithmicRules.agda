@@ -382,17 +382,6 @@ module lift.AlgorithmicRules where
   -- TODO
   partialReduction₂ {suc m} {t} (suc n) M xs = {!!}
 
-  {-
-  partialReduction₂ {zero} n f [] = refl
-  partialReduction₂ {suc m} n f xs =
-    begin
-      Pm.partRed n {1} f (Pm.take (suc n) {(m + m * n)} xs) ++
-      Pm.join (Pm.map (Pm.partRed n {1} f) (Pm.split (suc n) {m} (Pm.drop (suc n) xs)))
-    ≡⟨ cong (Pm.partRed n {1} f (Pm.take (suc n) {(m + m * n)} xs) ++_) (partialReduction₂ {m} n f (Pm.drop (suc n) xs) ) ⟩
-      Pm.partRed n {1} f (Pm.take (suc n) {(m + m * n)} xs) ++ Pm.partRed n {m} f (Pm.drop (suc n) xs)
-    ≡⟨ partRed-take-drop {m} n f xs ⟩
-      refl
-  -}
   {- Tiling -}
   map-join : {s : Set} → {t : Set} → {m n : ℕ} →
              (f : s → t) → (xs : Vec (Vec s n) m) →
