@@ -379,12 +379,9 @@ module lift.AlgorithmicRules where
       ε ∷ Pm.partRed zero {m} M (Pm.join {zero} {suc m} (Pm.split zero []))
     ≡⟨ cong (λ ys → (ε ∷ Pm.partRed zero {m} M ys)) (simplification₁ zero {m} []) ⟩
       refl
+  -- TODO
+  partialReduction₂ {suc m} {t} (suc n) M xs = {!!}
 
-  partialReduction₂ {suc m} {t} (suc n) M xs = ?
-    --begin
-       -- Pm.join (Pm.map (Pm.partRed (suc n) {zero} M) (Pm.take (suc n) {suc n * suc m} xs ∷ Pm.split (suc n) (Pm.drop (suc n) xs)))
-   -- ≡⟨⟩
-     --  {!!}
   {-
   partialReduction₂ {zero} n f [] = refl
   partialReduction₂ {suc m} n f xs =
