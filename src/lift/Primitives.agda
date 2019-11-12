@@ -48,6 +48,22 @@ module lift.Primitives where
     ≡⟨ cong (m +_) (*-comm n m) ⟩
      refl
 
+
+  +assoc : {m n o : ℕ} → m + (n + o) ≡ m + n + o
+  +assoc {m} {n} {o} =
+    begin
+      m + (n + o)
+    ≡⟨ sym (+-assoc m n o) ⟩
+      refl
+
+  postulate foo₁ : {m n : ℕ} → suc n + suc (n + m + m * n) ≡ suc (suc (n + m + n + n * m))
+
+  postulate foo₂ : {m n : ℕ} →  suc n + suc n * suc m ≡ suc n + suc (n + m + m * n)
+
+  -- TODO : can we put this in REWRITE to avoid using subst and lemma in definition of slide?
+  postulate +suc-com : (m n o : ℕ) → suc (m + (n + o)) ≡ suc (n + (m + o))
+
+  -- unused
   *+distrib : {m n o : ℕ} →  m + o + (m + o) * n ≡ m * suc n + o * suc n
   *+distrib {m} {n} {o} =
     begin
@@ -82,17 +98,7 @@ module lift.Primitives where
     ≡⟨ cong (λ x → suc (n + x)) (sym (*+distrib {m} {n} {o})) ⟩
       refl
 
-  +assoc : {m n o : ℕ} → m + (n + o) ≡ m + n + o
-  +assoc {m} {n} {o} =
-    begin
-      m + (n + o)
-    ≡⟨ sym (+-assoc m n o) ⟩
-      refl
-
-  -- TODO : can we put this in REWRITE to aviod using subst and lemma in definition of slide?
-  postulate +suc-com : (m n o : ℕ) → suc (m + (n + o)) ≡ suc (n + (m + o))
-
-  {-# REWRITE *zero *suc +zero +suc *suc′ *+distrib *+suc-distrib +assoc #-}
+  {-# REWRITE *zero *suc +zero +suc *suc′ +assoc #-}
 
   {- primitive map -}
   map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
