@@ -347,11 +347,45 @@ module lift.AlgorithmicRules where
       Pm.partRed n {(suc m)} f (Pm.take (suc n) {(m + m * n)} xs ++ Pm.drop (suc n) {(m + m * n)} xs)
     ≡⟨ cong (Pm.partRed n {(suc m)} f) (take-drop (suc n) {(m + m * n)} xs) ⟩
       refl
-
+  -}
   {- the second option of partial reduction -}
-  {- do not require f to be commutative and associative -}
-  partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (f : t → t → t) → (xs : Vec t (m * (suc n))) →
-                      Pm.join (Pm.map (Pm.partRed n {1} f) (Pm.split (suc n) {m} xs)) ≡ Pm.partRed n {m} f xs
+  take-all : (n : ℕ) → {t : Set} → (xs : Vec t n) →
+              Pm.take n {zero} xs ≡ xs
+  take-all zero [] = refl
+  take-all (suc n) (x ∷ xs) =
+    begin
+      x ∷ Pm.take n xs
+    ≡⟨ cong (x ∷_) (take-all n xs) ⟩
+      refl
+
+  map-join-partRed : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
+                     Pm.join (Pm.map (Pm.partRed n {zero} M) (Pm.split n {suc m} xs)) ≡ Pm.partRed n {m} M (Pm.join {n} {suc m} (Pm.split n xs))
+  map-join-partRed = {!!}
+
+  partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
+                      (Pm.join ∘ Pm.map (Pm.partRed n {zero} M) ∘ Pm.split n {suc m}) xs ≡ Pm.partRed n {m} M xs
+  partialReduction₂ {zero} zero M [] = refl
+  partialReduction₂ {zero} (suc n) M xs =
+    begin
+      [ Pm.reduce M (Pm.take (suc n) {zero} xs) ]
+    ≡⟨ cong (λ ys → [ (Pm.reduce M) ys ]) (take-all (suc n) xs ) ⟩
+      refl
+  partialReduction₂ {suc m} zero M [] = let _⊕_ = _⊕_ M; ε = ε M in
+    begin
+      Pm.join (Pm.map (Pm.partRed zero {zero} M) (Pm.split zero {suc (suc m)} []))
+    ≡⟨⟩
+      ε ∷ Pm.join (Pm.map (Pm.partRed zero {zero} M) (Pm.split zero {suc m} []))
+    ≡⟨ cong (λ ys → (ε ∷ ys)) (map-join-partRed {m} zero M []) ⟩
+      ε ∷ Pm.partRed zero {m} M (Pm.join {zero} {suc m} (Pm.split zero []))
+    ≡⟨ cong (λ ys → (ε ∷ Pm.partRed zero {m} M ys)) (simplification₁ zero {m} []) ⟩
+      refl
+
+  partialReduction₂ {suc m} {t} (suc n) M xs = ?
+    --begin
+       -- Pm.join (Pm.map (Pm.partRed (suc n) {zero} M) (Pm.take (suc n) {suc n * suc m} xs ∷ Pm.split (suc n) (Pm.drop (suc n) xs)))
+   -- ≡⟨⟩
+     --  {!!}
+  {-
   partialReduction₂ {zero} n f [] = refl
   partialReduction₂ {suc m} n f xs =
     begin
