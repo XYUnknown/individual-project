@@ -127,3 +127,9 @@
 ### 5 Nov 2019
 * *2 hours* added proofs for rewrites, cleaned up code
 * *1 hour* supervisor meeting
+
+### 8 Nov 2019
+* *2 hours* added Record for abstract binary operator and id element
+
+## Week 8
+* *5 hours* refined `partRed`, redution rule, add proof for first partial reduction rule

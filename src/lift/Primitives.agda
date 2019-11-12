@@ -11,6 +11,8 @@ module lift.Primitives where
   open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-distribʳ-+; *-identityʳ; +-comm; +-assoc)
   open import Function using (_∘_)
   open import Agda.Builtin.Equality.Rewrite
+  open import lift.Operators using (CommAssocMonoid)
+  open CommAssocMonoid
 
   {- rewrites -}
   *zero : {m : ℕ} → m * zero ≡ zero
@@ -46,6 +48,22 @@ module lift.Primitives where
     ≡⟨ cong (m +_) (*-comm n m) ⟩
      refl
 
+
+  +assoc : {m n o : ℕ} → m + (n + o) ≡ m + n + o
+  +assoc {m} {n} {o} =
+    begin
+      m + (n + o)
+    ≡⟨ sym (+-assoc m n o) ⟩
+      refl
+
+  postulate foo₁ : {m n : ℕ} → suc n + suc (n + m + m * n) ≡ suc (suc (n + m + n + n * m))
+
+  postulate foo₂ : {m n : ℕ} →  suc n + suc n * suc m ≡ suc n + suc (n + m + m * n)
+
+  -- TODO : can we put this in REWRITE to avoid using subst and lemma in definition of slide?
+  postulate +suc-com : (m n o : ℕ) → suc (m + (n + o)) ≡ suc (n + (m + o))
+
+  -- unused
   *+distrib : {m n o : ℕ} →  m + o + (m + o) * n ≡ m * suc n + o * suc n
   *+distrib {m} {n} {o} =
     begin
@@ -80,18 +98,7 @@ module lift.Primitives where
     ≡⟨ cong (λ x → suc (n + x)) (sym (*+distrib {m} {n} {o})) ⟩
       refl
 
-  +assoc : {m n o : ℕ} → m + (n + o) ≡ m + n + o
-  +assoc {m} {n} {o} =
-    begin
-      m + (n + o)
-    ≡⟨ sym (+-assoc m n o) ⟩
-      refl
-
-
-  -- TODO : can we put this in REWRITE to aviod using subst and lemma in definition of slide?
-  postulate +suc-com : (m n o : ℕ) → suc (m + (n + o)) ≡ suc (n + (m + o))
-
-  {-# REWRITE *zero *suc +zero +suc *suc′ *+distrib *+suc-distrib +assoc #-}
+  {-# REWRITE *zero *suc +zero +suc *suc′ +assoc #-}
 
   {- primitive map -}
   map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
@@ -149,19 +156,19 @@ module lift.Primitives where
   reduceSeq f init [] = init
   reduceSeq f init (x ∷ xs) = reduceSeq f (f x init) xs
 
-  reduce : {n : ℕ} → {t : Set} → (t → t → t) → t → Vec t n → t
-  reduce f init xs = reduceSeq f init xs
+  reduce : {n : ℕ} → {t : Set} → (M : CommAssocMonoid t) → Vec t n → t
+  reduce M xs = let _⊕_ = _⊕_ M; ε = ε M
+                in reduceSeq _⊕_ ε xs
 
-  {- primitive partRed-}
-  head : {n : ℕ} → {t : Set} → Vec t (suc n) → t
-  head (x ∷ xs) = x
-
-  reduce′ : {n : ℕ} → {t : Set} → (t → t → t) → Vec t (suc n) → t
-  reduce′ f (x ∷ xs) = reduceSeq f x xs
-
-  partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (t → t → t) → Vec t (m * (suc n)) → Vec t m
-  partRed n {zero} f [] = []
-  partRed n {suc m} f xs = reduce′ f (take (suc n) {(m + m * n)} xs) ∷ partRed n {m} f (drop (suc n) xs)
+  {- primitive partRed -}
+  -- m should > 0
+  partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → Vec t (suc m * n) → Vec t (suc m)
+  partRed zero {zero} M [] = let ε = ε M
+                             in [ ε ]
+  partRed (suc n) {zero} M xs = [ reduce M xs ]
+  partRed zero {suc m} M [] = let ε = ε M
+                              in ε ∷ partRed zero {m} M []
+  partRed (suc n) {suc m} M xs = [ reduce M (take (suc n) {suc (n + m + m * n)} xs) ] ++ partRed (suc n) {m} M ((drop (suc n) xs))
 
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
