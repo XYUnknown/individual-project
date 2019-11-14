@@ -138,3 +138,6 @@
 ### 12 Nov 2019
 * *3 hours* refining the second partial reduction rule
 * *1 hour* meeting with supervisor
+
+### 14 Nov 2019
+* *2 hours* adding proof for lemma
