@@ -326,35 +326,15 @@ module lift.AlgorithmicRules where
 
   partRed-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs₁ : Vec t n) → (xs₂ : Vec t (suc m * n)) →
                Pm.partRed n {suc m} M (xs₁ ++ xs₂) ≡ Pm.partRed n M xs₁ ++ partRed n {m} M xs₂
-  partRed-++ zero {zero} M [] [] = refl
-  partRed-++ (suc n) {zero} M xs₁ xs₂ =
+  partRed-++ zero {m} M [] [] = refl
+  partRed-++ (suc n) {m} M xs₁ xs₂ =
     begin
-      Pm.reduce M (Pm.take (suc n) {suc n} (xs₁ ++ xs₂)) ∷ Pm.reduce M (Pm.drop (suc n) {suc n} (xs₁ ++ xs₂)) ∷ []
-    ≡⟨ cong (λ ys → Pm.reduce M ys ∷ Pm.reduce M (Pm.drop (suc n) {suc n} (xs₁ ++ xs₂)) ∷ []) (take-++ (suc n) {suc n} xs₁ xs₂) ⟩
-      Pm.reduce M xs₁ ∷ Pm.reduce M (Pm.drop (suc n) {suc n} (xs₁ ++ xs₂)) ∷ []
-    ≡⟨ cong (λ ys → Pm.reduce M xs₁ ∷ Pm.reduce M ys ∷ []) (drop-++ (suc n) xs₁ xs₂)⟩
+      Pm.reduce M (Pm.take (suc n) {suc m * suc n} (xs₁ ++ xs₂)) ∷
+      Pm.partRed (suc n) M (Pm.drop (suc n) (xs₁ ++ xs₂))
+    ≡⟨ cong (λ ys → (Pm.reduce M ys ∷ Pm.partRed (suc n) M (Pm.drop (suc n) (xs₁ ++ xs₂)))) (take-++ (suc n) {suc m * suc n} xs₁ xs₂) ⟩
+      Pm.reduce M xs₁ ∷ Pm.partRed (suc n) M (Pm.drop (suc n) (xs₁ ++ xs₂))
+    ≡⟨ cong (λ ys → (Pm.reduce M xs₁ ∷ Pm.partRed (suc n) M ys)) (drop-++ (suc n) xs₁ xs₂) ⟩
       refl
-  partRed-++ zero {suc m} M [] [] = refl
-
-  -- TODO: solve pattern matching issue
-  partRed-++ (suc n) {suc m} M xs₁ xs₂ = {!!}
-    {-begin
-      Pm.reduce M xs₁ ∷ Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} xs₂) ∷ Pm.partRed (suc n) M (Pm.drop (suc n) xs₂)
-    ≡⟨ cong (λ ys → Pm.reduce M ys ∷ Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} xs₂)
-       ∷ Pm.partRed (suc n) M (Pm.drop (suc n) xs₂)) (sym (take-++ (suc n) {suc (suc  m) * suc n} xs₁ xs₂)) ⟩
-      Pm.reduce M (Pm.take (suc n) {suc (suc m) * suc n} (xs₁ ++ xs₂))
-      ∷ Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} xs₂)
-      ∷ Pm.partRed (suc n) M (Pm.drop (suc n) xs₂)
-    ≡⟨ cong (λ y → Pm.reduce M (Pm.take (suc n) {suc (suc m) * suc n} (xs₁ ++ xs₂)) ∷ y ∷ Pm.partRed (suc n) M (Pm.drop (suc n) xs₂))
-       (cong (λ ys → Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} ys)) (sym (drop-++ (suc n) xs₁ xs₂)))  ⟩
-      Pm.reduce M (Pm.take (suc n) {suc (suc m) * suc n} (xs₁ ++ xs₂)) ∷
-      Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} (Pm.drop (suc n) (xs₁ ++ xs₂))) ∷
-      Pm.partRed (suc n) M (Pm.drop (suc n) xs₂)
-    ≡⟨ cong (λ y → Pm.reduce M (Pm.take (suc n) {suc (suc m) * suc n} (xs₁ ++ xs₂))
-       ∷ Pm.reduce M (Pm.take (suc n) {suc (n + m + m * n)} (Pm.drop (suc n) (xs₁ ++ xs₂))) ∷ y)
-       (cong (λ ys → Pm.partRed (suc n) M (Pm.drop (suc n) ys)) (sym (drop-++ (suc n) xs₁ xs₂))) ⟩
-     {!Pm.partRed (suc n) {suc (suc m)} M (xs₁ ++ xs₂)
-    ∎!} -}
 
   map-join-partRed : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xss : Vec (Vec t n) (suc m)) →
                      Pm.join (Pm.map (Pm.partRed n {zero} M) xss) ≡ Pm.partRed n {m} M (Pm.join {n} {suc m} xss)
