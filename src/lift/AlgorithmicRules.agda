@@ -93,6 +93,116 @@ module lift.AlgorithmicRules where
     ≡⟨ cong (x ∷_) (take-drop n xs) ⟩
       refl
 
+  -- used in proving reduction
+  reduceSeq-reduce : {n : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (x : t) → (xs : Vec t n) →
+                     let _⊕_ = _⊕_ M in
+                     x ⊕ Pm.reduce M xs ≡ Pm.reduceSeq _⊕_ x xs
+  reduceSeq-reduce M x [] = let ε = ε M; _⊕_ = _⊕_ M in
+    begin
+      x ⊕ ε
+    ≡⟨ idʳ M x ⟩
+      refl
+  reduceSeq-reduce M x (x₁ ∷ xs) =  let ε = ε M; _⊕_ = _⊕_ M in
+    begin
+      x ⊕ Pm.reduceSeq _⊕_ (x₁ ⊕ ε) xs
+    ≡⟨ cong (λ y → x ⊕ (Pm.reduceSeq _⊕_ y xs)) (idʳ M x₁) ⟩
+      x ⊕ Pm.reduceSeq _⊕_ x₁ xs
+    ≡⟨ cong (x ⊕_) (sym (reduceSeq-reduce M x₁ xs)) ⟩
+      x ⊕ (x₁ ⊕ Pm.reduce M xs)
+    ≡⟨ sym (assoc M x x₁ (Pm.reduce M xs)) ⟩
+      (x ⊕ x₁) ⊕ Pm.reduce M xs
+    ≡⟨ cong (_⊕ Pm.reduce M xs) (comm M x x₁) ⟩
+      (x₁ ⊕ x) ⊕ Pm.reduce M xs
+    ≡⟨ reduceSeq-reduce M (x₁ ⊕ x) xs ⟩
+      refl
+
+  reduce-++ : {n m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs₁ : Vec t n) → (xs₂ : Vec t m) →
+              let _⊕_ = _⊕_ M in
+              Pm.reduce M xs₁ ⊕ Pm.reduce M xs₂ ≡ Pm.reduce M (xs₁ ++ xs₂)
+  reduce-++ M [] xs₂ = let _⊕_ = _⊕_ M; ε = ε M in
+    begin
+      Pm.reduce M [] ⊕ Pm.reduce M xs₂
+    ≡⟨⟩
+      ε ⊕ Pm.reduce M xs₂
+    ≡⟨ idˡ M (Pm.reduce M xs₂) ⟩
+      refl
+  reduce-++ M (x ∷ xs₁) xs₂ = let _⊕_ = _⊕_ M; ε = ε M in
+    begin
+      Pm.reduce M (x ∷ xs₁) ⊕ Pm.reduce M xs₂
+    ≡⟨⟩
+      Pm.reduceSeq _⊕_ (x ⊕ ε) xs₁ ⊕ Pm.reduce M xs₂
+    ≡⟨ cong (λ y → Pm.reduceSeq _⊕_ y xs₁ ⊕ Pm.reduce M xs₂) (idʳ M x) ⟩
+      Pm.reduceSeq _⊕_ x xs₁ ⊕ Pm.reduce M xs₂
+    ≡⟨ cong (_⊕ Pm.reduce M xs₂) (sym (reduceSeq-reduce M x xs₁)) ⟩
+      (x ⊕ Pm.reduce M xs₁) ⊕ Pm.reduce M xs₂
+    ≡⟨ assoc M x (Pm.reduce M xs₁) (Pm.reduce M xs₂) ⟩
+      x ⊕ (Pm.reduce M xs₁ ⊕ Pm.reduce M xs₂)
+    ≡⟨ cong (x ⊕_) (reduce-++ M xs₁ xs₂) ⟩
+      x ⊕ Pm.reduce M (xs₁ ++ xs₂)
+    ≡⟨ reduceSeq-reduce M x (xs₁ ++ xs₂) ⟩
+      Pm.reduceSeq _⊕_ x (xs₁ ++ xs₂)
+    ≡⟨ cong (λ y → Pm.reduceSeq _⊕_ y (xs₁ ++ xs₂)) (sym (idʳ M x)) ⟩
+      refl
+
+  reduce-take-drop : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs : Vec t (n + m)) →
+                     let _⊕_ = _⊕_ M in
+                     Pm.reduce M xs ≡ Pm.reduce M (Pm.take n {m} xs) ⊕ Pm.reduce M (Pm.drop n {m} xs)
+  reduce-take-drop n {m} M xs =
+    begin
+      Pm.reduce M xs
+    ≡⟨ cong (Pm.reduce M) (sym (take-drop n {m} xs)) ⟩
+      Pm.reduce M (Pm.take n {m} xs ++ Pm.drop n xs)
+    ≡⟨ sym (reduce-++ M (Pm.take n {m} xs) (Pm.drop n xs)) ⟩
+      refl
+
+  -- used in proving partialReduction₂
+  take-all : (n : ℕ) → {t : Set} → (xs : Vec t n) →
+              Pm.take n {zero} xs ≡ xs
+  take-all zero [] = refl
+  take-all (suc n) (x ∷ xs) =
+    begin
+      x ∷ Pm.take n xs
+    ≡⟨ cong (x ∷_) (take-all n xs) ⟩
+      refl
+
+  ++-[] : {n : ℕ} → {t : Set} → (xs : Vec t n) →
+          xs ++ [] ≡ xs
+  ++-[] [] = refl
+  ++-[] (x ∷ xs) =
+    begin
+      x ∷ xs ++ []
+    ≡⟨ cong (x ∷_)(++-[] xs) ⟩
+      refl
+
+  partRed-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs₁ : Vec t n) → (xs₂ : Vec t (n * suc m)) →
+               Pm.partRed n {suc m} M (xs₁ ++ xs₂) ≡ Pm.partRed n M xs₁ ++ partRed n {m} M xs₂
+  partRed-++ zero {m} M [] [] = refl
+  partRed-++ (suc n) {m} M xs₁ xs₂ =
+    begin
+      Pm.reduce M (Pm.take (suc n) {suc n * suc m} (xs₁ ++ xs₂)) ∷
+      Pm.partRed (suc n) M (Pm.drop (suc n) (xs₁ ++ xs₂))
+    ≡⟨ cong (λ ys → (Pm.reduce M ys ∷ Pm.partRed (suc n) M (Pm.drop (suc n) (xs₁ ++ xs₂)))) (take-++ (suc n) {suc n * suc m} xs₁ xs₂) ⟩
+      Pm.reduce M xs₁ ∷ Pm.partRed (suc n) M (Pm.drop (suc n) (xs₁ ++ xs₂))
+    ≡⟨ cong (λ ys → (Pm.reduce M xs₁ ∷ Pm.partRed (suc n) M ys)) (drop-++ (suc n) xs₁ xs₂) ⟩
+      refl
+
+  map-join-partRed : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xss : Vec (Vec t n) (suc m)) →
+                     Pm.join (Pm.map (Pm.partRed n {zero} M) xss) ≡ Pm.partRed n {m} M (Pm.join {n} {suc m} xss)
+  map-join-partRed {zero} n M (xs ∷ []) =
+    begin
+      Pm.partRed n M xs ++ []
+    ≡⟨ ++-[] (Pm.partRed n M xs) ⟩
+      Pm.partRed n M xs
+    ≡⟨ cong (λ ys → Pm.partRed n M ys) (sym (++-[] xs)) ⟩
+      refl
+  map-join-partRed {suc m} n M (xs ∷ xs₁) =
+    begin
+      Pm.partRed n {zero} M xs ++ Pm.join (Pm.map (Pm.partRed n {zero} M) xs₁)
+    ≡⟨ cong (Pm.partRed n {zero} M xs ++_) (map-join-partRed n M xs₁) ⟩
+      Pm.partRed n M xs ++ Pm.partRed n {m} M (Pm.join {n} {suc m} xs₁)
+    ≡⟨ sym (partRed-++ n M xs (Pm.join {n} {suc m} xs₁)) ⟩
+      refl
+
   {- Identity rules -}
   identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n → Vec t n) → (xs : Vec s n) →
               (f ∘ Pm.map Pm.id) xs ≡ f xs
@@ -131,6 +241,7 @@ module lift.AlgorithmicRules where
     ≡⟨⟩
       Pm.map (f ∘ g) []
     ∎
+
   fusion₁ f g (x ∷ xs) =
     begin
       (Pm.map f ∘ Pm.map g) (x ∷ xs)
@@ -200,68 +311,6 @@ module lift.AlgorithmicRules where
     ∎
 
   {- Reduction -}
-  reduceSeq-reduce : {n : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (x : t) → (xs : Vec t n) →
-          let _⊕_ = _⊕_ M in
-          x ⊕ Pm.reduce M xs ≡ Pm.reduceSeq _⊕_ x xs
-  reduceSeq-reduce M x [] = let ε = ε M; _⊕_ = _⊕_ M in
-    begin
-      x ⊕ ε
-    ≡⟨ idʳ M x ⟩
-      refl
-  reduceSeq-reduce M x (x₁ ∷ xs) =  let ε = ε M; _⊕_ = _⊕_ M in
-    begin
-      x ⊕ Pm.reduceSeq _⊕_ (x₁ ⊕ ε) xs
-    ≡⟨ cong (λ y → x ⊕ (Pm.reduceSeq _⊕_ y xs)) (idʳ M x₁) ⟩
-      x ⊕ Pm.reduceSeq _⊕_ x₁ xs
-    ≡⟨ cong (x ⊕_) (sym (reduceSeq-reduce M x₁ xs)) ⟩
-      x ⊕ (x₁ ⊕ Pm.reduce M xs)
-    ≡⟨ sym (assoc M x x₁ (Pm.reduce M xs)) ⟩
-      (x ⊕ x₁) ⊕ Pm.reduce M xs
-    ≡⟨ cong (_⊕ Pm.reduce M xs) (comm M x x₁) ⟩
-      (x₁ ⊕ x) ⊕ Pm.reduce M xs
-    ≡⟨ reduceSeq-reduce M (x₁ ⊕ x) xs ⟩
-      refl
-
-  reduce-++ : {n m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs₁ : Vec t n) → (xs₂ : Vec t m) →
-              let _⊕_ = _⊕_ M in
-              Pm.reduce M xs₁ ⊕ Pm.reduce M xs₂ ≡ Pm.reduce M (xs₁ ++ xs₂)
-  reduce-++ M [] xs₂ = let _⊕_ = _⊕_ M; ε = ε M in
-    begin
-      Pm.reduce M [] ⊕ Pm.reduce M xs₂
-    ≡⟨⟩
-      ε ⊕ Pm.reduce M xs₂
-    ≡⟨ idˡ M (Pm.reduce M xs₂) ⟩
-      refl
-  reduce-++ M (x ∷ xs₁) xs₂ = let _⊕_ = _⊕_ M; ε = ε M in
-    begin
-      Pm.reduce M (x ∷ xs₁) ⊕ Pm.reduce M xs₂
-    ≡⟨⟩
-      Pm.reduceSeq _⊕_ (x ⊕ ε) xs₁ ⊕ Pm.reduce M xs₂
-    ≡⟨ cong (λ y → Pm.reduceSeq _⊕_ y xs₁ ⊕ Pm.reduce M xs₂) (idʳ M x) ⟩
-      Pm.reduceSeq _⊕_ x xs₁ ⊕ Pm.reduce M xs₂
-    ≡⟨ cong (_⊕ Pm.reduce M xs₂) (sym (reduceSeq-reduce M x xs₁)) ⟩
-      (x ⊕ Pm.reduce M xs₁) ⊕ Pm.reduce M xs₂
-    ≡⟨ assoc M x (Pm.reduce M xs₁) (Pm.reduce M xs₂) ⟩
-      x ⊕ (Pm.reduce M xs₁ ⊕ Pm.reduce M xs₂)
-    ≡⟨ cong (x ⊕_) (reduce-++ M xs₁ xs₂) ⟩
-      x ⊕ Pm.reduce M (xs₁ ++ xs₂)
-    ≡⟨ reduceSeq-reduce M x (xs₁ ++ xs₂) ⟩
-      Pm.reduceSeq _⊕_ x (xs₁ ++ xs₂)
-    ≡⟨ cong (λ y → Pm.reduceSeq _⊕_ y (xs₁ ++ xs₂)) (sym (idʳ M x)) ⟩
-      refl
-
-  reduce-take-drop : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs : Vec t (n + m)) →
-                     let _⊕_ = _⊕_ M in
-                     Pm.reduce M xs ≡ Pm.reduce M (Pm.take n {m} xs) ⊕ Pm.reduce M (Pm.drop n {m} xs)
-  reduce-take-drop n {m} M xs =
-    begin
-      Pm.reduce M xs
-    ≡⟨ cong (Pm.reduce M) (sym (take-drop n {m} xs)) ⟩
-      Pm.reduce M (Pm.take n {m} xs ++ Pm.drop n xs)
-    ≡⟨ sym (reduce-++ M (Pm.take n {m} xs) (Pm.drop n xs)) ⟩
-      refl
-
-  -- The reduction rule
   reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (n * suc m)) →
               (Pm.reduce M ∘ Pm.partRed n {m} M) xs ≡ Pm.reduce M xs
   reduction {zero} zero M [] = let _⊕_ = _⊕_ M; ε = ε M in
@@ -305,54 +354,6 @@ module lift.AlgorithmicRules where
   partialReduction₁ zero M [] = refl
   partialReduction₁ (suc n) M xs = refl
 
-  {- the second option of partial reduction -}
-  take-all : (n : ℕ) → {t : Set} → (xs : Vec t n) →
-              Pm.take n {zero} xs ≡ xs
-  take-all zero [] = refl
-  take-all (suc n) (x ∷ xs) =
-    begin
-      x ∷ Pm.take n xs
-    ≡⟨ cong (x ∷_) (take-all n xs) ⟩
-      refl
-
-  ++-[] : {n : ℕ} → {t : Set} → (xs : Vec t n) →
-          xs ++ [] ≡ xs
-  ++-[] [] = refl
-  ++-[] (x ∷ xs) =
-    begin
-      x ∷ xs ++ []
-    ≡⟨ cong (x ∷_)(++-[] xs) ⟩
-      refl
-
-  partRed-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs₁ : Vec t n) → (xs₂ : Vec t (n * suc m)) →
-               Pm.partRed n {suc m} M (xs₁ ++ xs₂) ≡ Pm.partRed n M xs₁ ++ partRed n {m} M xs₂
-  partRed-++ zero {m} M [] [] = refl
-  partRed-++ (suc n) {m} M xs₁ xs₂ =
-    begin
-      Pm.reduce M (Pm.take (suc n) {suc n * suc m} (xs₁ ++ xs₂)) ∷
-      Pm.partRed (suc n) M (Pm.drop (suc n) (xs₁ ++ xs₂))
-    ≡⟨ cong (λ ys → (Pm.reduce M ys ∷ Pm.partRed (suc n) M (Pm.drop (suc n) (xs₁ ++ xs₂)))) (take-++ (suc n) {suc n * suc m} xs₁ xs₂) ⟩
-      Pm.reduce M xs₁ ∷ Pm.partRed (suc n) M (Pm.drop (suc n) (xs₁ ++ xs₂))
-    ≡⟨ cong (λ ys → (Pm.reduce M xs₁ ∷ Pm.partRed (suc n) M ys)) (drop-++ (suc n) xs₁ xs₂) ⟩
-      refl
-
-  map-join-partRed : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xss : Vec (Vec t n) (suc m)) →
-                     Pm.join (Pm.map (Pm.partRed n {zero} M) xss) ≡ Pm.partRed n {m} M (Pm.join {n} {suc m} xss)
-  map-join-partRed {zero} n M (xs ∷ []) =
-    begin
-      Pm.partRed n M xs ++ []
-    ≡⟨ ++-[] (Pm.partRed n M xs) ⟩
-      Pm.partRed n M xs
-    ≡⟨ cong (λ ys → Pm.partRed n M ys) (sym (++-[] xs)) ⟩
-      refl
-  map-join-partRed {suc m} n M (xs ∷ xs₁) =
-    begin
-      Pm.partRed n {zero} M xs ++ Pm.join (Pm.map (Pm.partRed n {zero} M) xs₁)
-    ≡⟨ cong (Pm.partRed n {zero} M xs ++_) (map-join-partRed n M xs₁) ⟩
-      Pm.partRed n M xs ++ Pm.partRed n {m} M (Pm.join {n} {suc m} xs₁)
-    ≡⟨ sym (partRed-++ n M xs (Pm.join {n} {suc m} xs₁)) ⟩
-      refl
-
   partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (n * suc m)) →
                       (Pm.join ∘ Pm.map (Pm.partRed n {zero} M) ∘ Pm.split n {suc m}) xs ≡ Pm.partRed n {m} M xs
   partialReduction₂ {zero} zero M [] = refl
@@ -370,7 +371,7 @@ module lift.AlgorithmicRules where
       ε ∷ Pm.partRed zero {m} M (Pm.join {zero} {suc m} (Pm.split zero []))
     ≡⟨ cong (λ ys → (ε ∷ Pm.partRed zero {m} M ys)) (simplification₁ zero {m} []) ⟩
       refl
-  partialReduction₂ {suc m} {t} (suc n) M xs =
+  partialReduction₂ {suc m} (suc n) M xs =
     begin
       Pm.join (Pm.map (Pm.partRed (suc n) {zero} M) (Pm.split (suc n) {suc (suc m)} xs))
     ≡⟨ map-join-partRed {suc m} (suc n) M (Pm.split (suc n) {suc (suc m)} xs) ⟩
