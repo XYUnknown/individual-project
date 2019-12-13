@@ -14,3 +14,5 @@
 ## Plan
 * We need a better understanding of the `REWRITE pragma` to better structure the proof.
 * The development of new proofs will be paused until 6th Dec.
+* Looking into rules in: 
+`src/test/apps/separableConvolution2DRewrite.scala`

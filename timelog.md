@@ -141,3 +141,13 @@
 
 ### 14 Nov 2019
 * *2 hours* adding proof for lemma
+
+## Week 9
+* paused
+## Week 10
+* paused
+## Week 11
+* paused
+
+## Week 12
+* *4.5 hours* refined definition of `partRed`, finished the proof of the second partial reduction rule
