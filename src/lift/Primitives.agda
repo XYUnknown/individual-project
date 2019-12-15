@@ -41,20 +41,16 @@ module lift.Primitives where
     ≡⟨ cong (_+ n) (+-comm m 1) ⟩
       refl
 
-  +comm₁ : {m n o : ℕ} → m + (n + (n + o)) ≡ n + (m + (n + o))
+  +comm₁ : {m n o : ℕ} → m + (n + o * suc n) ≡ n + (m + o * suc n)
   +comm₁ {m} {n} {o} =
     begin
-      m + (n + (n + o))
-    ≡⟨ sym (+-assoc m n (n + o)) ⟩
-      m + n + (n + o)
-    ≡⟨ cong (_+ (n + o)) (+-comm m n) ⟩
-      n + m + (n + o)
-    ≡⟨ +-assoc n m (n + o) ⟩
+      m + (n + o * suc n)
+    ≡⟨ sym (+-assoc m n (o * suc n)) ⟩
+      m + n + o * suc n
+    ≡⟨ cong (_+ o * suc n) (+-comm m n ) ⟩
+      n + m + o * suc n
+    ≡⟨ +-assoc n m (o * suc n) ⟩
       refl
-
-  -- TODO : can we put this in REWRITE to avoid using subst and lemma in definition of slide?
-  postulate +suc-com : (m n o : ℕ) → suc (m + (n + o)) ≡ suc (n + (m + o))
-
 
   {-# REWRITE *zero *suc +zero +suc +comm₁ #-}
 
@@ -90,24 +86,12 @@ module lift.Primitives where
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
 
   {- primitive slide -}
-  -- lemma
-  suc-com : (m n o : ℕ) → suc (m + (n + o))  ≡ suc (n + (m + o))
-  suc-com m n o =
-    begin
-      suc (m + (n + o))
-    ≡⟨ cong suc (sym (+-assoc m n o )) ⟩
-      suc (m + n + o)
-    ≡⟨ cong suc (cong (_+ o) (+-comm m n)) ⟩
-      suc (n + m + o)
-    ≡⟨ cong suc (+-assoc n m o) ⟩
-      refl
-
   -- (suc sp) and (suc n), to ensure step > 0
   slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (sz + n * (suc sp)) →
           Vec (Vec t sz) (suc n)
   slide {zero} sz sp xs = [ xs ]
   slide {suc n} sz sp {t} xs =
-    take sz {(suc n) * (suc sp)} xs ∷ slide {n} sz sp (drop (suc sp) (subst (Vec t) (suc-com sz sp (n + n * sp)) xs))
+    take sz {(suc n) * (suc sp)} xs ∷ slide {n} sz sp (drop (suc sp) xs)
 
   {- primitive reduce -}
   reduceSeq : {n : ℕ} → {s t : Set} → (s → t → t) → t → Vec s n → t
