@@ -58,35 +58,41 @@ module lift.AlgorithmicRules where
 ```
 ### Proven Rewrite Rules
 * Identity Rules
-```adga
-identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n → Vec t n) → (xs : Vec s n) →
+  - Option 1
+  ```adga
+  identity₁ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n → Vec t n) → (xs : Vec s n) →
               (f ∘ Pm.map Pm.id) xs ≡ f xs
-```
-```agda
-identity₂ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n → Vec t n) → (xs : Vec s n) →
+  ```
+  - Option 2
+  ```agda
+  identity₂ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n → Vec t n) → (xs : Vec s n) →
               (Pm.map Pm.id ∘ f) xs ≡ f xs
-```
+  ```
 
 * Fusion Rules
-```adga
-fusion₁ : {n : ℕ} → {s : Set} → {t : Set} → {r : Set} → (f : t → r) → (g : s → t) → (xs : Vec s n) →
+  - Option 1
+  ```adga
+  fusion₁ : {n : ℕ} → {s : Set} → {t : Set} → {r : Set} → (f : t → r) → (g : s → t) → (xs : Vec s n) →
             (Pm.map f ∘ Pm.map g) xs ≡ Pm.map (f ∘ g) xs
-```
-```agda
-fusion₂ : {n : ℕ} → {s : Set} → {t : Set} → {r : Set} →
+  ```
+  - Option 2
+  ```agda
+  fusion₂ : {n : ℕ} → {s : Set} → {t : Set} → {r : Set} →
             (f : s → t) → (bf : t → r → r) → (init : r) → (xs : Vec s n) →
             Pm.reduceSeq (λ (a : s) (b : r) → (bf (f a) b)) init xs ≡ (Pm.reduceSeq bf init ∘ Pm.map f) xs
-```
+  ```
 
 * Simplification Rules
-```adga
-simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
+  - Option 1
+  ```adga
+  simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
                     (Pm.join ∘ Pm.split n {m}) xs ≡ xs
-```
-```agda
-simplification₂ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec (Vec t n) m) →
+  ```
+  - Option 2
+  ```agda
+  simplification₂ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec (Vec t n) m) →
                     (Pm.split n ∘ Pm.join) xs ≡ xs
-```
+  ```
 
 * Split-join Rule
 ```agda
@@ -102,11 +108,13 @@ reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) �
 ```
 
 * Partial Reduction Rules
-```adga
-partialReduction₁ : {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t n)  →
+  - Option 1
+  ```adga
+  partialReduction₁ : {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t n)  →
                       Pm.partRed n M xs ≡ [ Pm.reduce M xs ]
-```
-```agda
-partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (n * suc m)) →
+  ```
+  - Option 2
+  ```agda
+  partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (n * suc m)) →
                       (Pm.join ∘ Pm.map (Pm.partRed n {zero} M) ∘ Pm.split n {suc m}) xs ≡ Pm.partRed n {m} M xs
-```
+  ```
