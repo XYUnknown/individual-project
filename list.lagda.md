@@ -106,8 +106,7 @@ reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) �
 partialReduction₁ : {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t n)  →
                       Pm.partRed n M xs ≡ [ Pm.reduce M xs ]
 ```
-_WIP_
 ```agda
-partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
+partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (n * suc m)) →
                       (Pm.join ∘ Pm.map (Pm.partRed n {zero} M) ∘ Pm.split n {suc m}) xs ≡ Pm.partRed n {m} M xs
 ```
