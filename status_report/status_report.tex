@@ -1,0 +1,126 @@
+    
+\documentclass[11pt]{article}
+\usepackage{times}
+\usepackage{fullpage}
+\usepackage{url}
+
+\usepackage{amssymb}
+\usepackage{newunicodechar}
+\usepackage{bbm}
+\usepackage[greek, english]{babel}
+\usepackage{textgreek}
+
+% This handles the translation of unicode to latex:
+
+\usepackage{ucs}
+\usepackage[utf8x]{inputenc}
+\usepackage{autofe}
+
+% Some characters that are not automatically defined
+% (you figure out by the latex compilation errors you get),
+% and you need to define:
+
+%\DeclareUnicodeCharacter{8988}{\ensuremath{\ulcorner}}
+%\DeclareUnicodeCharacter{8989}{\ensuremath{\urcorner}}
+%\DeclareUnicodeCharacter{8803}{\ensuremath{\overline{\equiv}}}
+%\DeclareUnicodeCharacter{03BB}{\ensuremath{\lambda}}
+
+% Add more as you need them (shouldn't happen often).
+
+% Using "\newenvironment" to redefine verbatim to
+% be called "code" doesn't always work properly. 
+% You can more reliably use:
+
+\usepackage{fancyvrb}
+
+\DefineVerbatimEnvironment
+    {code}{Verbatim}
+    {} % Add fancy options here if you like.
+  
+\title{ Proving the Correctness of Rewrite Rules in LIFT Rewite-Based System }
+\author{ Xueying Qin - 2335466Q }
+
+\begin{document}
+\maketitle
+
+\section{Status report}
+
+\subsection{Proposal}\label{proposal}
+
+\subsubsection{Motivation}\label{motivation}
+The rewrite system of LIFT systematically transforms high-level algorithmic patterns into low-level 
+high performance OpenCL code with equivalent functionality. During this process, a set of rewrite 
+rules are applied. Ensuring the correctness of these rules is important for ensuring the functionality 
+is not altered during the rewrite process. Currently, the correctness of these rules is only proven 
+correct on paper and only for a subset of the used rules. Thus, in this project I will develop 
+mechanical proofs in Agda to show the correctness of the rewrite rules.
+
+\subsubsection{Aims}\label{aims}
+First of all, I would like to design effective semantics for primitive function to simplify the process of 
+developing proofs. Secondly, developing effective lemmas to keep the modularity of proofs is also essential 
+for this project. Thirdly, it is important to verify if the rules are correct and potentially propose 
+strategies to fix issues if they occurs.
+
+\subsection{Progress}\label{progress}
+A set of primitives are defined and basic rewrite rules are proven. Details are recorded in the 
+project repository: \small{\url{https://github.com/XYUnknown/individual-project/blob/master/list.lagda.md}}
+\begin{itemize}
+    \item Primitives
+\begin{code}
+id : {T : Set} → T → T
+map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
+take : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t n
+drop : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n + m) → Vec t m
+split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → 
+        Vec (Vec t n) m
+join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
+slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → 
+        Vec t (sz + n * (suc sp)) → Vec (Vec t sz) (suc n)
+reduceSeq : {n : ℕ} → {s t : Set} → (s → t → t) → t → Vec s n → t
+reduce : {n : ℕ} → {t : Set} → (M : CommAssocMonoid t) → Vec t n → t
+partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → 
+          Vec t (suc m * n) → Vec t (suc m)
+\end{code}
+    \item Rewite rules
+    \begin{itemize}
+        \item Identity rules
+        \item Fusion rules
+        \item Simplification rules
+        \item Split-join rule
+        \item Reduction rule
+        \item Partial reduction rules
+    \end{itemize}
+\end{itemize}
+
+\subsection{Problems and risks}\label{problems-and-risks}
+
+\subsubsection{Problems}\label{problems}
+The dependent types and pattern matching in Agda overcomplicated defining primitives and 
+developing proofs. For example, when reasoning about the size of a vector, it has been tedious to 
+prove something like the size $m * suc \;n$ and $suc \;n * m$ are the same. We made use of the 
+built-in \texttt{REWRITE} feature to override some pattern matching, which helped simplify 
+the semantics and proofs.
+\\[0.2cm]
+The definitions of \texttt{reduce} and \texttt{partRed} require an arbitrary associtive and commutative 
+operator with an identity element. It was difficult to solely define such an operator with the identity element in Agda. 
+We resolved this issue by declaring a typeclass in Agda to enmulate this operator with certain properties. 
+This ensured the modularity of proofs.
+
+\subsubsection{Risks}\label{risks}
+The built-in $REWRITE$ is an unsafe feature in Agda, misusing it can potentially break the soundness of 
+the type system in Agda. Whenever we need to use it, we must justify, i.e., provide proofs for the pattern 
+matching to be rewritten into the system, to ensure the soundness of Agda type system.
+
+\subsection{Plan}\label{plan}
+In the first semester, I have finished the basic features I have proposed in the project proposal. In the first half of 
+next semester, firstly, I will develop the semantics for more complicated primitive such as \texttt{iterate}, 
+\texttt{reorder} and \texttt{transpose}. Sencondly, relevant rewrite rules will be proven. Moreover, we might 
+look into the correctness of ELEVATE strategies. In the second half of semester, I will write the finial 
+dissertation.
+
+    
+\subsection{Ethics and data}\label{ethics}
+This project does not involve human subjects or data. No approval required.
+
+
+\end{document}
