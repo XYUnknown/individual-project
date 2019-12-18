@@ -6,7 +6,7 @@ module lift.Primitives where
   open Eq using (_≡_; _≢_; refl; cong; sym; subst)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
   open import Data.Nat using (ℕ; zero; suc; pred; _+_; _*_; _∸_)
-  open import Data.Product using (∃₂; _,_)
+  open import Data.Product using (∃₂; _,_; _×_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   open import Data.Nat.Properties using (*-comm; *-distribˡ-+; *-distribʳ-+; *-identityʳ; +-comm; +-assoc)
   open import Function using (_∘_)
@@ -111,6 +111,11 @@ module lift.Primitives where
   partRed zero {suc m} M [] = let ε = ε M
                               in ε ∷ partRed zero {m} M []
   partRed (suc n) {suc m} M xs = [ reduce M (take (suc n) {suc (m + (n + n * m))} xs) ] ++ partRed (suc n) {m} M ((drop (suc n) xs))
+
+  {- primitive zip -}
+  zip : {n : ℕ} → {s : Set} → {t : Set} → Vec s n → Vec t n → Vec (s × t) n
+  zip [] [] = []
+  zip (x ∷ xs) (y ∷ ys) = (x , y) ∷ zip xs ys
 
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
