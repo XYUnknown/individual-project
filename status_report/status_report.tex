@@ -107,12 +107,12 @@ We resolved this issue by declaring a typeclass in Agda to enmulate this operato
 This ensured the modularity of proofs.
 
 \subsubsection{Risks}\label{risks}
-The built-in $REWRITE$ is an unsafe feature in Agda, misusing it can potentially break the soundness of 
-the type system in Agda. Whenever we need to use it, we must justify, i.e., provide proofs for the pattern 
-matching to be rewritten into the system, to ensure the soundness of Agda type system.
+The built-in \texttt{REWRITE} is an unsafe feature in Agda, misusing it can potentially break the soundness of 
+the type system in Agda. The mitigation of this risk is we must justify, i.e., provide proofs for the pattern 
+matching to be rewritten into the system whenever we need to use this feature, to ensure the soundness of Agda type system.
 
 \subsection{Plan}\label{plan}
-In the first semester, I have finished the basic features I have proposed in the project proposal. In the first half of 
+In the first semester, I have finished the basic features proposed in the project proposal. In the first half of 
 next semester, firstly, I will develop the semantics for more complicated primitive such as \texttt{iterate}, 
 \texttt{reorder} and \texttt{transpose}. Sencondly, relevant rewrite rules will be proven. Moreover, we might 
 look into the correctness of ELEVATE strategies. In the second half of semester, I will write the finial 
