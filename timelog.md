@@ -150,4 +150,8 @@
 * paused
 
 ## Week 12
-* *4.5 hours* refined definition of `partRed`, finished the proof of the second partial reduction rule
+* *4.5 hours* refining definition of `partRed`, finished the proof of the second partial reduction rule
+### 17 Sec 2019
+* *1 hour* meeting with supervisor
+### 18 Dec 2019
+* *2 hours* writing status report
