@@ -48,7 +48,14 @@ reduce : {n : ℕ} → {t : Set} → (M : CommAssocMonoid t) → Vec t n → t
 ```agda
 partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → Vec t (suc m * n) → Vec t (suc m)
 ```
-
+* zip
+```agda
+zip : {n : ℕ} → {s : Set} → {t : Set} → Vec s n → Vec t n → Vec (s × t) n
+```
+* unzip
+```agda
+unzip : ((x , y) ∷ xs) = Prod.zip _∷_ _∷_ (x , y) (unzip xs)
+```
 ## Rewrite Rules
 ### Module
 Source: `/individual-project/src/lift/AlgorithmicRules.adga`
