@@ -226,6 +226,89 @@ module lift.AlgorithmicRules where
       f xs
     ∎
 
+  -- a vector with size zero is empty
+  empty : {t : Set} → (xs : Vec t zero) → xs ≡ []
+  empty [] = refl
+
+  fill-empty : {t : Set} → {n : ℕ} → (xss : Vec (Vec t zero) n) →
+               Pm.fill n [] ≡ xss
+  fill-empty [] = refl
+  fill-empty ([] ∷ xss) =
+    begin
+      [] ∷ Pm.fill _ []
+    ≡⟨ cong ([] ∷_) (fill-empty xss) ⟩
+      refl
+
+  fill-empty₂ : {m : ℕ} → {t : Set} → (xs : Vec t m) →
+                Pm.map Pm.tail (Pm.transpose (xs ∷ [])) ≡ Pm.fill m []
+  fill-empty₂ [] = refl
+  fill-empty₂ (x ∷ xs) =
+    begin
+      [] ∷ Pm.map Pm.tail (Pm.transpose (xs ∷ []))
+    ≡⟨ cong ([] ∷_) (fill-empty₂ xs) ⟩
+      refl
+
+  map-tail-trans : {n m : ℕ} → {t : Set} → (xs : Vec t (suc m)) → (xss : Vec (Vec t (suc (suc m))) (suc n)) →
+                   Pm.map Pm.tail (Pm.transpose (Pm.tail xs ∷ Pm.map Pm.tail (Pm.map Pm.tail xss))) ≡ Pm.transpose (Pm.map Pm.tail (Pm.map Pm.tail xss))
+  map-tail-trans {n} {zero} (x ∷ []) xss = refl
+  map-tail-trans {n} {suc m} (x ∷ xs) xss =
+    begin
+      Pm.map Pm.head (Pm.map Pm.tail (Pm.map Pm.tail xss)) ∷
+      Pm.map Pm.tail (Pm.transpose (Pm.tail xs ∷ Pm.map Pm.tail (Pm.map Pm.tail (Pm.map Pm.tail xss))))
+    ≡⟨ cong ( Pm.map Pm.head (Pm.map Pm.tail (Pm.map Pm.tail xss)) ∷_) (map-tail-trans xs (Pm.map Pm.tail xss)) ⟩
+      refl
+
+  transpose-head : {n m : ℕ} → {t : Set} → (xs : Vec t m) → (xss : Vec (Vec t (suc m)) n) →
+                   Pm.map Pm.head (Pm.transpose (xs ∷ Pm.map Pm.tail xss)) ≡ xs
+  transpose-head {n} {zero} [] xss = refl
+  transpose-head {n} {suc m} (x ∷ xs) xss =
+    begin
+      x ∷ Pm.map Pm.head (Pm.transpose (xs ∷ Pm.map Pm.tail (Pm.map Pm.tail xss)))
+    ≡⟨ cong (x ∷_) (transpose-head {n} {m} xs (Pm.map Pm.tail xss)) ⟩
+      refl
+
+  transpose-tail : {n m : ℕ} → {t : Set} → (xs : Vec t m) → (xss : Vec (Vec t (suc m)) n) →
+                   Pm.map Pm.head xss ∷ Pm.map Pm.tail (Pm.transpose (xs ∷ Pm.map Pm.tail xss)) ≡ Pm.transpose xss
+  transpose-tail {zero} {m} xs [] =
+    begin
+      [] ∷ Pm.map Pm.tail (Pm.transpose (xs ∷ []))
+    ≡⟨ cong ([] ∷_) (fill-empty₂ xs) ⟩
+      refl
+  transpose-tail {suc n} {zero} [] xss = refl
+  transpose-tail {suc n} {suc m} xs xss =
+    begin
+      Pm.map Pm.head xss ∷
+      Pm.map Pm.head (Pm.map Pm.tail xss) ∷
+      Pm.map Pm.tail (Pm.transpose (Pm.tail xs ∷ Pm.map Pm.tail (Pm.map Pm.tail xss)))
+    ≡⟨ cong (Pm.map Pm.head xss ∷_) (cong (Pm.map Pm.head (Pm.map Pm.tail xss) ∷_) (map-tail-trans xs xss)) ⟩
+      refl
+
+  -- (Aᵀ)ᵀ ≡ A
+  identity₃ : {n m : ℕ} → {t : Set} → (xss : Vec (Vec t m) n) →
+              Pm.transpose (Pm.transpose xss) ≡ xss
+  identity₃ {zero} {zero} [] = refl
+  identity₃ {suc n} {zero} ([] ∷ xss) =
+    begin
+      [] ∷ Pm.fill n []
+    ≡⟨ cong ([] ∷_) (fill-empty xss) ⟩
+      refl
+  identity₃ {zero} {suc m} [] =
+    begin
+      Pm.transpose (fill _ [])
+    ≡⟨ empty (Pm.transpose (Pm.fill _ [])) ⟩
+      refl
+  identity₃ {suc n} {suc m} ((x ∷ xs) ∷ xss) =
+    begin
+      (x ∷ Pm.map Pm.head (Pm.transpose (xs ∷ Pm.map Pm.tail xss))) ∷
+      Pm.transpose (Pm.map Pm.head xss ∷ Pm.map Pm.tail (Pm.transpose (xs ∷ Pm.map Pm.tail xss)))
+    ≡⟨ cong (_∷ Pm.transpose (Pm.map Pm.head xss ∷ Pm.map Pm.tail (Pm.transpose (xs ∷ Pm.map Pm.tail xss))))
+       (cong (x ∷_) (transpose-head xs xss)) ⟩
+      (x ∷ xs) ∷ Pm.transpose (Pm.map Pm.head xss ∷ Pm.map Pm.tail (Pm.transpose (xs ∷ Pm.map Pm.tail xss)))
+    ≡⟨ cong (λ yss → (x ∷ xs) ∷ Pm.transpose yss) (transpose-tail xs xss) ⟩
+      (x ∷ xs) ∷ Pm.transpose (Pm.transpose xss)
+    ≡⟨ cong ((x ∷ xs) ∷_) (identity₃ xss) ⟩
+      refl
+
   {- Fusion rules -}
   fusion₁ : {n : ℕ} → {s : Set} → {t : Set} → {r : Set} → (f : t → r) → (g : s → t) → (xs : Vec s n) →
             (Pm.map f ∘ Pm.map g) xs ≡ Pm.map (f ∘ g) xs
@@ -391,3 +474,9 @@ module lift.AlgorithmicRules where
       Pm.map f xs ++ Pm.map f (Pm.join xs₁)
     ≡⟨ cong (Pm.map f xs ++_) (map-join f xs₁) ⟩
       refl
+
+  -- u = 2 * sz
+  slide-join : {n : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * suc sp)) →
+               Pm.slide {n} sz sp xs ≡
+               Pm.join (Pm.map (λ (tile : Vec t (2 * sz)) → Pm.slide {{!!}} sz sp tile) (Pm.slide (2 * sz) (sz + sp) xs) )
+  slide-join = {!!}
