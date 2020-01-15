@@ -136,11 +136,6 @@ module lift.Primitives where
   fill zero x = []
   fill (suc n) x = x ∷ fill n x
 
-  -- lemma, pointwise application apply functions in a vector to arguments in a vector
-  point-apply : {s t : Set} → {n : ℕ} → Vec (s → t) n → Vec s n → Vec t n
-  point-apply [] [] = []
-  point-apply (f ∷ fs) (x ∷ xs) = f x ∷ point-apply fs xs
-
   -- lemma head and tail
   head : {t : Set} → {n : ℕ} → Vec t (suc n) → t
   head (x ∷ xs) = x
