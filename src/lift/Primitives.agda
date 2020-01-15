@@ -60,6 +60,13 @@ module lift.Primitives where
   map f [] = []
   map f (x ∷ xs) = (f x) ∷ (map f xs)
 
+  {- primitive mapⁿ -}
+  -- the type of the function should be s → s
+  -- the function doesn't change the type of the intake argument
+  mapⁿ : {m : ℕ} → (n : ℕ) → {s : Set} → (s → s) → Vec s m → Vec s m
+  mapⁿ zero f xs = xs
+  mapⁿ (suc n) f xs = mapⁿ n f (map f xs)
+
   {- primitive id -}
   id : {T : Set} → T → T
   id t = t
@@ -122,6 +129,30 @@ module lift.Primitives where
   unzip : {n : ℕ} → {s : Set} → {t : Set} → Vec (s × t) n → Vec s n × Vec t n
   unzip [] = [] , []
   unzip ((x , y) ∷ xs) = Prod.zip _∷_ _∷_ (x , y) (unzip xs)
+
+  {- primitive transpose -}
+  -- lemma, fill a vector with x
+  fill : {t : Set} → (n : ℕ) → t → Vec t n
+  fill zero x = []
+  fill (suc n) x = x ∷ fill n x
+
+  -- lemma, pointwise application apply functions in a vector to arguments in a vector
+  point-apply : {s t : Set} → {n : ℕ} → Vec (s → t) n → Vec s n → Vec t n
+  point-apply [] [] = []
+  point-apply (f ∷ fs) (x ∷ xs) = f x ∷ point-apply fs xs
+
+  -- lemma head and tail
+  head : {t : Set} → {n : ℕ} → Vec t (suc n) → t
+  head (x ∷ xs) = x
+
+  tail : {t : Set} → {n : ℕ} → Vec t (suc n) → Vec t n
+  tail (x ∷ xs) = xs
+
+  transpose : {n m : ℕ} → {t : Set} → Vec (Vec t m) n → Vec (Vec t n) m
+  transpose {zero} {zero} [] = []
+  transpose {suc n} {zero} xss = []
+  transpose {zero} {suc m} [] = fill _ []
+  transpose {suc n} {suc m} xss = map head xss ∷ transpose (map tail xss)
 
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
