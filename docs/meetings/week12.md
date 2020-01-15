@@ -1,4 +1,4 @@
-# Week Seven Meeting
+# Week 12 Meeting
 ## Schedule
 16 Dec 2019, 15:00 - 16:00
 
