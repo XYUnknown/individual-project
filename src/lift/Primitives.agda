@@ -149,6 +149,25 @@ module lift.Primitives where
   transpose {zero} {suc m} [] = fill _ []
   transpose {suc n} {suc m} xss = map head xss ∷ transpose (map tail xss)
 
+  {- primitive padCst -}
+  padCstˡ : {n : ℕ} → (l : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n)
+  padCstˡ zero x xs = xs
+  padCstˡ (suc l) x xs = padCstˡ l x ([ x ] ++ xs)
+
+  padCstʳ : {n : ℕ} → (r : ℕ) → {t : Set} → t → Vec t n → Vec t (n + r)
+  padCstʳ zero x xs = xs
+  padCstʳ (suc r) x xs = padCstʳ r x (xs ++ [ x ])
+
+  padCst : {n : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n + r)
+  padCst l r x xs = padCstʳ r x (padCstˡ l x xs)
+
+  {- this breaks agda -}
+  -- padCst : {n : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n + r)
+  -- padCst zero zero x xs = xs
+  -- padCst zero (suc r) x xs = padCst zero r x (xs ++ [ x ])
+  -- padCst (suc l) zero x xs = padCst l zero x ([ x ] ++ xs)
+  -- padCst (suc l) (suc r) x xs = padCst l r x ([ x ] ++ xs ++ [ x ])
+
   {- unused and alternative definitions -}
   {- alternative semantics for take and drop -}
   splitAt : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n + m)) →
