@@ -12,6 +12,7 @@ module lift.MovementRules where
   open import Function using (_∘_)
   import lift.Primitives as Pm
   open Pm
+  open import lift.Helpers
 
   {- lemmas -}
   map-fill-empty : {s t : Set} → (m : ℕ) → (f : s → t) →
@@ -23,25 +24,8 @@ module lift.MovementRules where
     ≡⟨ cong ([] ∷_) (map-fill-empty m f) ⟩
       refl
 
-  map-head : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s (suc m)) n) →
-             Pm.map f (Pm.map Pm.head xss) ≡ Pm.map Pm.head (Pm.map (Pm.map f) xss)
-  map-head f [] = refl
-  map-head f ((x ∷ xs) ∷ xss) =
-    begin
-      f x ∷ Pm.map f (Pm.map Pm.head xss)
-    ≡⟨ cong (f x ∷_) (map-head f xss) ⟩
-      refl
-
-  map-tail : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s (suc m)) n) →
-             Pm.map (Pm.map f) (Pm.map Pm.tail xss) ≡ Pm.map Pm.tail (Pm.map (Pm.map f) xss)
-  map-tail f [] = refl
-  map-tail f ((x ∷ xs) ∷ xss) =
-    begin
-      Pm.map f xs ∷ Pm.map (Pm.map f) (Pm.map Pm.tail xss)
-    ≡⟨ cong (Pm.map f xs ∷_) (map-tail f xss) ⟩
-      refl
-
   {- rules -}
+  {- Transpose -}
   mapMapFBeforeTranspose : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s m) n) →
                            Pm.map (Pm.map f) (Pm.transpose xss) ≡ Pm.transpose (Pm.map (Pm.map f) xss)
   mapMapFBeforeTranspose {zero} {m} f [] =
@@ -64,6 +48,25 @@ module lift.MovementRules where
     ≡⟨ cong (λ yss → (f x ∷ Pm.map head (Pm.map (Pm.map f) xss)) ∷
        Pm.transpose (Pm.map f xs ∷ yss)) (map-tail f xss) ⟩
       refl
+
+  {- Slide -}
+  slideBeforeMapMapF : {n : ℕ} → (sz : ℕ) → (sp : ℕ) → {s t : Set} →
+                       (f : s → t) → (xs : Vec s (sz + n * (suc sp))) →
+                       Pm.map (Pm.map f) (Pm.slide {n} sz sp xs) ≡ Pm.slide {n} sz sp (Pm.map f xs)
+  slideBeforeMapMapF {zero} sz sp f xs = refl
+  slideBeforeMapMapF {suc n} sz sp f xs =
+    begin
+      Pm.map f (take sz xs) ∷
+      Pm.map (Pm.map f) (Pm.slide {n} sz sp (Pm.drop (suc sp) xs))
+    ≡⟨ cong (_∷ Pm.map (Pm.map f) (Pm.slide {n} sz sp (Pm.drop (suc sp) xs))) (map-take sz f xs) ⟩
+      Pm.take sz (Pm.map f xs) ∷
+      Pm.map (Pm.map f) (Pm.slide sz sp (Pm.drop (suc sp) xs))
+    ≡⟨ cong (Pm.take sz (Pm.map f xs) ∷_) (slideBeforeMapMapF {n} sz sp f (Pm.drop (suc sp) xs))⟩
+      Pm.take sz (Pm.map f xs) ∷ Pm.slide sz sp (Pm.map f (Pm.drop (suc sp) xs))
+    ≡⟨ cong (λ ys → Pm.take sz (Pm.map f xs) ∷ Pm.slide sz sp ys) (map-drop (suc sp) f xs) ⟩
+      refl
+
+
 
 
 
