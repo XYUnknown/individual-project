@@ -144,9 +144,8 @@ module lift.Primitives where
   tail (x ∷ xs) = xs
 
   transpose : {n m : ℕ} → {t : Set} → Vec (Vec t m) n → Vec (Vec t n) m
-  transpose {zero} {zero} [] = []
   transpose {suc n} {zero} xss = []
-  transpose {zero} {suc m} [] = fill _ []
+  transpose {zero} {m} [] = fill _ []
   transpose {suc n} {suc m} xss = map head xss ∷ transpose (map tail xss)
 
   {- primitive padCst -}

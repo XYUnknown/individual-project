@@ -286,13 +286,12 @@ module lift.AlgorithmicRules where
   -- (Aᵀ)ᵀ ≡ A
   identity₃ : {n m : ℕ} → {t : Set} → (xss : Vec (Vec t m) n) →
               Pm.transpose (Pm.transpose xss) ≡ xss
-  identity₃ {zero} {zero} [] = refl
   identity₃ {suc n} {zero} ([] ∷ xss) =
     begin
       [] ∷ Pm.fill n []
     ≡⟨ cong ([] ∷_) (fill-empty xss) ⟩
       refl
-  identity₃ {zero} {suc m} [] =
+  identity₃ {zero} {m} [] =
     begin
       Pm.transpose (fill _ [])
     ≡⟨ empty (Pm.transpose (Pm.fill _ [])) ⟩
