@@ -160,3 +160,15 @@ module lift.MovementRules where
     ≡⟨ cong (λ y → Pm.join (Pm.map Pm.head (Pm.map (λ xss → Pm.map Pm.head xss ∷ Pm.transpose (Pm.map Pm.tail xss)) xsss)) ∷
        Pm.map Pm.join (Pm.transpose y)) (lem₂ xsss) ⟩
       refl
+
+  {- Join + Join -}
+  joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                   Pm.join (Pm.join xsss) ≡ Pm.join (Pm.map Pm.join xsss)
+  joinBeforeJoin [] = refl
+  joinBeforeJoin (xss ∷ xsss) =
+    begin
+      Pm.join (xss ++ Pm.join xsss)
+    ≡⟨ join-++ xss (Pm.join xsss)⟩
+      Pm.join xss ++ Pm.join (Pm.join xsss)
+    ≡⟨ cong (Pm.join xss ++_) (joinBeforeJoin xsss) ⟩
+      refl
