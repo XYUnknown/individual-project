@@ -53,7 +53,12 @@ module lift.Primitives where
     ≡⟨ +-assoc n m (o * suc n) ⟩
       refl
 
-  {-# REWRITE *zero *suc +zero +suc +comm₁ #-}
+  -- for join + join movement rules
+  postulate +*dist : {m n o : ℕ} → o * m + o * n ≡ o * (m + n)
+
+  postulate *assoc : {m n o : ℕ} → o * n * m ≡ o * (n * m)
+
+  {-# REWRITE *zero *suc +zero +suc +comm₁ *assoc +*dist #-}
 
   {- primitive map -}
   map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
