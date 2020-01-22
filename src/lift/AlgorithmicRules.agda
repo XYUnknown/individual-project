@@ -81,25 +81,7 @@ module lift.AlgorithmicRules where
     ≡⟨ sym (reduce-++ M (Pm.take n {m} xs) (Pm.drop n xs)) ⟩
       refl
 
-  -- used in proving partialReduction₂
-  take-all : (n : ℕ) → {t : Set} → (xs : Vec t n) →
-              Pm.take n {zero} xs ≡ xs
-  take-all zero [] = refl
-  take-all (suc n) (x ∷ xs) =
-    begin
-      x ∷ Pm.take n xs
-    ≡⟨ cong (x ∷_) (take-all n xs) ⟩
-      refl
-
-  ++-[] : {n : ℕ} → {t : Set} → (xs : Vec t n) →
-          xs ++ [] ≡ xs
-  ++-[] [] = refl
-  ++-[] (x ∷ xs) =
-    begin
-      x ∷ xs ++ []
-    ≡⟨ cong (x ∷_)(++-[] xs) ⟩
-      refl
-
+  -- used in proving partialReduction₂ ml
   partRed-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs₁ : Vec t n) → (xs₂ : Vec t (n * suc m)) →
                Pm.partRed n {suc m} M (xs₁ ++ xs₂) ≡ Pm.partRed n M xs₁ ++ partRed n {m} M xs₂
   partRed-++ zero {m} M [] [] = refl
