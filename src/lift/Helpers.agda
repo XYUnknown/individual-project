@@ -6,12 +6,21 @@ module lift.Helpers where
   open Eq using (_≡_; refl; cong; sym; subst; cong₂)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
-  open import Data.Nat.Properties using (*-distribʳ-+)
+  open import Data.Nat.Properties using (*-distribʳ-+; +-assoc)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   open import Function using (_∘_)
   import lift.Primitives as Pm
   open Pm
+
+  ++-[] : {n : ℕ} → {t : Set} → (xs : Vec t n) →
+    xs ++ [] ≡ xs
+  ++-[] [] = refl
+  ++-[] (x ∷ xs) =
+    begin
+      x ∷ xs ++ []
+    ≡⟨ cong (x ∷_)(++-[] xs) ⟩
+      refl
 
   map-id : {n : ℕ} → {s : Set} → (xs : Vec s n ) → Pm.map Pm.id xs ≡ xs
   map-id [] = refl
@@ -51,8 +60,47 @@ module lift.Helpers where
     ≡⟨ drop-++ n xs xs₁ ⟩
       refl
 
+  join-++ : {n m o : ℕ} → {t : Set} → (xs₁ : Vec (Vec t o) n) → (xs₂ : Vec (Vec t o) m) →
+            Pm.join (xs₁ ++ xs₂) ≡ Pm.join xs₁ ++ Pm.join xs₂
+  join-++ [] xs₂ = refl
+  join-++ (x ∷ xs₁) xs₂ =
+    begin
+      x ++ Pm.join (xs₁ ++ xs₂)
+    ≡⟨ cong (x ++_) (join-++ xs₁ xs₂) ⟩
+      x ++ (Pm.join xs₁ ++ Pm.join xs₂)
+    ≡⟨⟩
+      {!!}
+
+  take-all : (n : ℕ) → {t : Set} → (xs : Vec t n) →
+             Pm.take n {zero} xs ≡ xs
+  take-all zero [] = refl
+  take-all (suc n) (x ∷ xs) =
+    begin
+      x ∷ Pm.take n xs
+    ≡⟨ cong (x ∷_) (take-all n xs) ⟩
+      refl
+
+  {-
+  suc-subst : {n m o : ℕ} → {t : Set} → (x : t) → (xs : Vec t (n + m + o)) →
+              x ∷ subst (Vec t) (+-assoc n m o) xs ≡
+              subst (Vec t) (cong suc (+-assoc n m o)) (x ∷ xs)
+  suc-subst x xs = {!!}
+
+  ++-assoc : {n m o : ℕ} → {t : Set} → (xs : Vec t n) → (ys : Vec t m) → (zs : Vec t o) →
+           xs ++ (ys ++ zs) ≡ subst (Vec t) (+-assoc n m o) ((xs ++ ys) ++ zs)
+  ++-assoc [] ys zs = refl
+  ++-assoc {suc n} {m} {o} {t} (x ∷ xs) ys zs =
+    begin
+      x ∷ xs ++ ys ++ zs
+    ≡⟨ cong (x ∷_) (++-assoc xs ys zs) ⟩
+      x ∷ subst (Vec t) (+-assoc n m o) ((xs ++ ys) ++ zs)
+    ≡⟨ {!!} ⟩
+      subst (Vec t) (cong suc (+-assoc n m o)) (x ∷ (xs ++ ys) ++ zs)
+    ∎
+  -}
+
   map-take : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
-             Pm.map f (Pm.take n {m} xs) ≡  (Pm.take n {m} (Pm.map f xs))
+             Pm.map f (Pm.take n {m} xs) ≡ (Pm.take n {m} (Pm.map f xs))
   map-take zero f xs = refl
   map-take (suc n) {m} f (x ∷ xs) =
     begin
