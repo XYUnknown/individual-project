@@ -384,18 +384,6 @@ module lift.AlgorithmicRules where
       refl
 
   {- Tiling -}
-  map-join : {s : Set} → {t : Set} → {m n : ℕ} →
-             (f : s → t) → (xs : Vec (Vec s n) m) →
-             Pm.map f (Pm.join xs) ≡ Pm.join (Pm.map (Pm.map f) xs)
-  map-join f [] = refl
-  map-join f (xs ∷ xs₁) =
-    begin
-      Pm.map f (xs ++ Pm.join (xs₁))
-    ≡⟨ map-++ f xs (Pm.join xs₁) ⟩
-      Pm.map f xs ++ Pm.map f (Pm.join xs₁)
-    ≡⟨ cong (Pm.map f xs ++_) (map-join f xs₁) ⟩
-      refl
-
   -- u = 2 * sz
   slide-join : {n : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * suc sp)) →
                Pm.slide {n} sz sp xs ≡
