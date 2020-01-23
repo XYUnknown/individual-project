@@ -13,6 +13,10 @@ module lift.Helpers where
   import lift.Primitives as Pm
   open Pm
 
+  -- a vector with size zero is empty
+  empty : {t : Set} → (xs : Vec t zero) → xs ≡ []
+  empty [] = refl
+
   ++-[] : {n : ℕ} → {t : Set} → (xs : Vec t n) →
     xs ++ [] ≡ xs
   ++-[] [] = refl
@@ -59,6 +63,15 @@ module lift.Helpers where
       Pm.drop n (xs ++ xs₁)
     ≡⟨ drop-++ n xs xs₁ ⟩
       refl
+
+  transpose-++ : {n m : ℕ} → {t : Set} → (xs : Vec (Vec t zero) n) → (ys : Vec (Vec t zero) m) →
+                 Pm.transpose (xs ++ ys) ≡ []
+  transpose-++ [] ys =
+    begin
+      Pm.transpose ys
+    ≡⟨ empty (Pm.transpose ys) ⟩
+      refl
+  transpose-++ (x ∷ xs) ys = refl
 
   join-++ : {n m o : ℕ} → {t : Set} → (xs₁ : Vec (Vec t o) n) → (xs₂ : Vec (Vec t o) m) →
             Pm.join (xs₁ ++ xs₂) ≡ Pm.join xs₁ ++ Pm.join xs₂
@@ -154,8 +167,4 @@ module lift.Helpers where
       Pm.map f xs ∷ Pm.map (Pm.map f) (Pm.map Pm.tail xss)
     ≡⟨ cong (Pm.map f xs ∷_) (map-tail f xss) ⟩
       refl
-
-  -- a vector with size zero is empty
-  empty : {t : Set} → (xs : Vec t zero) → xs ≡ []
-  empty [] = refl
 
