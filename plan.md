@@ -44,7 +44,9 @@ Week-by-week plan for the whole project. Update this as you go along.
 ## Spring Semester
 
 * **Week 13**
+    * Define `mapⁿ` `padCst` and `transpose`
 * **Week 14**
+    * Proving movement rules
 * **Week 15**
 * **Week 16**
 * **Week 17**

@@ -155,3 +155,24 @@
 * *1 hour* meeting with supervisor
 ### 18 Dec 2019
 * *2 hours* writing status report
+
+## Week 13
+### 14 Jan 2020
+* *1 hour* meeting with supervisor
+### 15 Jan 2020
+* *2 hours* proving identity rule for vector transpose
+* *1 hour* define `padCst` and `mapⁿ`
+
+## Week 14
+
+### 20 Jan 2020
+* *2 hours* proving movement rules `mapMapFBeforeTranspose` and `slideBeforeMapMapF`
+* *1 hours* refactor code
+
+### 22 Jan 2020
+* *2 hours* proving movement rule `joinBeforeTranspose`, useful lemmas were developed
+* *2 hours* trying to prove `joinBeforeJoin`, there are some issues caused by dependent types and the associative of `_++_` for `Vec` has not yet been proven.
+
+### 23 Jan 2020
+* *5.5 hours* proving movement rule `transposeBeforeMapJoin`, useful lemmas were developed
+* *0.5 hour* updating docs, such as timelog
