@@ -13,6 +13,7 @@ module lift.MovementRules where
   import lift.Primitives as Pm
   open Pm
   open import lift.Helpers
+  open import lift.AlgorithmicRules using (identity₃)
 
   {- lemmas -}
   map-fill-empty : {s t : Set} → (m : ℕ) → (f : s → t) →
@@ -253,42 +254,55 @@ module lift.MovementRules where
     ≡⟨ cong (_++ Pm.join (Pm.map Pm.transpose (Pm.map Pm.tail xsss))) (map-head-tail-transpose xs xss₁) ⟩
       refl
 
+  double-map-transpose : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                         Pm.map Pm.transpose (Pm.map Pm.transpose xsss) ≡ xsss
+  double-map-transpose [] = refl
+  double-map-transpose (xss ∷ xsss) =
+    begin
+      Pm.transpose (Pm.transpose xss) ∷ Pm.map Pm.transpose (Pm.map Pm.transpose xsss)
+    ≡⟨ cong₂ (λ x y → x ∷ y) (identity₃ xss) (double-map-transpose xsss) ⟩
+      refl
+
+  sym-lem₁ : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+             Pm.transpose (Pm.join (Pm.map Pm.transpose xsss)) ≡ Pm.map Pm.join (Pm.transpose xsss)
+  sym-lem₁ xsss =
+    begin
+      Pm.transpose (Pm.join (Pm.map Pm.transpose xsss))
+    ≡⟨ joinBeforeTranspose (Pm.map Pm.transpose xsss) ⟩
+      Pm.map Pm.join (Pm.transpose (Pm.map Pm.transpose (Pm.map Pm.transpose xsss)))
+    ≡⟨ cong (λ y → Pm.map Pm.join (Pm.transpose y)) (double-map-transpose xsss) ⟩
+      refl
   transposeBeforeMapJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
                            Pm.map Pm.join (Pm.transpose xsss) ≡ Pm.transpose (Pm.join (Pm.map Pm.transpose xsss))
-  transposeBeforeMapJoin {zero} {m} {o} [] =
+  transposeBeforeMapJoin xsss = sym (sym-lem₁ xsss)
+
+  sym-lem₂ : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+             Pm.transpose (Pm.map Pm.join (Pm.transpose xsss)) ≡ Pm.join (Pm.map Pm.transpose xsss)
+  sym-lem₂ xsss =
     begin
-      Pm.map Pm.join (Pm.fill m [])
-    ≡⟨ sym (map-join-fill-empty m []) ⟩
+      Pm.transpose (Pm.map Pm.join (Pm.transpose xsss))
+    ≡⟨ cong Pm.transpose (transposeBeforeMapJoin xsss) ⟩
+      Pm.transpose (Pm.transpose (Pm.join (Pm.map Pm.transpose xsss)))
+    ≡⟨ identity₃ (Pm.join (Pm.map Pm.transpose xsss)) ⟩
       refl
-  transposeBeforeMapJoin {suc n} {zero} {o} ([] ∷ xsss) =
+
+  mapTransposeBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                           Pm.join (Pm.map Pm.transpose xsss) ≡ Pm.transpose (Pm.map Pm.join (Pm.transpose xsss))
+  mapTransposeBeforeJoin xsss = sym (sym-lem₂ xsss)
+
+  sym-lem₃ : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+             Pm.join (Pm.map Pm.transpose (Pm.transpose xsss)) ≡ Pm.transpose (Pm.map Pm.join xsss)
+  sym-lem₃ xsss =
     begin
-      []
-    ≡⟨ sym (transpose-++ (Pm.fill o []) (Pm.join (Pm.map Pm.transpose xsss))) ⟩
+      Pm.join (Pm.map Pm.transpose (Pm.transpose xsss))
+    ≡⟨ mapTransposeBeforeJoin (Pm.transpose xsss) ⟩
+      Pm.transpose (Pm.map Pm.join (Pm.transpose (Pm.transpose xsss)))
+    ≡⟨ cong (λ y → Pm.transpose (Pm.map Pm.join y)) (identity₃ xsss) ⟩
       refl
-  transposeBeforeMapJoin {suc n} {suc m} {zero} (([] ∷ xss) ∷ xsss) =
-    begin
-      Pm.join (Pm.map Pm.head xsss) ∷ Pm.map Pm.join (Pm.transpose (xss ∷ Pm.map Pm.tail xsss))
-    ≡⟨ cong (Pm.join (Pm.map Pm.head xsss) ∷_) (transposeBeforeMapJoin (xss ∷ Pm.map Pm.tail xsss)) ⟩
-      Pm.join (Pm.map Pm.head xsss) ∷
-      Pm.transpose {zero} {m} (Pm.transpose xss ++ Pm.join (Pm.map Pm.transpose (Pm.map Pm.tail xsss)))
-    ≡⟨ cong (λ y → Pm.join (Pm.map Pm.head xsss) ∷ Pm.transpose {zero} {m} y)
-       (empty (Pm.transpose xss ++ Pm.join (Pm.map Pm.transpose (Pm.map Pm.tail xsss)))) ⟩
-      Pm.join (Pm.map Pm.head xsss) ∷ Pm.fill m []
-    ≡⟨ cong (_∷ Pm.fill m []) (empty (Pm.join (Pm.map Pm.head xsss))) ⟩
-      Pm.fill (suc m) []
-    ≡⟨ sym (lem₃ xsss) ⟩
-      refl
-  transposeBeforeMapJoin {suc n} {suc m} {suc o} (xsss) =
-    begin
-      Pm.join (Pm.map Pm.head xsss) ∷ Pm.map Pm.join (Pm.transpose (Pm.map Pm.tail xsss))
-    ≡⟨ cong (Pm.join (Pm.map Pm.head xsss) ∷_) (transposeBeforeMapJoin (Pm.map Pm.tail xsss)) ⟩
-      Pm.join (Pm.map Pm.head xsss) ∷ Pm.transpose (Pm.join (Pm.map Pm.transpose (Pm.map Pm.tail xsss)))
-    ≡⟨ cong (_∷ Pm.transpose (Pm.join (Pm.map Pm.transpose (Pm.map Pm.tail xsss)))) (sym (lem₄ xsss)) ⟩
-      Pm.map Pm.head (Pm.join (Pm.map (λ xss → Pm.map Pm.head xss ∷ Pm.transpose (Pm.map Pm.tail xss)) xsss)) ∷
-      Pm.transpose (Pm.join (Pm.map Pm.transpose (Pm.map Pm.tail xsss)))
-    ≡⟨ cong (λ y →  Pm.map Pm.head (Pm.join (Pm.map (λ xss →
-       Pm.map Pm.head xss ∷ Pm.transpose (Pm.map Pm.tail xss)) xsss)) ∷ Pm.transpose y) (sym (lem₅ xsss)) ⟩
-      refl
+
+  mapJoinBeforeTranspose : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                           Pm.transpose (Pm.map Pm.join xsss) ≡ Pm.join (Pm.map Pm.transpose (Pm.transpose xsss))
+  mapJoinBeforeTranspose xsss = sym (sym-lem₃ xsss)
 
   {- Join + Join -}
   joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
