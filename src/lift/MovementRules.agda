@@ -139,6 +139,10 @@ module lift.MovementRules where
        Pm.transpose (Pm.map f xs ∷ yss)) (map-tail f xss) ⟩
       refl
 
+  transposeBeforeMapMapF : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s m) n) →
+                           Pm.transpose (Pm.map (Pm.map f) xss) ≡ Pm.map (Pm.map f) (Pm.transpose xss)
+  transposeBeforeMapMapF f xss = sym (mapMapFBeforeTranspose f xss)
+
   {- Slide -}
   slideBeforeMapMapF : {n : ℕ} → (sz : ℕ) → (sp : ℕ) → {s t : Set} →
                        (f : s → t) → (xs : Vec s (sz + n * (suc sp))) →
@@ -156,10 +160,15 @@ module lift.MovementRules where
     ≡⟨ cong (λ ys → Pm.take sz (Pm.map f xs) ∷ Pm.slide sz sp ys) (map-drop (suc sp) f xs) ⟩
       refl
 
+  mapFBeforeSlide : {n : ℕ} → (sz : ℕ) → (sp : ℕ) → {s t : Set} →
+                    (f : s → t) → (xs : Vec s (sz + n * (suc sp))) →
+                    Pm.slide {n} sz sp (Pm.map f xs) ≡ Pm.map (Pm.map f) (Pm.slide {n} sz sp xs)
+  mapFBeforeSlide sz sp f xs = sym (slideBeforeMapMapF sz sp f xs)
+
   {- Join -}
   joinBeforeMapF : {s : Set} → {t : Set} → {m n : ℕ} →
-             (f : s → t) → (xs : Vec (Vec s n) m) →
-             Pm.map f (Pm.join xs) ≡ Pm.join (Pm.map (Pm.map f) xs)
+                   (f : s → t) → (xs : Vec (Vec s n) m) →
+                   Pm.map f (Pm.join xs) ≡ Pm.join (Pm.map (Pm.map f) xs)
   joinBeforeMapF f [] = refl
   joinBeforeMapF f (xs ∷ xs₁) =
     begin
@@ -168,6 +177,11 @@ module lift.MovementRules where
       Pm.map f xs ++ Pm.map f (Pm.join xs₁)
     ≡⟨ cong (Pm.map f xs ++_) (joinBeforeMapF f xs₁) ⟩
       refl
+
+  mapMapFBeforeJoin : {s : Set} → {t : Set} → {m n : ℕ} →
+                      (f : s → t) → (xs : Vec (Vec s n) m) →
+                      Pm.join (Pm.map (Pm.map f) xs) ≡ Pm.map f (Pm.join xs)
+  mapMapFBeforeJoin f xs = sym (joinBeforeMapF f xs)
 
   {- Join + Transpose -}
   joinBeforeTranspose : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
