@@ -87,6 +87,11 @@ module lift.AlgorithmicRules where
   identity₂ : {n : ℕ} → {s : Set} → {t : Set} → (f : Vec s n → Vec t n) → (xs : Vec s n) →
               (Pm.map Pm.id ∘ f) xs ≡ f xs
   ```
+  - Option 3
+  ```agda
+  identity₃ : {n m : ℕ} → {t : Set} → (xss : Vec (Vec t m) n) →
+              Pm.transpose (Pm.transpose xss) ≡ xss
+  ```
 
 * Fusion Rules
   - Option 1
