@@ -176,3 +176,7 @@
 ### 23 Jan 2020
 * *5.5 hours* proving movement rule `transposeBeforeMapJoin`, useful lemmas were developed
 * *0.5 hour* updating docs, such as timelog
+
+### 24 Jan 2020
+* *1 hour* proving movement rules `mapTransposeBeforeJoin` and `mapJoinBeforeTranspose`
+* *0.5 hours* simplify existing proof, clean up lemmas

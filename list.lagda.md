@@ -56,7 +56,19 @@ zip : {n : ℕ} → {s : Set} → {t : Set} → Vec s n → Vec t n → Vec (s �
 ```agda
 unzip : ((x , y) ∷ xs) = Prod.zip _∷_ _∷_ (x , y) (unzip xs)
 ```
-## Rewrite Rules
+* transpose
+```agda
+transpose : {n m : ℕ} → {t : Set} → Vec (Vec t m) n → Vec (Vec t n) m
+```
+* padCst
+```agda
+padCst : {n : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n + r)
+```
+* mapⁿ
+```agda
+mapⁿ : {m : ℕ} → (n : ℕ) → {s : Set} → (s → s) → Vec s m → Vec s m
+```
+## Algorithmic Rewrite Rules
 ### Module
 Source: `/individual-project/src/lift/AlgorithmicRules.adga`
 ```agda
@@ -124,4 +136,74 @@ reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) �
   ```agda
   partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (n * suc m)) →
                       (Pm.join ∘ Pm.map (Pm.partRed n {zero} M) ∘ Pm.split n {suc m}) xs ≡ Pm.partRed n {m} M xs
+  ```
+## Movement Rewrite Rules
+### Module
+Source: `/individual-project/src/lift/MovementRules.adga`
+```agda
+module lift.MovementRules where
+```
+
+### Proven Rewrite Rules
+* Transpose
+  ```agda
+  mapMapFBeforeTranspose : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s m) n) →
+                           Pm.map (Pm.map f) (Pm.transpose xss) ≡ Pm.transpose (Pm.map (Pm.map f) xss)
+  ```
+  ```agda
+  transposeBeforeMapMapF : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s m) n) →
+                           Pm.transpose (Pm.map (Pm.map f) xss) ≡ Pm.map (Pm.map f) (Pm.transpose xss)
+  ```
+
+* Slide
+  ```agda
+  slideBeforeMapMapF : {n : ℕ} → (sz : ℕ) → (sp : ℕ) → {s t : Set} →
+                       (f : s → t) → (xs : Vec s (sz + n * (suc sp))) →
+                       Pm.map (Pm.map f) (Pm.slide {n} sz sp xs) ≡ Pm.slide {n} sz sp (Pm.map f xs)
+  ```
+
+  ```agda
+  mapFBeforeSlide : {n : ℕ} → (sz : ℕ) → (sp : ℕ) → {s t : Set} →
+                    (f : s → t) → (xs : Vec s (sz + n * (suc sp))) →
+                    Pm.slide {n} sz sp (Pm.map f xs) ≡ Pm.map (Pm.map f) (Pm.slide {n} sz sp xs)
+  ```
+
+* Join
+  ```agda
+  joinBeforeMapF : {s : Set} → {t : Set} → {m n : ℕ} →
+                   (f : s → t) → (xs : Vec (Vec s n) m) →
+                   Pm.map f (Pm.join xs) ≡ Pm.join (Pm.map (Pm.map f) xs)
+  ```
+
+  ```agda
+  mapMapFBeforeJoin : {s : Set} → {t : Set} → {m n : ℕ} →
+                      (f : s → t) → (xs : Vec (Vec s n) m) →
+                      Pm.join (Pm.map (Pm.map f) xs) ≡ Pm.map f (Pm.join xs)
+  ```
+
+* Join + Transpose
+  ```agda
+  joinBeforeTranspose : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                        Pm.transpose (Pm.join xsss) ≡ Pm.map Pm.join (Pm.transpose (Pm.map Pm.transpose xsss))
+  ```
+
+  ```agda
+  transposeBeforeMapJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                           Pm.map Pm.join (Pm.transpose xsss) ≡ Pm.transpose (Pm.join (Pm.map Pm.transpose xsss))
+  ```
+
+  ```agda
+  mapTransposeBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                           Pm.join (Pm.map Pm.transpose xsss) ≡ Pm.transpose (Pm.map Pm.join (Pm.transpose xsss))
+  ```
+
+  ```agda
+  mapJoinBeforeTranspose : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                           Pm.transpose (Pm.map Pm.join xsss) ≡ Pm.join (Pm.map Pm.transpose (Pm.transpose xsss))
+  ```
+
+* Join + Join (_WIP_)
+  ```agda
+  joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                   Pm.join (Pm.join xsss) ≡ Pm.join (Pm.map Pm.join xsss)
   ```
