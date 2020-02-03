@@ -207,8 +207,8 @@ module lift.MovementRules where
                            Pm.transpose (Pm.map Pm.join xsss) ≡ Pm.join (Pm.map Pm.transpose (Pm.transpose xsss))
   ```
 
-* Join + Join (_WIP_)
+* Join + Join (Proven using heterogeneous equality)
   ```agda
   joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
-                   Pm.join (Pm.join xsss) ≡ Pm.join (Pm.map Pm.join xsss)
+                   Pm.join (Pm.join xsss) ≅ Pm.join (Pm.map Pm.join xsss)
   ```
