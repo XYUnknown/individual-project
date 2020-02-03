@@ -1,3 +1,4 @@
+{-# OPTIONS --without-K --safe #-}
 module lift.Operators where
   open import Relation.Binary.PropositionalEquality
   open import Data.Nat
