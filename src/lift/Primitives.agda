@@ -53,12 +53,7 @@ module lift.Primitives where
     ≡⟨ +-assoc n m (o * suc n) ⟩
       refl
 
-  -- for join + join movement rules
-  postulate +*dist : {m n o : ℕ} → o * m + o * n ≡ o * (m + n)
-
-  postulate *assoc : {m n o : ℕ} → o * n * m ≡ o * (n * m)
-
-  {-# REWRITE *zero *suc +zero +suc +comm₁ *assoc +*dist #-}
+  {-# REWRITE *zero *suc +zero +suc +comm₁ #-}
 
   {- primitive map -}
   map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
@@ -105,6 +100,10 @@ module lift.Primitives where
   slide {zero} sz sp xs = [ xs ]
   slide {suc n} sz sp {t} xs =
     take sz {(suc n) * (suc sp)} xs ∷ slide {n} sz sp (drop (suc sp) xs)
+
+  {- split as a special case of slide -}
+  split′ : {n : ℕ} → (sz : ℕ) → {t : Set} → Vec t (sz + n * (suc sz)) → Vec (Vec t sz) (suc n)
+  split′ {n} sz xs = slide {n} sz sz xs
 
   {- primitive reduce -}
   reduceSeq : {n : ℕ} → {s t : Set} → (s → t → t) → t → Vec s n → t
