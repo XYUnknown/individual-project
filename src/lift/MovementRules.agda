@@ -10,10 +10,14 @@ module lift.MovementRules where
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   open import Function using (_∘_)
+  import Relation.Binary.HeterogeneousEquality as Heq
+  open Heq using (_≅_) renaming (sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
+  open Heq.≅-Reasoning using (_≅⟨_⟩_) renaming (begin_ to hbegin_; _≡⟨⟩_ to _h≡⟨⟩_; _≡⟨_⟩_ to _h≡⟨_⟩_; _∎ to _h∎)
   import lift.Primitives as Pm
   open Pm
   open import lift.Helpers
   open import lift.AlgorithmicRules using (identity₃)
+  open import lift.HeterogeneousHelpers using (hcong′)
 
   {- lemmas -}
   double-map-transpose : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
@@ -259,14 +263,51 @@ module lift.MovementRules where
                            Pm.transpose (Pm.map Pm.join xsss) ≡ Pm.join (Pm.map Pm.transpose (Pm.transpose xsss))
   mapJoinBeforeTranspose xsss = sym (sym-lem₃ xsss)
 
-  {- Join + Join -}
-  joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
-                   Pm.join (Pm.join xsss) ≡ Pm.join (Pm.map Pm.join xsss)
-  joinBeforeJoin [] = refl
-  joinBeforeJoin (xss ∷ xsss) =
+  {- Transpose + Split -}
+  map-head-split : {m q : ℕ} → {t : Set} → (n : ℕ) → (xss : Vec (Vec t (n * (suc m))) q) →
+                   Pm.transpose (Pm.map Pm.head (Pm.map (Pm.split n {suc m}) xss)) ≡ Pm.take n {n * m} (Pm.transpose xss)
+  map-head-split n [] = {!!}
+  map-head-split n (xs ∷ xss) = {!!}
+
+  lem₃ :  {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n + n * m)) q) →
+          map transpose (transpose (map (split n {suc m}) xsss)) ≡
+          take n {n * m} (transpose xsss) ∷ split n {m} (drop n (transpose xsss))
+  lem₃ {m} {p} {zero} n [] = {!!}
+  lem₃ {m} {p} {suc q} n xsss =
     begin
-      Pm.join (xss ++ Pm.join xsss)
-    ≡⟨ join-++ xss (Pm.join xsss)⟩
-      Pm.join xss ++ Pm.join (Pm.join xsss)
-    ≡⟨ cong (Pm.join xss ++_) (joinBeforeJoin xsss) ⟩
-      refl
+      transpose (map head (map (split n) xsss)) ∷
+      map transpose (transpose (map tail (map (split n) xsss)))
+    ≡⟨⟩
+      {!!}
+
+  transposeBeforeSplit : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n * m)) q) →
+                       Pm.split n {m} (Pm.transpose xsss) ≡
+                       Pm.map Pm.transpose (Pm.transpose (Pm.map (Pm.split n {m}) xsss))
+  transposeBeforeSplit {zero} n [] = refl
+  transposeBeforeSplit {zero} n (xss ∷ xsss) = refl
+  transposeBeforeSplit {suc m} n xsss =
+    begin
+      take n (transpose xsss) ∷ split n (drop n (transpose xsss))
+    ≡⟨⟩
+      {!!}
+
+  {- Transpose + Slide -}
+  transposeBeforeSlide : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
+                         Pm.slide {n} sz sp (Pm.transpose xsss) ≡
+                         Pm.map Pm.transpose (Pm.transpose (Pm.map (Pm.slide {n} sz sp) xsss))
+  transposeBeforeSlide {n} {m} sz sp xsss = {!!}
+
+  {- Join + Join -}
+  postulate *assoc : (n m o : ℕ) → o * (m * n) ≡ o * m * n
+
+  joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                   Pm.join (Pm.join xsss) ≅ Pm.join (Pm.map Pm.join xsss)
+  joinBeforeJoin [] = Heq.refl
+  joinBeforeJoin {suc n} {m} {o} {t} (xss ∷ xsss) =
+    hbegin
+     join (xss ++ join xsss)
+    ≅⟨ join-++ xss (join xsss) ⟩
+     join xss ++ join (join xsss)
+    ≅⟨ hcong′ (Vec t) (*assoc n m o) (λ y → join xss ++ y) (joinBeforeJoin xsss) ⟩
+     join xss ++ join (map join xsss)
+    h∎
