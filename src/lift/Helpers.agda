@@ -9,7 +9,10 @@ module lift.Helpers where
   open import Data.Nat.Properties using (*-distribʳ-+; +-assoc)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
-  open import Function using (_∘_)
+  import Relation.Binary.HeterogeneousEquality as Heq
+  open Heq using (_≅_) renaming (sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
+  open Heq.≅-Reasoning using (_≅⟨_⟩_) renaming (begin_ to hbegin_; _≡⟨⟩_ to _h≡⟨⟩_; _≡⟨_⟩_ to _h≡⟨_⟩_;  _∎ to _h∎)
+  open import lift.HeterogeneousHelpers using (hcong′)
   import lift.Primitives as Pm
   open Pm
 
@@ -73,16 +76,24 @@ module lift.Helpers where
       refl
   transpose-++ (x ∷ xs) ys = refl
 
+  ++-assoc : {n m o : ℕ} → {t : Set} → (xs : Vec t n) → (ys : Vec t m) → (zs : Vec t o) →
+             (xs ++ ys) ++ zs ≅ xs ++ (ys ++ zs)
+  ++-assoc [] ys zs = Heq.refl
+  ++-assoc {suc n} {m} {o} {t} (x ∷ xs) ys zs = hcong′ (Vec t) (+-assoc n m o) (λ l → x ∷ l) (++-assoc xs ys zs)
+
+  postulate +*distr : (n m o : ℕ) → o * (n + m) ≡ o * n + o * m
+
   join-++ : {n m o : ℕ} → {t : Set} → (xs₁ : Vec (Vec t o) n) → (xs₂ : Vec (Vec t o) m) →
-            Pm.join (xs₁ ++ xs₂) ≡ Pm.join xs₁ ++ Pm.join xs₂
-  join-++ [] xs₂ = refl
-  join-++ (x ∷ xs₁) xs₂ =
-    begin
-      x ++ Pm.join (xs₁ ++ xs₂)
-    ≡⟨ cong (x ++_) (join-++ xs₁ xs₂) ⟩
-      x ++ (Pm.join xs₁ ++ Pm.join xs₂)
-    ≡⟨⟩
-      {!!}
+            Pm.join (xs₁ ++ xs₂) ≅ Pm.join xs₁ ++ Pm.join xs₂
+  join-++ [] xs₂ = Heq.refl
+  join-++ {suc n} {m} {o} {t} (xs ∷ xs₁) xs₂ =
+    hbegin
+      xs ++ join (xs₁ ++ xs₂)
+    ≅⟨ hcong′ (Vec t) (+*distr n m o) (λ y → xs ++ y) (join-++ xs₁ xs₂) ⟩
+      xs ++ join xs₁ ++ join xs₂
+    ≅⟨ hsym (++-assoc xs (join xs₁) (join xs₂)) ⟩
+      (xs ++ join xs₁) ++ join xs₂
+    h∎
 
   take-all : (n : ℕ) → {t : Set} → (xs : Vec t n) →
              Pm.take n {zero} xs ≡ xs
@@ -92,25 +103,6 @@ module lift.Helpers where
       x ∷ Pm.take n xs
     ≡⟨ cong (x ∷_) (take-all n xs) ⟩
       refl
-
-  {-
-  suc-subst : {n m o : ℕ} → {t : Set} → (x : t) → (xs : Vec t (n + m + o)) →
-              x ∷ subst (Vec t) (+-assoc n m o) xs ≡
-              subst (Vec t) (cong suc (+-assoc n m o)) (x ∷ xs)
-  suc-subst x xs = {!!}
-
-  ++-assoc : {n m o : ℕ} → {t : Set} → (xs : Vec t n) → (ys : Vec t m) → (zs : Vec t o) →
-           xs ++ (ys ++ zs) ≡ subst (Vec t) (+-assoc n m o) ((xs ++ ys) ++ zs)
-  ++-assoc [] ys zs = refl
-  ++-assoc {suc n} {m} {o} {t} (x ∷ xs) ys zs =
-    begin
-      x ∷ xs ++ ys ++ zs
-    ≡⟨ cong (x ∷_) (++-assoc xs ys zs) ⟩
-      x ∷ subst (Vec t) (+-assoc n m o) ((xs ++ ys) ++ zs)
-    ≡⟨ {!!} ⟩
-      subst (Vec t) (cong suc (+-assoc n m o)) (x ∷ (xs ++ ys) ++ zs)
-    ∎
-  -}
 
   map-take : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
              Pm.map f (Pm.take n {m} xs) ≡ (Pm.take n {m} (Pm.map f xs))
@@ -128,7 +120,6 @@ module lift.Helpers where
 
   map-split : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
               Pm.map (Pm.map f) (Pm.split n {m} xs) ≡ Pm.split n {m} (Pm.map f xs)
-
   map-split n {zero} f xs = refl
   map-split n {suc m} f xs =
     begin
