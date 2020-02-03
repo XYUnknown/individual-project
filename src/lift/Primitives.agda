@@ -60,12 +60,10 @@ module lift.Primitives where
   map f [] = []
   map f (x ∷ xs) = (f x) ∷ (map f xs)
 
-  {- primitive mapⁿ -}
-  -- the type of the function should be s → s
-  -- the function doesn't change the type of the intake argument
-  mapⁿ : {m : ℕ} → (n : ℕ) → {s : Set} → (s → s) → Vec s m → Vec s m
-  mapⁿ zero f xs = xs
-  mapⁿ (suc n) f xs = mapⁿ n f (map f xs)
+  {- primitive map₂ -}
+  -- the more complex case is map_n
+  map₂ : {n m : ℕ} → {s t : Set} → (s → t) → Vec (Vec s n) m → Vec (Vec t n) m
+  map₂ f xs = map (map f) xs
 
   {- primitive id -}
   id : {T : Set} → T → T
