@@ -6,7 +6,7 @@ module lift.MovementRules where
   open Eq using (_≡_; refl; cong; sym; subst; cong₂)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
-  open import Data.Nat.Properties using (*-distribʳ-+)
+  open import Data.Nat.Properties using (*-distribʳ-+; *-assoc)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   open import Function using (_∘_)
@@ -298,8 +298,6 @@ module lift.MovementRules where
   transposeBeforeSlide {n} {m} sz sp xsss = {!!}
 
   {- Join + Join -}
-  postulate *assoc : (n m o : ℕ) → o * (m * n) ≡ o * m * n
-
   joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
                    Pm.join (Pm.join xsss) ≅ Pm.join (Pm.map Pm.join xsss)
   joinBeforeJoin [] = Heq.refl
@@ -308,6 +306,6 @@ module lift.MovementRules where
      join (xss ++ join xsss)
     ≅⟨ join-++ xss (join xsss) ⟩
      join xss ++ join (join xsss)
-    ≅⟨ hcong′ (Vec t) (*assoc n m o) (λ y → join xss ++ y) (joinBeforeJoin xsss) ⟩
+    ≅⟨ hcong′ (Vec t) (sym (*-assoc o m n)) (λ y → join xss ++ y) (joinBeforeJoin xsss) ⟩
      join xss ++ join (map join xsss)
     h∎

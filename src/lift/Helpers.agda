@@ -6,7 +6,7 @@ module lift.Helpers where
   open Eq using (_≡_; refl; cong; sym; subst; cong₂)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
-  open import Data.Nat.Properties using (*-distribʳ-+; +-assoc)
+  open import Data.Nat.Properties using (*-distribʳ-+; +-assoc; *-distribˡ-+)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   import Relation.Binary.HeterogeneousEquality as Heq
@@ -81,15 +81,13 @@ module lift.Helpers where
   ++-assoc [] ys zs = Heq.refl
   ++-assoc {suc n} {m} {o} {t} (x ∷ xs) ys zs = hcong′ (Vec t) (+-assoc n m o) (λ l → x ∷ l) (++-assoc xs ys zs)
 
-  postulate +*distr : (n m o : ℕ) → o * (n + m) ≡ o * n + o * m
-
   join-++ : {n m o : ℕ} → {t : Set} → (xs₁ : Vec (Vec t o) n) → (xs₂ : Vec (Vec t o) m) →
             Pm.join (xs₁ ++ xs₂) ≅ Pm.join xs₁ ++ Pm.join xs₂
   join-++ [] xs₂ = Heq.refl
   join-++ {suc n} {m} {o} {t} (xs ∷ xs₁) xs₂ =
     hbegin
       xs ++ join (xs₁ ++ xs₂)
-    ≅⟨ hcong′ (Vec t) (+*distr n m o) (λ y → xs ++ y) (join-++ xs₁ xs₂) ⟩
+    ≅⟨ hcong′ (Vec t) (*-distribˡ-+ o n m) (λ y → xs ++ y) (join-++ xs₁ xs₂) ⟩
       xs ++ join xs₁ ++ join xs₂
     ≅⟨ hsym (++-assoc xs (join xs₁) (join xs₂)) ⟩
       (xs ++ join xs₁) ++ join xs₂
