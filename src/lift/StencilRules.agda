@@ -23,42 +23,30 @@ module lift.StencilRules where
   -- suc v = (suc n) * (suc sp)
   -- sz - suc sp ≡ u - suc v
   postulate lem₁ : (n m sz sp : ℕ) →
-                   sz + (n + m * (suc n)) * (suc sp) ≡ sz + n * (suc sp) + m * suc (n + sp + n * sp)
+                   sz + n * (suc sp) + m * suc (n + sp + n * sp) ≡ sz + (n + m * (suc n)) * (suc sp)
   postulate lem₂ : (n m : ℕ) → suc n * suc m ≡ suc (n + m * suc n)
 
   postulate lem₃ : {n sz sp : ℕ} → {t : Set} → (xs : Vec t (sz + n * suc sp)) →
                    subst (Vec t) (lem₁ n zero sz sp) xs ≡ xs
 
-  slideJoin : {n m : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + (n + m * (suc n)) * (suc sp))) →
+  slideJoin : {n m : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
               Pm.join (Pm.map (λ (tile : Vec t (sz + n * (suc sp))) →
-              Pm.slide {n} sz sp tile) (Pm.slide {m} (sz + n * (suc sp)) (n + sp + n * sp) (subst (Vec t) (lem₁ n m sz sp) xs))) ≅
-              Pm.slide {n + m * (suc n)} sz sp xs
+              Pm.slide {n} sz sp tile) (Pm.slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≅
+              Pm.slide {n + m * (suc n)} sz sp (subst (Vec t) (lem₁ n m sz sp) xs)
   slideJoin {n} {zero} {t} sz sp xs =
     hbegin
-      slide sz sp (subst (Vec t) (lem₁ n zero sz sp) xs) ++ []
-    h≡⟨ ++-[] (slide sz sp (subst (Vec t) (lem₁ n zero sz sp) xs)) ⟩
-      slide sz sp (subst (Vec t) (lem₁ n zero sz sp) xs)
-    h≡⟨ cong (λ y → slide sz sp y) (lem₃ xs) ⟩
+      slide sz sp xs ++ []
+    h≡⟨ ++-[] (slide sz sp xs) ⟩
       slide sz sp xs
+    h≡⟨ cong (λ y → slide sz sp y) (sym (lem₃ {n} {sz} {sp} xs)) ⟩
+      slide sz sp (subst (Vec t) (lem₁ n zero sz sp) xs)
     h∎
 
   slideJoin {n} {suc m} {t} sz sp xs =
     hbegin
+      slide {n} sz sp (take (sz + n * suc sp) xs) ++
       join (map (slide {n} sz sp)
-      (slide {suc m} (sz + n * suc sp) (n + sp + n * sp) (subst (Vec t) (lem₁ n (suc m) sz sp) xs)))
-    h≡⟨⟩
-      join (map (slide {n} sz sp)
-      (take (sz + n * suc sp) (subst (Vec t) (lem₁ n (suc m) sz sp) xs) ∷
-      slide {m} (sz + n * suc sp) (n + sp + n * sp) (drop (suc (n + sp + n * sp)) (subst (Vec t) (lem₁ n (suc m) sz sp) xs))))
-    h≡⟨⟩
-      join (slide {n} sz sp (take (sz + n * suc sp) (subst (Vec t) (lem₁ n (suc m) sz sp) xs)) ∷
-      (map (slide {n} sz sp)
-      (slide {m} (sz + n * suc sp) (n + sp + n * sp) (drop (suc (n + sp + n * sp)) (subst (Vec t) (lem₁ n (suc m) sz sp) xs)))))
-    h≡⟨⟩
-      slide {n} sz sp (take (sz + n * suc sp) (subst (Vec t) (lem₁ n (suc m) sz sp) xs)) ++
-      join (map (slide {n} sz sp)
-      (slide {m} (sz + n * suc sp) (n + sp + n * sp) (drop (suc (n + sp + n * sp)) (subst (Vec t) (lem₁ n (suc m) sz sp) xs))))
+      (slide {m} (sz + n * suc sp) (n + sp + n * sp) (drop (suc (n + sp + n * sp)) xs)))
     h≡⟨⟩
       {!!}
-
 
