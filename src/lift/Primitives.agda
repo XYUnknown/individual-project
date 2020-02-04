@@ -91,6 +91,24 @@ module lift.Primitives where
   join (xs ∷ xs₁) = xs ++ join xs₁
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
 
+  {- primitive transpose -}
+  -- lemma, fill a vector with x
+  fill : {t : Set} → (n : ℕ) → t → Vec t n
+  fill zero x = []
+  fill (suc n) x = x ∷ fill n x
+
+  -- lemma head and tail
+  head : {t : Set} → {n : ℕ} → Vec t (suc n) → t
+  head (x ∷ xs) = x
+
+  tail : {t : Set} → {n : ℕ} → Vec t (suc n) → Vec t n
+  tail (x ∷ xs) = xs
+
+  transpose : {n m : ℕ} → {t : Set} → Vec (Vec t m) n → Vec (Vec t n) m
+  transpose {suc n} {zero} xss = []
+  transpose {zero} {m} [] = fill _ []
+  transpose {suc n} {suc m} xss = map head xss ∷ transpose (map tail xss)
+
   {- primitive slide -}
   -- (suc sp) and (suc n), to ensure step > 0
   slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (sz + n * (suc sp)) →
@@ -98,6 +116,10 @@ module lift.Primitives where
   slide {zero} sz sp xs = [ xs ]
   slide {suc n} sz sp {t} xs =
     take sz {(suc n) * (suc sp)} xs ∷ slide {n} sz sp (drop (suc sp) xs)
+
+  slide₂ : {n m : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec (Vec t (sz + n * (suc sp))) (sz + m * (suc sp)) →
+           Vec (Vec (Vec (Vec t sz) sz) (suc n)) (suc m)
+  slide₂ {n} {m} sz sp xs = map transpose (slide {m} sz sp (map (slide {n} sz sp) xs))
 
   {- split as a special case of slide -}
   split′ : {n : ℕ} → (sz : ℕ) → {t : Set} → Vec t (sz + n * (suc sz)) → Vec (Vec t sz) (suc n)
@@ -131,24 +153,6 @@ module lift.Primitives where
   unzip : {n : ℕ} → {s : Set} → {t : Set} → Vec (s × t) n → Vec s n × Vec t n
   unzip [] = [] , []
   unzip ((x , y) ∷ xs) = Prod.zip _∷_ _∷_ (x , y) (unzip xs)
-
-  {- primitive transpose -}
-  -- lemma, fill a vector with x
-  fill : {t : Set} → (n : ℕ) → t → Vec t n
-  fill zero x = []
-  fill (suc n) x = x ∷ fill n x
-
-  -- lemma head and tail
-  head : {t : Set} → {n : ℕ} → Vec t (suc n) → t
-  head (x ∷ xs) = x
-
-  tail : {t : Set} → {n : ℕ} → Vec t (suc n) → Vec t n
-  tail (x ∷ xs) = xs
-
-  transpose : {n m : ℕ} → {t : Set} → Vec (Vec t m) n → Vec (Vec t n) m
-  transpose {suc n} {zero} xss = []
-  transpose {zero} {m} [] = fill _ []
-  transpose {suc n} {suc m} xss = map head xss ∷ transpose (map tail xss)
 
   {- primitive padCst -}
   padCstˡ : {n : ℕ} → (l : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n)
