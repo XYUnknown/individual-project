@@ -223,3 +223,19 @@ module lift.MovementRules where
                          Pm.slide {n} sz sp (Pm.transpose xsss) ≡
                          Pm.map Pm.transpose (Pm.transpose (Pm.map (Pm.slide {n} sz sp) xsss))
   ```
+
+## Stencil Rewrite Rules
+### Module
+Source: `/individual-project/src/lift/StencilRules.adga`
+```agda
+module lift.StencilRules where
+```
+
+### Proven Rewrite Rules
+* Tiling (_WIP_)
+  ```agda
+  slideJoin : {n m : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
+              Pm.join (Pm.map (λ (tile : Vec t (sz + n * (suc sp))) →
+              Pm.slide {n} sz sp tile) (Pm.slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≅
+              Pm.slide {n + m * (suc n)} sz sp (subst (Vec t) (lem₁ n m sz sp) xs)
+  ```
