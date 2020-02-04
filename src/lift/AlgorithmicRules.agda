@@ -16,9 +16,7 @@ module lift.AlgorithmicRules where
   open CommAssocMonoid
   open import lift.Helpers
 
-
   {- lemmas -}
-
   -- used in proving reduction
   reduceSeq-reduce : {n : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (x : t) → (xs : Vec t n) →
                      let _⊕_ = _⊕_ M in
@@ -364,10 +362,3 @@ module lift.AlgorithmicRules where
       Pm.partRed (suc n) {suc m} M (Pm.join {suc n} (Pm.split (suc n) {suc (suc m)} xs))
     ≡⟨ cong (Pm.partRed (suc n) M) (simplification₁ (suc n) {suc (suc m)} xs) ⟩
       refl
-
-  {- Tiling -}
-  -- u = 2 * sz
-  slide-join : {n : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * suc sp)) →
-               Pm.slide {n} sz sp xs ≡
-               Pm.join (Pm.map (λ (tile : Vec t (2 * sz)) → Pm.slide {{!!}} sz sp tile) (Pm.slide (2 * sz) (sz + sp) xs) )
-  slide-join = {!!}
