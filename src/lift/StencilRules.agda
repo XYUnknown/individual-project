@@ -9,13 +9,12 @@ module lift.StencilRules where
   open import Data.Nat.Properties using (*-distribʳ-+)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
-  open import Function using (_∘_)
   import Relation.Binary.HeterogeneousEquality as Heq
   open Heq using (_≅_) renaming (sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
   open Heq.≅-Reasoning using (_≅⟨_⟩_) renaming (begin_ to hbegin_; _≡⟨⟩_ to _h≡⟨⟩_; _≡⟨_⟩_ to _h≡⟨_⟩_; _∎ to _h∎)
   open import lift.HeterogeneousHelpers using (hcong′)
-  import lift.Primitives as Pm
-  open Pm
+  open import lift.Primitives using (map; id; take; drop; split;
+    join; fill; head; tail; transpose; slide; reduceSeq; reduce; partRed)
   open import lift.Helpers
 
   {- Tiling -}
@@ -30,9 +29,9 @@ module lift.StencilRules where
                    subst (Vec t) (lem₁ n zero sz sp) xs ≡ xs
 
   slideJoin : {n m : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
-              Pm.join (Pm.map (λ (tile : Vec t (sz + n * (suc sp))) →
-              Pm.slide {n} sz sp tile) (Pm.slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≅
-              Pm.slide {n + m * (suc n)} sz sp (subst (Vec t) (lem₁ n m sz sp) xs)
+              join (map (λ (tile : Vec t (sz + n * (suc sp))) →
+              slide {n} sz sp tile) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≅
+              slide {n + m * (suc n)} sz sp (subst (Vec t) (lem₁ n m sz sp) xs)
   slideJoin {n} {zero} {t} sz sp xs =
     hbegin
       slide sz sp xs ++ []

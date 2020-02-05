@@ -13,7 +13,8 @@ module lift.Helpers where
   open Heq using (_≅_) renaming (sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
   open Heq.≅-Reasoning using (_≅⟨_⟩_) renaming (begin_ to hbegin_; _≡⟨⟩_ to _h≡⟨⟩_; _≡⟨_⟩_ to _h≡⟨_⟩_;  _∎ to _h∎)
   open import lift.HeterogeneousHelpers using (hcong′)
-  open import lift.Primitives using (map; id; take; drop; split; join; fill; head; tail; transpose; slide; reduceSeq; reduce; partRed)
+  open import lift.Primitives using (map; id; take; drop; split;
+    join; fill; head; tail; transpose; slide; reduceSeq; reduce; partRed)
 
   -- a vector with size zero is empty
   empty : {t : Set} → (xs : Vec t zero) → xs ≡ []

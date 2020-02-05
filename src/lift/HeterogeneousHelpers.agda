@@ -12,9 +12,9 @@ module lift.HeterogeneousHelpers where
   open import Level hiding (zero; suc)
 
   hcong′ : {α β γ : Level} {I : Set α} {i j : I}
-           -> (A : I -> Set β) {B : {k : I} -> A k -> Set γ} {x : A i} {y : A j}
-           -> i ≡ j
-           -> (f : {k : I} -> (x : A k) -> B x)
-           -> x ≅ y
-           -> f x ≅ f y
+           → (A : I → Set β) {B : {k : I} → A k → Set γ} {x : A i} {y : A j}
+           → i ≡ j
+           → (f : {k : I} → (x : A k) → B x)
+           → x ≅ y
+           → f x ≅ f y
   hcong′ _ refl _ Heq.refl = Heq.refl
