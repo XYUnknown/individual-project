@@ -216,6 +216,14 @@ module lift.MovementRules where
                        split n {m} (transpose xsss) ≡
                        map transpose (transpose (map (split n {m}) xsss))
   ```
+  ```agda
+  mapSplitBeforeTranspose : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n * m)) q) →
+                            transpose (map (split n {m}) xsss) ≡ map transpose (split n (transpose xsss))
+  ```
+  ```agda
+  transposeBeforeMapSplit : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) q) (n * m)) →
+                            map (split n {m}) (transpose xsss) ≡ transpose (map transpose (split n xsss))
+  ```
 
 * Transpose + Slide (_WIP_)
   ```agda
