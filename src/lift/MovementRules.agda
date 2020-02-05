@@ -264,21 +264,98 @@ module lift.MovementRules where
   mapJoinBeforeTranspose xsss = sym (sym-lem₃ xsss)
 
   {- Transpose + Split -}
-  map-head-split : {m q : ℕ} → {t : Set} → (n : ℕ) → (xss : Vec (Vec t (n * (suc m))) q) →
-                   transpose (map head (map (split n {suc m}) xss)) ≡ take n {n * m} (transpose xss)
-  map-head-split n [] = {!!}
-  map-head-split n (xs ∷ xss) = {!!}
+  head-take : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (suc (n + m))) →
+              head xs ≡ head (take (suc n) {m} xs)
+  head-take zero (x ∷ xs) = refl
+  head-take (suc n) (x ∷ xs) = refl
 
-  lem₃ :  {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n + n * m)) q) →
-          map transpose (transpose (map (split n {suc m}) xsss)) ≡
-          take n {n * m} (transpose xsss) ∷ split n {m} (drop n (transpose xsss))
-  lem₃ {m} {p} {zero} n [] = {!!}
-  lem₃ {m} {p} {suc q} n xsss =
+  tail-take : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (suc (n + m))) →
+              take n {m} (tail xs) ≡ tail (take (suc n) {m} xs)
+  tail-take zero (x ∷ xs) = refl
+  tail-take (suc n) (x ∷ xs) = refl
+
+  map-head-take : (n : ℕ) → {m p : ℕ} → {t : Set} → (xs : Vec (Vec t (suc (n + m))) p) →
+                  map head xs ≡ map head (map (take (suc n) {m}) xs)
+  map-head-take n [] = refl
+  map-head-take n {m} (xs₁ ∷ xs) =
     begin
-      transpose (map head (map (split n) xsss)) ∷
-      map transpose (transpose (map tail (map (split n) xsss)))
-    ≡⟨⟩
-      {!!}
+      head xs₁ ∷ map head xs
+    ≡⟨ cong₂ (λ x y → x ∷ y) (head-take n {m} xs₁) (map-head-take n {m} xs) ⟩
+      refl
+
+  map-tail-take : (n : ℕ) → {m p : ℕ} → {t : Set} → (xs : Vec (Vec t (suc (n + m))) p) →
+                  map (take n {m}) (map tail xs) ≡  map tail (map (take (suc n) {m}) xs)
+  map-tail-take n [] = refl
+  map-tail-take n (xs₁ ∷ xs) =
+    begin
+      take n (tail xs₁) ∷ map (take n) (map tail xs)
+    ≡⟨ cong₂ (λ x y → x ∷ y) (tail-take n xs₁) (map-tail-take n xs) ⟩
+      refl
+
+  take-fill : {m : ℕ} → {t : Set} → (n : ℕ) → (x : t) → take n {m} (fill (n + m) x) ≡ fill n x
+  take-fill zero x = refl
+  take-fill (suc n) x = cong (x ∷_) (take-fill n x)
+
+  drop-fill : {m : ℕ} → {t : Set} → (n : ℕ) → (x : t) → drop n {m} (fill (n + m) x) ≡ fill m x
+  drop-fill zero x = refl
+  drop-fill (suc n) x = drop-fill n x
+
+  take-transpose : (n : ℕ) → {m p : ℕ} → {t : Set} → (xs : Vec (Vec t (n + m)) p) →
+                   take n {m} (transpose xs) ≡ transpose (map (take n {m}) xs)
+  take-transpose n {m} {zero} [] = take-fill n []
+  take-transpose zero {m} {suc p} xs = refl
+  take-transpose (suc n) {m} {suc p} ((x ∷ xs₁) ∷ xs) =
+    begin
+      (x ∷ map head xs) ∷ take n (transpose (xs₁ ∷ map tail xs))
+    ≡⟨ cong ((x ∷ map head xs) ∷_) (take-transpose n (xs₁ ∷ map tail xs)) ⟩
+      (x ∷ map head xs) ∷ transpose (take n xs₁ ∷ map (take n) (map tail xs))
+    ≡⟨ cong (λ y → (x ∷ y) ∷ transpose (take n xs₁ ∷ map (take n) (map tail xs))) (map-head-take n {m} xs) ⟩
+      (x ∷ map head (map (take (suc n)) xs)) ∷ transpose (take n xs₁ ∷ map (take n) (map tail xs))
+    ≡⟨ cong (λ y → (x ∷ map head (map (take (suc n)) xs)) ∷ transpose (take n xs₁ ∷ y)) (map-tail-take n xs) ⟩
+      refl
+
+  drop-tail : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (suc (n + m))) →
+              drop n {m} (tail xs) ≡ drop (suc n) {m} xs
+  drop-tail zero (x ∷ xs) = refl
+  drop-tail (suc n) (x ∷ xs) = refl
+
+  map-tail-drop : (n : ℕ) → {m p : ℕ} → {t : Set} → (xs : Vec (Vec t (suc (n + m))) p) →
+                  map (drop n {m}) (map tail xs) ≡ map (drop (suc n) {m}) xs
+  map-tail-drop n [] = refl
+  map-tail-drop n (xs₁ ∷ xs) = cong₂ (λ x y → x ∷ y) (drop-tail n xs₁) (map-tail-drop n xs)
+
+  drop-transpose : (n : ℕ) → {m p : ℕ} → {t : Set} → (xs : Vec (Vec t (n + m)) p) →
+                   drop n {m} (transpose xs) ≡ transpose (map (drop n {m}) xs)
+  drop-transpose n {m} {zero} [] = drop-fill n []
+  drop-transpose zero {m} {suc p} xs =
+    begin
+      transpose xs
+    ≡⟨ cong transpose (sym (map-id xs)) ⟩
+      refl
+  drop-transpose (suc n) {m} {suc p} ((x ∷ xs₁) ∷ xs) =
+    begin
+      drop n (transpose (xs₁ ∷ map tail xs))
+    ≡⟨ drop-transpose n (xs₁ ∷ map tail xs) ⟩
+      transpose (drop n xs₁ ∷ map (drop n) (map tail xs))
+    ≡⟨ cong (λ y → transpose (drop n xs₁ ∷ y)) (map-tail-drop n xs) ⟩
+      refl
+
+  map-head-split : {m q : ℕ} → {t : Set} → (n : ℕ) → (xss : Vec (Vec t (n + n * m)) q) →
+                    map head (map (split n {suc m}) xss) ≡ map (take n {n * m}) xss
+  map-head-split n [] = refl
+  map-head-split n (xs ∷ xss) = cong (take n xs ∷_) (map-head-split n xss)
+
+  map-tail-split : {m q : ℕ} → {t : Set} → (n : ℕ) → (xss : Vec (Vec t (n + n * m)) q) →
+                   map tail (map (split n {suc m}) xss) ≡ map (split n) (map (drop n) xss)
+  map-tail-split n [] = refl
+  map-tail-split n (xs ∷ xss) = cong (split n (drop n xs) ∷_) (map-tail-split n xss)
+
+  lem₃ : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n + n * m)) q) →
+         map transpose (transpose (map (λ xs → take n {n * m} xs ∷ split n {m} (drop n xs)) xsss)) ≡
+         transpose (map (take n {n * m}) xsss) ∷ map transpose (transpose (map (split n) (map (drop n) xsss)))
+  lem₃ n [] = refl
+  lem₃ n (xss ∷ xsss) = cong₂ (λ x y → transpose (take n xss ∷ x) ∷ map transpose (transpose (split n (drop n xss) ∷ y)))
+                        (map-head-split n xsss) (map-tail-split n xsss)
 
   transposeBeforeSplit : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n * m)) q) →
                          split n {m} (transpose xsss) ≡
@@ -288,8 +365,12 @@ module lift.MovementRules where
   transposeBeforeSplit {suc m} n xsss =
     begin
       take n (transpose xsss) ∷ split n (drop n (transpose xsss))
-    ≡⟨⟩
-      {!!}
+    ≡⟨ cong (_∷ split n (drop n (transpose xsss))) (take-transpose n xsss) ⟩
+      transpose (map (take n) xsss) ∷ split n (drop n (transpose xsss))
+    ≡⟨ cong (λ y → transpose (map (take n) xsss) ∷ split n y) (drop-transpose n xsss) ⟩
+      transpose (map (take n) xsss) ∷ split n (transpose (map (drop n) xsss))
+    ≡⟨ cong (transpose (map (take n) xsss) ∷_) (transposeBeforeSplit n (map (drop n) xsss)) ⟩
+      sym (lem₃ n xsss)
 
   {- Transpose + Slide -}
   transposeBeforeSlide : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
