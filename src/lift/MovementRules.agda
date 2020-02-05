@@ -358,8 +358,7 @@ module lift.MovementRules where
                         (map-head-split n xsss) (map-tail-split n xsss)
 
   transposeBeforeSplit : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n * m)) q) →
-                         split n {m} (transpose xsss) ≡
-                         map transpose (transpose (map (split n {m}) xsss))
+                         split n {m} (transpose xsss) ≡ map transpose (transpose (map (split n {m}) xsss))
   transposeBeforeSplit {zero} n [] = refl
   transposeBeforeSplit {zero} n (xss ∷ xsss) = refl
   transposeBeforeSplit {suc m} n xsss =
@@ -371,6 +370,20 @@ module lift.MovementRules where
       transpose (map (take n) xsss) ∷ split n (transpose (map (drop n) xsss))
     ≡⟨ cong (transpose (map (take n) xsss) ∷_) (transposeBeforeSplit n (map (drop n) xsss)) ⟩
       sym (lem₃ n xsss)
+
+  sym-lem₄ : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n * m)) q) →
+             map transpose (split n (transpose xsss)) ≡ transpose (map (split n {m}) xsss)
+  sym-lem₄ n xsss =
+    begin
+      map transpose (split n (transpose xsss))
+    ≡⟨ cong (map transpose) (transposeBeforeSplit n xsss) ⟩
+      map transpose (map transpose (transpose (map (split n) xsss)))
+    ≡⟨ double-map-transpose (transpose (map (split n) xsss)) ⟩
+      refl
+
+  mapSplitBeforeTranspose : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n * m)) q) →
+                            transpose (map (split n {m}) xsss) ≡ map transpose (split n (transpose xsss))
+  mapSplitBeforeTranspose n xsss = sym (sym-lem₄ n xsss)
 
   {- Transpose + Slide -}
   transposeBeforeSlide : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
