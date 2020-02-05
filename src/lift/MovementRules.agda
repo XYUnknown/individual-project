@@ -385,6 +385,22 @@ module lift.MovementRules where
                             transpose (map (split n {m}) xsss) ≡ map transpose (split n (transpose xsss))
   mapSplitBeforeTranspose n xsss = sym (sym-lem₄ n xsss)
 
+  sym-lem₅ : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) q) (n * m)) →
+             transpose (map transpose (split n xsss)) ≡  map (split n {m}) (transpose xsss)
+  sym-lem₅ n xsss =
+    begin
+      transpose (map transpose (split n xsss))
+    ≡⟨ cong (λ y → transpose (map transpose (split n y))) (sym (identity₃ xsss)) ⟩
+      transpose (map transpose (split n (transpose (transpose xsss))))
+    ≡⟨ cong transpose (sym-lem₄ n (transpose xsss)) ⟩
+      transpose (transpose (map (split n) (transpose xsss)))
+    ≡⟨ identity₃ (map (split n) (transpose xsss)) ⟩
+      refl
+
+  transposeBeforeMapSplit : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) q) (n * m)) →
+                            map (split n {m}) (transpose xsss) ≡ transpose (map transpose (split n xsss))
+  transposeBeforeMapSplit n xsss = sym (sym-lem₅ n xsss)
+
   {- Transpose + Slide -}
   transposeBeforeSlide : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
                          slide {n} sz sp (transpose xsss) ≡
