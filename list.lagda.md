@@ -210,7 +210,7 @@ module lift.MovementRules where
                    join (join xsss) ≅ join (map join xsss)
   ```
 
-* Transpose + Split (_WIP_)
+* Transpose + Split
   ```agda
   transposeBeforeSplit : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n * m)) q) →
                        split n {m} (transpose xsss) ≡
