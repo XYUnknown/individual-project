@@ -225,7 +225,7 @@ module lift.MovementRules where
                             map (split n {m}) (transpose xsss) ≡ transpose (map transpose (split n xsss))
   ```
 
-* Transpose + Slide (_WIP_)
+* Transpose + Slide
   ```agda
   transposeBeforeSlide : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
                          slide {n} sz sp (transpose xsss) ≡
