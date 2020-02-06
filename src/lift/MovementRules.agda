@@ -402,10 +402,56 @@ module lift.MovementRules where
   transposeBeforeMapSplit n xsss = sym (sym-lem₅ n xsss)
 
   {- Transpose + Slide -}
+  map-head-id : {n m : ℕ} → {t : Set} → (xss : Vec (Vec t m) n) →
+                map head (map (λ xs → xs ∷ []) xss) ≡ xss
+  map-head-id [] = refl
+  map-head-id (xss₁ ∷ xss) = cong (xss₁ ∷_) (map-head-id xss)
+
+  map-head-slide : {n m : ℕ} → {t : Set} → (sz sp : ℕ) → (xss : Vec (Vec t (suc (sp + (sz + (n + n * sp))))) m) →
+                   map head (map (slide {suc n} sz sp) xss) ≡ map (take sz {suc (sp + (n + n * sp))}) xss
+  map-head-slide sz sp [] = refl
+  map-head-slide sz sp (xss₁ ∷ xss) = cong (take sz xss₁ ∷_) (map-head-slide sz sp xss)
+
+  map-tail-slide : {n m : ℕ} → {t : Set} → (sz sp : ℕ) → (xss : Vec (Vec t (suc (sp + (sz + (n + n * sp))))) m) →
+                   map tail (map (slide {suc n} sz sp) xss) ≡ map (slide sz sp) (map (drop (suc sp)) xss)
+  map-tail-slide sz sp [] = refl
+  map-tail-slide sz sp (xss₁ ∷ xss) = cong (slide sz sp (drop (suc sp) xss₁) ∷_) (map-tail-slide sz sp xss)
+
+  lem₄ : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (suc (sp + (sz + (n + n * sp))))) m) →
+         map transpose (transpose (map (λ xs → take sz {suc (sp + (n * suc sp))} xs ∷ slide {n} sz sp (drop (suc sp) xs)) xsss)) ≡
+         transpose (map (take sz {suc (sp + (n + n * sp))}) xsss) ∷ map transpose (transpose (map (slide sz sp) (map (drop (suc sp)) xsss)))
+  lem₄ sz sp [] = refl
+  lem₄ {n} sz sp (xss ∷ xsss) =
+    begin
+      transpose (take sz {suc (sp + n * suc sp)} xss ∷ map head (map (slide sz sp) xsss)) ∷
+      transpose (head (slide {n} sz sp (drop (suc sp) xss)) ∷ map head (map tail (map (slide sz sp) xsss))) ∷
+      map transpose (transpose (tail (slide sz sp (drop (suc sp) xss)) ∷ map tail (map tail (map (slide sz sp) xsss))))
+    ≡⟨ cong (λ y → transpose (take sz {suc (sp + n * suc sp)} xss ∷ y) ∷
+       transpose (head (slide {n} sz sp (drop (suc sp) xss)) ∷ map head (map tail (map (slide sz sp) xsss))) ∷
+       map transpose (transpose (tail (slide sz sp (drop (suc sp) xss)) ∷ map tail (map tail (map (slide sz sp) xsss)))))
+       (map-head-slide sz sp xsss) ⟩
+      transpose (take sz xss ∷ map (take sz) xsss) ∷
+      transpose (head (slide {n} sz sp (drop (suc sp) xss)) ∷ map head (map tail (map (slide sz sp) xsss))) ∷
+      map transpose (transpose (tail (slide sz sp (drop (suc sp) xss)) ∷ map tail (map tail (map (slide sz sp) xsss))))
+    ≡⟨ cong₂ (λ x y → transpose (take sz xss ∷ map (take sz) xsss) ∷
+       transpose (head (slide {n} sz sp (drop (suc sp) xss)) ∷ map head x) ∷
+       map transpose (transpose (tail (slide sz sp (drop (suc sp) xss)) ∷ map tail y)))
+       (map-tail-slide sz sp xsss) (map-tail-slide sz sp xsss) ⟩
+      refl
+
   transposeBeforeSlide : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
-                         slide {n} sz sp (transpose xsss) ≡
-                         map transpose (transpose (map (slide {n} sz sp) xsss))
-  transposeBeforeSlide {n} {m} sz sp xsss = {!!}
+                         slide {n} sz sp (transpose xsss) ≡ map transpose (transpose (map (slide {n} sz sp) xsss))
+  transposeBeforeSlide {zero} sz sp [] = refl
+  transposeBeforeSlide {zero} sz sp (xss ∷ xsss) = cong (λ y → transpose (xss ∷ y) ∷ []) (sym (map-head-id xsss))
+  transposeBeforeSlide {suc n} sz sp xsss =
+    begin
+      take sz (transpose xsss) ∷ slide sz sp (drop (suc sp) (transpose xsss))
+    ≡⟨ cong₂ (λ x y → x ∷ slide sz sp y) (take-transpose sz xsss) (drop-transpose (suc sp) xsss) ⟩
+      transpose (map (take sz) xsss) ∷ slide sz sp (transpose (map (drop (suc sp)) xsss))
+    ≡⟨ cong (transpose (map (take sz) xsss) ∷_) (transposeBeforeSlide sz sp (map (drop (suc sp)) xsss)) ⟩
+      transpose (map (take sz) xsss) ∷ map transpose (transpose (map (slide sz sp) (map (drop (suc sp)) xsss)))
+    ≡⟨ sym (lem₄ sz sp xsss)⟩
+      refl
 
   {- Join + Join -}
   joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
