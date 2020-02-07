@@ -491,3 +491,9 @@ module lift.MovementRules where
     ≅⟨ hcong′ (Vec t) (sym (*-assoc o m n)) (λ y → join xss ++ y) (joinBeforeJoin xsss) ⟩
      join xss ++ join (map join xsss)
     h∎
+
+  mapJoinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                      join (map join xsss) ≅ join (join xsss)
+  mapJoinBeforeJoin xsss = hsym (joinBeforeJoin xsss)
+
+  {- Split + Slide -}
