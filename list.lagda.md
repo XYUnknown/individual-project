@@ -213,8 +213,8 @@ module lift.MovementRules where
 * Transpose + Split
   ```agda
   transposeBeforeSplit : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n * m)) q) →
-                       split n {m} (transpose xsss) ≡
-                       map transpose (transpose (map (split n {m}) xsss))
+                         split n {m} (transpose xsss) ≡
+                         map transpose (transpose (map (split n {m}) xsss))
   ```
   ```agda
   mapSplitBeforeTranspose : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (n * m)) q) →
@@ -234,7 +234,6 @@ module lift.MovementRules where
   ```agda
   mapSlideBeforeTranspose : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
                             transpose (map (slide {n} sz sp) xsss) ≡ map transpose (slide sz sp (transpose xsss))
-  mapSlideBeforeTranspose sz sp xsss = sym (sym-lem₆ sz sp xsss)
   ```
   ```agda
   transposeBeforeMapSlide : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) m) (sz + n * (suc sp))) →
