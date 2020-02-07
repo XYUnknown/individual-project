@@ -209,6 +209,10 @@ module lift.MovementRules where
   joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
                    join (join xsss) ≅ join (map join xsss)
   ```
+  ```agda
+  mapJoinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+                      join (map join xsss) ≅ join (join xsss)
+  ```
 
 * Transpose + Split
   ```agda
