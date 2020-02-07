@@ -497,3 +497,11 @@ module lift.MovementRules where
   mapJoinBeforeJoin xsss = hsym (joinBeforeJoin xsss)
 
   {- Split + Slide -}
+  -- split k (slide sz sp xs) ≡ map (slide sz sp) (slide (k + sz - sp) k xs)
+  -- we choose k = (suc m) * sp
+  -- for some reason i'm not able to declare it
+  {-
+  slideBeforeSplit : (sz sp : ℕ) → {n m : ℕ} → {t : Set} → (xs : Vec t (sz + ((suc m) * sp * n) * (suc sp))) →
+                     split ((suc m) * sp) (slide sz sp xs) ≡ map (slide sz sp) (slide (sz + m * sp) ((suc m) * sp) xs)
+  slideBeforeSplit = ?
+  -}
