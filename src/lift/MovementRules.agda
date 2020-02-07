@@ -453,6 +453,32 @@ module lift.MovementRules where
     ≡⟨ sym (lem₄ sz sp xsss)⟩
       refl
 
+  sym-lem₆ : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
+             map transpose (slide sz sp (transpose xsss)) ≡ transpose (map (slide {n} sz sp) xsss)
+  sym-lem₆ sz sp xsss =
+    begin
+      map transpose (slide sz sp (transpose xsss))
+    ≡⟨ cong (map transpose) (transposeBeforeSlide sz sp xsss) ⟩
+      double-map-transpose (transpose (map (slide sz sp) xsss))
+
+  mapSlideBeforeTranspose : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
+                            transpose (map (slide {n} sz sp) xsss) ≡ map transpose (slide sz sp (transpose xsss))
+  mapSlideBeforeTranspose sz sp xsss = sym (sym-lem₆ sz sp xsss)
+
+  sym-lem₇ : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) m) (sz + n * (suc sp))) →
+             transpose (map transpose (slide sz sp xsss)) ≡ map (slide {n} sz sp) (transpose xsss)
+  sym-lem₇ sz sp xsss =
+    begin
+      transpose (map transpose (slide sz sp xsss))
+    ≡⟨ cong (λ y → transpose (map transpose (slide sz sp y))) (sym (identity₃ xsss)) ⟩
+      transpose (map transpose (slide sz sp (transpose (transpose xsss))))
+    ≡⟨ cong (λ y → transpose y) (sym-lem₆ sz sp (transpose xsss)) ⟩
+      identity₃ (map (slide sz sp) (transpose xsss))
+
+  transposeBeforeMapSlide : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) m) (sz + n * (suc sp))) →
+                            map (slide {n} sz sp) (transpose xsss) ≡ transpose (map transpose (slide sz sp xsss))
+  transposeBeforeMapSlide sz sp xsss = sym (sym-lem₇ sz sp xsss)
+
   {- Join + Join -}
   joinBeforeJoin : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
                    join (join xsss) ≅ join (map join xsss)
