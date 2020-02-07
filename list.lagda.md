@@ -231,6 +231,15 @@ module lift.MovementRules where
                          slide {n} sz sp (transpose xsss) ≡
                          map transpose (transpose (map (slide {n} sz sp) xsss))
   ```
+  ```agda
+  mapSlideBeforeTranspose : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
+                            transpose (map (slide {n} sz sp) xsss) ≡ map transpose (slide sz sp (transpose xsss))
+  mapSlideBeforeTranspose sz sp xsss = sym (sym-lem₆ sz sp xsss)
+  ```
+  ```agda
+  transposeBeforeMapSlide : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) m) (sz + n * (suc sp))) →
+                            map (slide {n} sz sp) (transpose xsss) ≡ transpose (map transpose (slide sz sp xsss))
+  ```
 
 ## Stencil Rewrite Rules
 ### Module
