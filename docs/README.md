@@ -7,3 +7,6 @@ Here is a list of things the developer is ~~struggeling with~~ interested in:
 3. Agda `REWRITE` pragma
 4. Proof irrelevence and without-K
 5. Heterogeneous equality
+
+## Posts
+1. A list of proven rewrite rules: [List](https://xyunknown.github.io/individual-project/list.lagda)
