@@ -1,6 +1,7 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 {- TODO: remove the pragma when all the holes are filled -}
 {-# OPTIONS --rewriting --prop #-}
+{-# OPTIONS --without-K #-}
 module lift.Primitives where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; _≢_; refl; cong; sym; subst)
