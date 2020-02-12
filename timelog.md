@@ -180,3 +180,38 @@
 ### 24 Jan 2020
 * *1 hour* proving movement rules `mapTransposeBeforeJoin` and `mapJoinBeforeTranspose`
 * *0.5 hours* simplify existing proof, clean up lemmas
+
+## Week 15
+### 28 Jan 2020
+* *1 hour* clean up repository
+
+## Week 16
+### 03 Feb 2020
+* *3 hours* researching about heterogeneous equality and add proof for `JoinBeforeJoin`
+* *0.5 hours* redefining `map_n`
+
+### 04 Feb 2020
+* *0.5 hours* adding definition of `slide_2`
+* *3 hours* proving tiling rule, finished base case
+
+### 05 Feb 2020
+* *1 hour* cleaning up repo and add expamle for proving heterogeneous equality
+* *5 hours* adding proofs for `transposeBeforeMapSplit`, `mapSplitBeforeTranspose` and `transposeBeforeSplit`
+
+### 06 Feb 2020
+* *2 hours* adding proof for `transposeBeforeSlide`
+
+### 07 Feb 2020
+* *0.5 hours* adding proofs for `transposeBeforeMapSlide` and `mapSlideBeforeTranspose`
+* *0.5 hour* adding declaration for `slideBeforeSplit`
+* *0.5 hours* adding documentations and cleanning up code
+
+### Week 17
+### 10 Feb 2020
+* *2 hours* Adding proofs for lemmas for proving tiling rule
+
+### 11 Feb 2020
+* *2 hours* documenting code and add github page for project
+
+### 12 Feb 2020
+* *0.5 hours* Updating time log
