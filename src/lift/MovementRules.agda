@@ -147,6 +147,15 @@ module lift.MovementRules where
                            transpose (map (map f) xss) ≡ map (map f) (transpose xss)
   transposeBeforeMapMapF f xss = sym (mapMapFBeforeTranspose f xss)
 
+  {- Split -}
+  splitBeforeMapMapF : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
+                       map (map f) (split n {m} xs) ≡ split n {m} (map f xs)
+  splitBeforeMapMapF n {m} f xs = map-split n {m} f xs
+
+  mapFBeforeSplit : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
+                    split n {m} (map f xs) ≡ map (map f) (split n {m} xs)
+  mapFBeforeSplit n {m} f xs = sym (splitBeforeMapMapF n f xs)
+
   {- Slide -}
   slideBeforeMapMapF : {n : ℕ} → (sz : ℕ) → (sp : ℕ) → {s t : Set} →
                        (f : s → t) → (xs : Vec s (sz + n * (suc sp))) →
