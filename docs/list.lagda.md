@@ -139,6 +139,7 @@ module lift.AlgorithmicRules where
   partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (n * suc m)) →
                       (join ∘ map (partRed n {zero} M) ∘ split n {suc m}) xs ≡ partRed n {m} M xs
   ```
+
 ## Movement Rewrite Rules
 ### Module
 Source: `/individual-project/src/lift/MovementRules.adga`
@@ -155,6 +156,17 @@ module lift.MovementRules where
   ```agda
   transposeBeforeMapMapF : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s m) n) →
                            transpose (map (map f) xss) ≡ map (map f) (transpose xss)
+  ```
+
+* Split
+  ```agda
+  splitBeforeMapMapF : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
+                       map (map f) (split n {m} xs) ≡ split n {m} (map f xs)
+  ```
+  
+  ```agda
+  mapFBeforeSplit : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
+                    split n {m} (map f xs) ≡ map (map f) (split n {m} xs)
   ```
 
 * Slide
