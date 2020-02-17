@@ -73,6 +73,10 @@ module lift.Primitives where
   slide₂ : {n m : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec (Vec t (sz + n * (suc sp))) (sz + m * (suc sp)) →
            Vec (Vec (Vec (Vec t sz) sz) (suc n)) (suc m)
   ```
+* padCst₂
+  ```agda
+  padCst₂ : {n m : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec (Vec t n) m → Vec (Vec t (l + n + r)) (l + m + r)
+  ```
 
 ## Algorithmic Rewrite Rules
 ### Module
