@@ -167,6 +167,10 @@ module lift.Primitives where
   padCst : {n : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n + r)
   padCst l r x xs = padCstʳ r x (padCstˡ l x xs)
 
+  -- The type of the constant value should match the type of the elements in the Vec
+  padCst₂ : {n m : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec (Vec t n) m → Vec (Vec t (l + n + r)) (l + m + r)
+  padCst₂ l r x xs xss = map (padCst l r x) (padCst l r xs xss)
+
   {- this breaks agda -}
   -- padCst : {n : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n + r)
   -- padCst zero zero x xs = xs
