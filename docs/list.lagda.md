@@ -75,7 +75,7 @@ module lift.Primitives where
   ```
 * padCst₂
   ```agda
-  padCst₂ : {n m : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec (Vec t n) m → Vec (Vec t (l + n + r)) (l + m + r)
+  padCst₂ : {n m : ℕ} → (l r : ℕ) → {t : Set} → t → Vec (Vec t n) m → Vec (Vec t (l + n + r)) (l + m + r)
   ```
 
 ## Algorithmic Rewrite Rules
