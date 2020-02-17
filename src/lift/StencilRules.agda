@@ -78,16 +78,7 @@ module lift.StencilRules where
                    slide {n + m * (suc n)} sz sp (subst (Vec t) (lem₁ n m sz sp) (drop (suc (n + sp + n * sp)) xs)) ≅
                    slide {n + (suc m) * (suc n)} sz sp (subst (Vec t) (lem₁ n (suc m) sz sp) xs)
 
-  {-
-  slideJoin : {n m : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) →
-              (xs : Vec t (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
-              join (map (λ (tile : Vec t (sz + n * (suc sp))) →
-              slide {n} sz sp tile) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≅
-              slide {n + m * (suc n)} sz sp xs
-  slideJoin {n} {zero} {t} sz sp xs = {!!}
-  slideJoin {n} {suc m} {t} sz sp xs = {!!}
-  -}
-
+  -- Adapted from paper https://www.lift-project.org/publications/2018/hagedorn18Stencils.pdf
   slideJoin : {n m : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
               join (map (λ (tile : Vec t (sz + n * (suc sp))) →
               slide {n} sz sp tile) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≅
@@ -100,7 +91,7 @@ module lift.StencilRules where
     h≡⟨ cong (λ y → slide sz sp y) (lem₃ {n} {sz} {sp} xs) ⟩
       slide sz sp (subst (Vec t) (lem₁ n zero sz sp) xs)
     h∎
-  slideJoin {n} {suc m} {t} sz sp xs = ?
+  slideJoin {n} {suc m} {t} sz sp xs = {!!}
   {-
     hbegin
       slide {n} sz sp (take (sz + n * suc sp) xs) ++

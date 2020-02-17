@@ -54,9 +54,6 @@ module lift.Primitives where
     ≡⟨ +-assoc n m (o * suc n) ⟩
       refl
 
-  -- postulate lem₁ : (n m sz sp : ℕ) →
-  --                 sz + n * (suc sp) + m * suc (n + sp + n * sp) ≡ sz + (n + m * (suc n)) * (suc sp)
-
   {-# REWRITE *zero *suc +zero +suc +comm₁ #-}
 
   {- primitive map -}
