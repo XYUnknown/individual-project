@@ -43,18 +43,19 @@ module lift.Primitives where
     ≡⟨ cong (_+ n) (+-comm m 1) ⟩
       refl
 
-  +comm₁ : {m n o : ℕ} → m + (n + o * suc n) ≡ n + (m + o * suc n)
-  +comm₁ {m} {n} {o} =
+  rewrite-for-slide-partRed : {m n o : ℕ} → n + (m + (o + o * n)) ≡ m + (n + (o + o * n))
+  rewrite-for-slide-partRed {m} {n} {o} =
     begin
-      m + (n + o * suc n)
-    ≡⟨ sym (+-assoc m n (o * suc n)) ⟩
-      m + n + o * suc n
-    ≡⟨ cong (_+ o * suc n) (+-comm m n ) ⟩
-      n + m + o * suc n
-    ≡⟨ +-assoc n m (o * suc n) ⟩
+      n + (m + (o + o * n))
+    ≡⟨ sym (+-assoc n m (o + o * n)) ⟩
+      n + m + (o + o * n)
+    ≡⟨ cong (_+ (o + o * n)) (+-comm n m) ⟩
+      m + n + (o + o * n)
+    ≡⟨ +-assoc m n (o + o * n) ⟩
       refl
 
-  {-# REWRITE *zero *suc +zero +suc +comm₁ #-}
+  postulate bar : {n m sz sp : ℕ} → (sz + (n + (m + m * n) + (n + (m + m * n)) * sp)) ≡ sz + n * (suc sp) + m * suc (n + sp + n * sp)
+  {-# REWRITE *zero *suc +zero +suc rewrite-for-slide-partRed bar #-}
 
   {- primitive map -}
   map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
@@ -174,7 +175,7 @@ module lift.Primitives where
   padCst₂ : {n m : ℕ} → (l r : ℕ) → {t : Set} → t → Vec (Vec t n) m → Vec (Vec t (l + n + r)) (l + m + r)
   padCst₂ {n} l r x xs = map (padCst l r x) (padCst l r (repeat x n) xs)
 
-  {- this breaks agda -}
+  {- this breaks agda, issues fixed in agda v2.6.1 -}
   -- padCst : {n : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n + r)
   -- padCst zero zero x xs = xs
   -- padCst zero (suc r) x xs = padCst zero r x (xs ++ [ x ])
