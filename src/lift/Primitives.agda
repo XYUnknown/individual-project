@@ -54,7 +54,9 @@ module lift.Primitives where
     ≡⟨ +-assoc m n (o + o * n) ⟩
       refl
 
-  {-# REWRITE *zero *suc +zero +suc rewrite-for-slide-partRed #-}
+  postulate bar : {n m sz sp : ℕ} → (sz + (n + (m + m * n) + (n + (m + m * n)) * sp)) ≡ sz + n * (suc sp) + m * suc (n + sp + n * sp)
+
+  {-# REWRITE *zero *suc +zero +suc rewrite-for-slide-partRed bar #-}
 
   {- primitive map -}
   map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
