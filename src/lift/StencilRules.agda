@@ -77,12 +77,19 @@ module lift.StencilRules where
                    slide {n} sz sp (take (sz + n * suc sp) {(suc m) * suc (n + sp + n * sp)} xs) ++
                    slide {n + m * (suc n)} sz sp (subst (Vec t) (lem₁ n m sz sp) (drop (suc (n + sp + n * sp)) xs)) ≅
                    slide {n + (suc m) * (suc n)} sz sp (subst (Vec t) (lem₁ n (suc m) sz sp) xs)
+  {-
+    type of slide {n} sz sp tile) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) : Vec (Vec t sz) (suc (m + (n + n * m)))
+    type of slide {n + m * (suc n)} sz sp xs : Vec (Vec t sz) (suc (n + (m + m * n)))
+    proving foo : suc (m + (n + n * m)) ≡ suc (m + (n + n * m)) conflicts with rewrites +zero +suc and *zero *suc
+    potentially the pattern reduces from lhs to rhs then back to lhs and loops forever
+    therefore the compiler hangs
+  -}
+  postulate foo : {n m : ℕ} → suc (n + (m + m * n)) ≡ suc (m + (n + n * m))
 
   -- Adapted from paper https://www.lift-project.org/publications/2018/hagedorn18Stencils.pdf
   slideJoin : {n m : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
               join (map (λ (tile : Vec t (sz + n * (suc sp))) →
-              slide {n} sz sp tile) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≅
-              slide {n + m * (suc n)} sz sp xs
+              slide {n} sz sp tile) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≅ slide {n + m * (suc n)} sz sp xs
   slideJoin {n} {zero} sz sp xs =
     hbegin
       slide sz sp xs ++ []
@@ -90,5 +97,11 @@ module lift.StencilRules where
       slide sz sp xs
     h∎
 
-  slideJoin {n} {suc m} sz sp xs = {!!}
-
+  slideJoin {n} {suc m} {t} sz sp xs =
+    hbegin
+      slide {n} sz sp (take (sz + n * suc sp) xs) ++
+      join (map (slide {n} sz sp)
+      (slide {m} (sz + n * suc sp) (n + sp + n * sp) (drop (suc (n + sp + n * sp)) xs)))
+    ≅⟨ hcong′ (Vec (Vec t sz)) (lem₂ n m) (λ y → slide {n} sz sp (take (sz + n * suc sp) {(suc m) * suc (n + sp + n * sp)} xs) ++ y)
+      (slideJoin {n} {m} sz sp (drop (suc (n + sp + n * sp)) xs)) ⟩
+      {!!}

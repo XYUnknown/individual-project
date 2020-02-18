@@ -54,6 +54,9 @@ module lift.Primitives where
     ≡⟨ +-assoc m n (o + o * n) ⟩
       refl
 
+  {- this cannot be rewritten beacuse of *zero *suc +zero +suc, rewrting it causes the compiler hangs -}
+  postulate foo : {n m : ℕ} → n + (m + m * n) ≡ m + (n + n * m)
+
   postulate bar : {n m sz sp : ℕ} → (sz + (n + (m + m * n) + (n + (m + m * n)) * sp)) ≡ sz + n * (suc sp) + m * suc (n + sp + n * sp)
 
   {-# REWRITE *zero *suc +zero +suc rewrite-for-slide-partRed bar #-}
