@@ -27,5 +27,7 @@ module example.PadCstIssue where
   padCst zero zero x xs = xs
   padCst zero (suc r) x xs = padCst zero r x (xs ++ [ x ])
   padCst (suc l) zero x xs = padCst l zero x ([ x ] ++ xs)
-  {- the bug occurs here -}
+  {- the bug occurs here
+     Agda v2.6.1 fixes this issue
+  -}
   padCst (suc l) (suc r) x xs = padCst l r x ([ x ] ++ xs ++ [ x ])
