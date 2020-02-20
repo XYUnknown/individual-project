@@ -22,7 +22,9 @@ module lift.Primitives where
   *zero {zero} = refl
   *zero {suc m} = *zero {m}
 
-  postulate *id : {m : ℕ} → m * 1 ≡ m
+  *id : {m : ℕ} → m * 1 ≡ m
+  *id {zero} = refl
+  *id {suc m} = cong suc *id
 
   +zero : {m : ℕ} → m + zero ≡ m
   +zero {zero}  = refl
@@ -100,7 +102,14 @@ module lift.Primitives where
 
   {- primitive slide -}
   -- (suc sp) and (suc n), to ensure step > 0
-  postulate slide-lem : (n sz sp : ℕ) →  suc (sz + (sp + n * suc sp)) ≡ suc (sp + (sz + n * suc sp))
+  slide-lem : (n sz sp : ℕ) → suc (sz + (sp + n * suc sp)) ≡ suc (sp + (sz + n * suc sp))
+  slide-lem n sz sp =
+    begin
+      suc (sz + (sp + n * suc sp))
+    ≡⟨ cong (λ y → suc y) (sym (+-assoc sz sp (n * suc sp))) ⟩
+      suc (sz + sp + n * suc sp)
+    ≡⟨ cong (λ y → suc (y + n * suc sp)) (+-comm sz sp) ⟩
+      cong (λ y → suc y) (+-assoc sp sz (n * suc sp))
 
   slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (sz + n * (suc sp)) →
           Vec (Vec t sz) (suc n)
