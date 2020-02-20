@@ -1,6 +1,6 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 {- TODO: remove the pragma when all the holes are filled -}
-{-# OPTIONS --rewriting --prop #-}
+{-# OPTIONS --rewriting --prop --confluence-check #-}
 {-# OPTIONS --with-K #-}
 module lift.StencilRules where
   import Relation.Binary.PropositionalEquality as Eq
@@ -15,7 +15,7 @@ module lift.StencilRules where
   open Heq.≅-Reasoning using (_≅⟨_⟩_) renaming (begin_ to hbegin_; _≡⟨⟩_ to _h≡⟨⟩_; _≡⟨_⟩_ to _h≡⟨_⟩_; _∎ to _h∎)
   open import lift.HeterogeneousHelpers using (hcong′)
   open import lift.Primitives using (map; id; take; drop; split;
-    join; fill; head; tail; transpose; slide; cast)
+    join; fill; head; tail; transpose; slide-lem; slide; cast)
   open import lift.Helpers
 
   {- Tiling -}
@@ -38,8 +38,11 @@ module lift.StencilRules where
          (xs : Vec t (suc (sz + n * suc sp + (n + sp + n * sp + m * suc (n + sp + n * sp))))) →
          slide {n} sz sp (take (sz + n * suc sp) {suc (n + sp + n * sp + m * suc (n + sp + n * sp))} xs) ++
          slide {n + m * suc n} sz sp (cast (lem₁ n m sz sp) (drop (suc (n + sp + n * sp)) (cast (lem₃ n m sz sp) xs))) ≡
-         slide {suc (n + (n + m * suc n))} sz sp (cast (lem₁ n (suc m) sz sp) xs)
-  lem₄ sz sp xs = {!!}
+         take sz {suc (sp + (n + (n + m * suc n)) * suc sp)} (cast (lem₁ n (suc m) sz sp) xs) ∷
+         slide {n + (n + m * suc n)} sz sp (drop (suc sp) {sz + (n + (n + m * suc n)) * suc sp}
+         (cast (slide-lem (n + (n + m * suc n)) sz sp ) (cast (lem₁ n (suc m) sz sp) xs)))
+  lem₄ {zero} {m} sz sp xs = ?
+  lem₄ {suc n} {m} sz sp xs = ?
 
   -- Adapted from paper https://www.lift-project.org/publications/2018/hagedorn18Stencils.pdf
   slideJoin : {n m : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
@@ -62,5 +65,5 @@ module lift.StencilRules where
       (slideJoin {n} {m} sz sp (drop (suc (n + sp + n * sp)) (cast (lem₃ n m sz sp) xs)) ) ⟩
       slide {n} sz sp (take (sz + n * suc sp) xs) ++
       slide {n + m * suc n} sz sp (cast (lem₁ n m sz sp) (drop (suc (n + sp + n * sp)) (cast (lem₃ n m sz sp) xs)))
-    ≡⟨⟩
-      {!!}
+    ≡⟨ lem₄ {n} {m} sz sp xs ⟩
+      refl
