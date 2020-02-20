@@ -1,19 +1,19 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 {- TODO: remove the pragma when all the holes are filled -}
-{-# OPTIONS --rewriting --prop #-}
+{-# OPTIONS --rewriting --prop  --confluence-check #-}
 module lift.Helpers where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym; subst; cong₂)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
-  open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
+  open import Data.Nat using (ℕ; zero; suc; _+_; _*_; pred)
   open import Data.Nat.Properties using (*-distribʳ-+; +-assoc; *-distribˡ-+)
   open import Data.Product using (∃₂; _,_)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   import Relation.Binary.HeterogeneousEquality as Heq
-  open Heq using (_≅_) renaming (sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
+  open Heq using (_≅_; icong) renaming (sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
   open Heq.≅-Reasoning using (_≅⟨_⟩_) renaming (begin_ to hbegin_; _≡⟨⟩_ to _h≡⟨⟩_; _≡⟨_⟩_ to _h≡⟨_⟩_;  _∎ to _h∎)
   open import lift.HeterogeneousHelpers using (hcong′)
-  open import lift.Primitives using (map; id; take; drop; split; join; fill; head; tail; transpose; slide; reduceSeq; reduce; partRed)
+  open import lift.Primitives using (cast; map; id; take; drop; split; join; fill; head; tail; transpose; slide; reduceSeq; reduce; partRed)
 
   -- a vector with size zero is empty
   empty : {t : Set} → (xs : Vec t zero) → xs ≡ []
@@ -86,7 +86,7 @@ module lift.Helpers where
   join-++ {suc n} {m} {o} {t} (xs ∷ xs₁) xs₂ =
     hbegin
       xs ++ join (xs₁ ++ xs₂)
-    ≅⟨ hcong′ (Vec t) (*-distribˡ-+ o n m) (λ y → xs ++ y) (join-++ xs₁ xs₂) ⟩
+    ≅⟨ hcong′ (Vec t) (*-distribʳ-+ o n m) (λ y → xs ++ y) (join-++ xs₁ xs₂) ⟩
       xs ++ join xs₁ ++ join xs₂
     ≅⟨ hsym (++-assoc xs (join xs₁) (join xs₂)) ⟩
       (xs ++ join xs₁) ++ join xs₂
@@ -100,6 +100,10 @@ module lift.Helpers where
       x ∷ take n xs
     ≡⟨ cong (x ∷_) (take-all n xs) ⟩
       refl
+
+  map-cast : {m n : ℕ} {s t : Set} → (f : s → t) → (xs : Vec s m) → .(eq : m ≡ n) → map f (cast eq xs) ≡ cast eq (map f xs)
+  map-cast {zero} {zero} f [] eq = refl
+  map-cast {suc m} {suc n} f (x ∷ xs) eq = cong (f x ∷_) (map-cast {m} {n} f xs (cong pred eq))
 
   map-take : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
              map f (take n {m} xs) ≡ (take n {m} (map f xs))
@@ -115,7 +119,7 @@ module lift.Helpers where
   map-drop zero f xs = refl
   map-drop (suc n) f (x ∷ xs) = map-drop n f xs
 
-  map-split : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n * m)) →
+  map-split : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (m * n)) →
               map (map f) (split n {m} xs) ≡ split n {m} (map f xs)
   map-split n {zero} f xs = refl
   map-split n {suc m} f xs =
@@ -232,3 +236,32 @@ module lift.Helpers where
     ≡⟨ cong (λ y → transpose (drop n xs₁ ∷ y)) (map-tail-drop n xs) ⟩
       refl
 
+  fill-cast : {m n : ℕ} → {t : Set} → {xs : Vec t zero} → .(eq : m ≡ n) → cast eq (fill m xs) ≡ fill n []
+  fill-cast {zero} {zero} eq = refl
+  fill-cast {suc m} {suc n} {t} {[]} eq = cong ([] ∷_) (fill-cast {m} {n} (cong pred eq))
+
+  map-head-cast : {m m₁ n : ℕ} → {t : Set} → .(eq : suc m ≡ suc m₁) → (xs : Vec (Vec t (suc m)) (suc n)) →
+                  map head xs ≡ map head (map (cast eq) xs)
+  map-head-cast {zero} {zero} {zero} eq ((x ∷ []) ∷ []) = refl
+  map-head-cast {zero} {zero} {suc n} eq ((x ∷ []) ∷ xs₁) = cong (x ∷_) (map-head-cast eq xs₁)
+  map-head-cast {suc m} {suc m₁} {zero} eq ((x ∷ xs) ∷ []) = refl
+  map-head-cast {suc m} {suc m₁} {suc n} eq ((x ∷ xs) ∷ xs₁) = cong (x ∷_) (map-head-cast eq xs₁)
+
+  map-tail-cast : {m m₁ n : ℕ} → {t : Set} → .(eq : suc m ≡ suc m₁) → (xs : Vec (Vec t (suc m)) (suc n)) →
+                  map (cast (cong pred eq)) (map tail xs) ≡ map tail (map (cast eq) xs)
+  map-tail-cast {zero} {zero} {zero} eq ((x ∷ []) ∷ []) = refl
+  map-tail-cast {zero} {zero} {suc n} eq ((x ∷ []) ∷ xs₁) = cong ([] ∷_) (map-tail-cast eq xs₁)
+  map-tail-cast {suc m} {suc m₁} {zero} eq ((x ∷ xs) ∷ []) = refl
+  map-tail-cast {suc m} {suc m₁} {suc n} eq ((x ∷ xs) ∷ xs₁) = cong (cast (cong pred eq) xs ∷_) (map-tail-cast eq xs₁)
+
+  transpose-cast : {m m₁ n : ℕ} → {t : Set} → .(eq : m ≡ m₁) → (xs : Vec (Vec t m) n) → cast eq (transpose xs) ≡ transpose (map (cast eq) xs)
+  transpose-cast {zero} {zero} {zero} eq [] = refl
+  transpose-cast {zero} {zero} {suc n} eq xs = refl
+  transpose-cast {suc m} {suc m₁} {zero} eq [] = cong ([] ∷_) (fill-cast {m} {m₁} (cong pred eq))
+  transpose-cast {suc m} {suc m₁} {suc n} eq xs =
+    begin
+      map head xs ∷ cast _ (transpose (map tail xs))
+    ≡⟨ cong (map head xs ∷_) (transpose-cast {m} {m₁} (cong pred eq) (map tail xs) ) ⟩
+      map head xs ∷ transpose (map (cast _) (map tail xs))
+    ≡⟨ cong₂ (λ x y → x ∷ transpose y) (map-head-cast eq xs) (map-tail-cast eq xs) ⟩
+      refl
