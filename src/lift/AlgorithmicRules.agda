@@ -79,15 +79,15 @@ module lift.AlgorithmicRules where
     ≡⟨ sym (reduce-++ M (take n {m} xs) (drop n xs)) ⟩
       refl
 
-  -- used in proving partialReduction₂ ml
-  partRed-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs₁ : Vec t n) → (xs₂ : Vec t (n * suc m)) →
+  -- used in proving partialReduction₂
+  partRed-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → (xs₁ : Vec t n) → (xs₂ : Vec t (suc m * n)) →
                partRed n {suc m} M (xs₁ ++ xs₂) ≡ partRed n M xs₁ ++ partRed n {m} M xs₂
   partRed-++ zero {m} M [] [] = refl
   partRed-++ (suc n) {m} M xs₁ xs₂ =
     begin
-      reduce M (take (suc n) {suc n * suc m} (xs₁ ++ xs₂)) ∷
+      reduce M (take (suc n) {suc (n + m * suc n)} (xs₁ ++ xs₂)) ∷
       partRed (suc n) M (drop (suc n) (xs₁ ++ xs₂))
-    ≡⟨ cong (λ ys → (reduce M ys ∷ partRed (suc n) M (drop (suc n) (xs₁ ++ xs₂)))) (take-++ (suc n) {suc n * suc m} xs₁ xs₂) ⟩
+    ≡⟨ cong (λ ys → (reduce M ys ∷ partRed (suc n) M (drop (suc n) (xs₁ ++ xs₂)))) (take-++ (suc n) xs₁ xs₂) ⟩
       reduce M xs₁ ∷ partRed (suc n) M (drop (suc n) (xs₁ ++ xs₂))
     ≡⟨ cong (λ ys → (reduce M xs₁ ∷ partRed (suc n) M ys)) (drop-++ (suc n) xs₁ xs₂) ⟩
       refl
@@ -255,7 +255,7 @@ module lift.AlgorithmicRules where
     ∎
 
   {- Simplification rules -}
-  simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (n * m)) →
+  simplification₁ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (m * n)) →
                     (join ∘ split n {m}) xs ≡ xs
   simplification₁ n {zero} [] = refl
   simplification₁ n {suc m} xs =
@@ -281,7 +281,7 @@ module lift.AlgorithmicRules where
 
   {- Split-join rule -}
   splitJoin : {m : ℕ} → {s : Set} → {t : Set} →
-              (n : ℕ) → (f : s → t) → (xs : Vec s (n * m)) →
+              (n : ℕ) → (f : s → t) → (xs : Vec s (m * n)) →
               (join ∘ map (map f) ∘ split n {m}) xs ≡ map f xs
   splitJoin {m} n f xs =
     begin
@@ -295,7 +295,7 @@ module lift.AlgorithmicRules where
     ∎
 
   {- Reduction -}
-  reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (n * suc m)) →
+  reduction : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
               (reduce M ∘ partRed n {m} M) xs ≡ reduce M xs
   reduction {zero} zero M [] = let _⊕_ = _⊕_ M; ε = ε M in
     begin
@@ -322,14 +322,15 @@ module lift.AlgorithmicRules where
       refl
   reduction {suc m} (suc n) M xs = let _⊕_ = _⊕_ M; ε = ε M in
     begin
-      reduce M ([ reduce M (take (suc n) {suc (m + (n + n * m))} xs) ] ++ partRed (suc n) {m} M (drop (suc n) xs))
-    ≡⟨ sym (reduce-++ M [ reduce M (take (suc n) {suc (m + (n + n * m) )} xs) ] (partRed (suc n) {m} M (drop (suc n) xs))) ⟩
-      reduce M [ reduce M (take (suc n) {suc (m + (n + n * m))} xs) ] ⊕ reduce M (partRed (suc n) {m} M (drop (suc n) xs))
-    ≡⟨ cong (_⊕ reduce M (partRed (suc n) {m} M (drop (suc n) xs))) (idʳ M (reduce M (take (suc n) {suc (m + (n + n * m))} xs))) ⟩
-      reduce M (take (suc n) {suc (m + (n + n * m))} xs) ⊕ reduce M (partRed (suc n) {m} M (drop (suc n) xs))
-    ≡⟨ cong (reduce M (take (suc n) {suc (m + (n + n * m))} xs) ⊕_) (reduction {m} (suc n) M (drop (suc n) xs)) ⟩
-      reduce M (take (suc n) {suc (m + (n + n * m))} xs) ⊕ reduce M (drop (suc n) {suc (m + (n + n * m))} xs)
-    ≡⟨ sym (reduce-take-drop (suc n) {suc (m + (n + n * m))} M xs) ⟩
+      reduce M ([ reduce M (take (suc n) {suc (n + (m * suc n))} xs) ] ++ partRed (suc n) {m} M (drop (suc n) xs))
+    ≡⟨ sym (reduce-++ M [ reduce M (take (suc n) {suc (n + (m * suc n))} xs) ] (partRed (suc n) {m} M (drop (suc n) xs))) ⟩
+      reduce M [ reduce M (take (suc n) {suc (n + (m * suc n))} xs) ] ⊕ reduce M (partRed (suc n) {m} M (drop (suc n) xs))
+    ≡⟨ cong (_⊕ reduce M (partRed (suc n) {m} M (drop (suc n) xs)))
+       (idʳ M (reduce M (take (suc n) {suc (n + (m * suc n))} xs))) ⟩
+      reduce M (take (suc n) {suc (n + (m * suc n))} xs) ⊕ reduce M (partRed (suc n) {m} M (drop (suc n) xs))
+    ≡⟨ cong (reduce M (take (suc n) {suc (n + (m * suc n))} xs) ⊕_) (reduction {m} (suc n) M (drop (suc n) xs)) ⟩
+      reduce M (take (suc n) {suc (n + (m * suc n))} xs) ⊕ reduce M (drop (suc n) {suc (n + (m * suc n))} xs)
+    ≡⟨ sym (reduce-take-drop (suc n) {suc (n + (m * suc n))} M xs) ⟩
       refl
 
   {- Partial Reduction -}
@@ -338,7 +339,7 @@ module lift.AlgorithmicRules where
   partialReduction₁ zero M [] = refl
   partialReduction₁ (suc n) M xs = refl
 
-  partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (n * suc m)) →
+  partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
                       (join ∘ map (partRed n {zero} M) ∘ split n {suc m}) xs ≡ partRed n {m} M xs
   partialReduction₂ {zero} zero M [] = refl
   partialReduction₂ {zero} (suc n) M xs =
@@ -362,3 +363,4 @@ module lift.AlgorithmicRules where
       partRed (suc n) {suc m} M (join {suc n} (split (suc n) {suc (suc m)} xs))
     ≡⟨ cong (partRed (suc n) M) (simplification₁ (suc n) {suc (suc m)} xs) ⟩
       refl
+

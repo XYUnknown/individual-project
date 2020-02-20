@@ -1,6 +1,6 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 {- TODO: remove the pragma when all the holes are filled -}
-{-# OPTIONS --rewriting --prop #-}
+{-# OPTIONS --rewriting --prop --confluence-check #-}
 {-# OPTIONS --without-K #-}
 module lift.Primitives where
   import Relation.Binary.PropositionalEquality as Eq
@@ -15,20 +15,14 @@ module lift.Primitives where
   open import Agda.Builtin.Equality.Rewrite
   open import lift.Operators using (CommAssocMonoid)
   open CommAssocMonoid
+  -- open import Debug.Trace using (trace)
 
   {- rewrites -}
   *zero : {m : ℕ} → m * zero ≡ zero
   *zero {zero} = refl
   *zero {suc m} = *zero {m}
 
-  *suc : {m n : ℕ} → m * (suc n) ≡ m + m * n
-  *suc {m} {n} =
-    begin
-      m * suc n
-    ≡⟨ *-distribˡ-+ m 1 n ⟩
-      m * 1 + m * n
-    ≡⟨ cong (_+ m * n) (*-identityʳ m) ⟩
-      refl
+  postulate *id : {m : ℕ} → m * 1 ≡ m
 
   +zero : {m : ℕ} → m + zero ≡ m
   +zero {zero}  = refl
@@ -43,23 +37,12 @@ module lift.Primitives where
     ≡⟨ cong (_+ n) (+-comm m 1) ⟩
       refl
 
-  rewrite-for-slide-partRed : {m n o : ℕ} → n + (m + (o + o * n)) ≡ m + (n + (o + o * n))
-  rewrite-for-slide-partRed {m} {n} {o} =
-    begin
-      n + (m + (o + o * n))
-    ≡⟨ sym (+-assoc n m (o + o * n)) ⟩
-      n + m + (o + o * n)
-    ≡⟨ cong (_+ (o + o * n)) (+-comm n m) ⟩
-      m + n + (o + o * n)
-    ≡⟨ +-assoc m n (o + o * n) ⟩
-      refl
+  {-# REWRITE *zero *id +zero +suc #-}
 
-  {- this cannot be rewritten beacuse of *zero *suc +zero +suc, rewrting it causes the compiler hangs -}
-  postulate foo : {n m : ℕ} → n + (m + m * n) ≡ m + (n + n * m)
-
-  postulate bar : {n m sz sp : ℕ} → (sz + (n + (m + m * n) + (n + (m + m * n)) * sp)) ≡ sz + n * (suc sp) + m * suc (n + sp + n * sp)
-
-  {-# REWRITE *zero *suc +zero +suc rewrite-for-slide-partRed bar #-}
+  {- cast a vector, adapted from cast in Fin -}
+  cast : {t : Set} → {m n : ℕ} → .(_ : m ≡ n) → Vec t m → Vec t n
+  cast {t} {zero} {zero} eq [] = []
+  cast {t} {suc m} {suc n} eq (x ∷ xs) = x ∷ cast {t} {m} {n} (cong pred eq) xs
 
   {- primitive map -}
   map : {n : ℕ} → {s : Set} → {t : Set} → (s → t) → Vec s n → Vec t n
@@ -87,12 +70,12 @@ module lift.Primitives where
 
   {- primitive split -}
   {- split as slide with (step ≡ size) ? -}
-  split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (n * m) → Vec (Vec t n) m
+  split : (n : ℕ) → {m : ℕ} → {t : Set} → Vec t (m * n) → Vec (Vec t n) m
   split n {zero} xs = []
-  split n {suc m} xs = take n {n * m} xs ∷ split n (drop n xs)
+  split n {suc m} xs = take n {m * n} xs ∷ split n (drop n xs)
 
   {- primitive join -}
-  join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (n * m)
+  join : {n m : ℕ} → {t : Set} → Vec (Vec t n) m → Vec t (m * n)
   join [] = []
   join (xs ∷ xs₁) = xs ++ join xs₁
   -- join {n} {suc m} {t} (xs ∷ xs₁) = subst (Vec t) (sym (distrib-suc m n)) (xs ++ join xs₁)
@@ -117,11 +100,13 @@ module lift.Primitives where
 
   {- primitive slide -}
   -- (suc sp) and (suc n), to ensure step > 0
+  postulate slide-lem : (n sz sp : ℕ) →  suc (sz + (sp + n * suc sp)) ≡ suc (sp + (sz + n * suc sp))
+
   slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (sz + n * (suc sp)) →
           Vec (Vec t sz) (suc n)
   slide {zero} sz sp xs = [ xs ]
   slide {suc n} sz sp {t} xs =
-    take sz {(suc n) * (suc sp)} xs ∷ slide {n} sz sp (drop (suc sp) xs)
+    take sz {(suc n) * (suc sp)} xs ∷ slide {n} sz sp (drop (suc sp) (cast (slide-lem n sz sp) xs))
 
   slide₂ : {n m : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec (Vec t (sz + n * (suc sp))) (sz + m * (suc sp)) →
            Vec (Vec (Vec (Vec t sz) sz) (suc n)) (suc m)
@@ -142,13 +127,14 @@ module lift.Primitives where
 
   {- primitive partRed -}
   -- m should > 0
-  partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → Vec t (n * suc m) → Vec t (suc m)
+  partRed : (n : ℕ) → {m : ℕ} → {t : Set} → (M : CommAssocMonoid t) → Vec t (suc m * n) → Vec t (suc m)
   partRed zero {zero} M [] = let ε = ε M
                              in [ ε ]
   partRed (suc n) {zero} M xs = [ reduce M xs ]
   partRed zero {suc m} M [] = let ε = ε M
                               in ε ∷ partRed zero {m} M []
-  partRed (suc n) {suc m} M xs = [ reduce M (take (suc n) {suc (m + (n + n * m))} xs) ] ++ partRed (suc n) {m} M ((drop (suc n) xs))
+  partRed (suc n) {suc m} M xs = [ reduce M (take (suc n) {suc (n + (m * suc n))} xs) ] ++
+                                 partRed (suc n) {m} M ((drop (suc n) xs))
 
   {- primitive zip -}
   zip : {n : ℕ} → {s : Set} → {t : Set} → Vec s n → Vec t n → Vec (s × t) n
