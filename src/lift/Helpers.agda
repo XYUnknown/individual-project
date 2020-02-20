@@ -1,6 +1,6 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 {- TODO: remove the pragma when all the holes are filled -}
-{-# OPTIONS --rewriting --prop #-}
+{-# OPTIONS --rewriting --prop  --confluence-check #-}
 module lift.Helpers where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym; subst; cong₂)
