@@ -1,12 +1,12 @@
 {-# OPTIONS --allow-unsolved-metas #-}
 {- TODO: remove the pragma when all the holes are filled -}
-{-# OPTIONS --rewriting --prop #-}
+{-# OPTIONS --rewriting --prop --confluence-check #-}
 module example.HeterogeneousEqualityProof where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym; subst; cong₂)
   open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_)
-  open import Data.Nat.Properties using (*-distribˡ-+; +-assoc; *-assoc)
+  open import Data.Nat.Properties using (*-distribʳ-+; +-assoc; *-assoc)
   open import Data.Vec using (Vec; _∷_; []; [_]; _++_)
   import Relation.Binary.HeterogeneousEquality as Heq
   open Heq using (_≅_) renaming (sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
@@ -29,7 +29,7 @@ module example.HeterogeneousEqualityProof where
   join-++ {suc n} {m} {o} {t} (xs ∷ xs₁) xs₂ =
     hbegin
       xs ++ join (xs₁ ++ xs₂)
-    ≅⟨ hcong′ (Vec t) (*-distribˡ-+ o n m) (λ y → xs ++ y) (join-++ xs₁ xs₂) ⟩
+    ≅⟨ hcong′ (Vec t) (*-distribʳ-+ o n m) (λ y → xs ++ y) (join-++ xs₁ xs₂) ⟩
       xs ++ join xs₁ ++ join xs₂
     ≅⟨ hsym (++-assoc xs (join xs₁) (join xs₂)) ⟩
       (xs ++ join xs₁) ++ join xs₂
@@ -65,6 +65,6 @@ module example.HeterogeneousEqualityProof where
       join (xss ++ join xsss)
     ≅⟨ join-++ xss (join xsss) ⟩ -- using lemma join-++
       join xss ++ join (join xsss)
-    ≅⟨ hcong′ (Vec t) (sym (*-assoc o m n)) (λ y → join xss ++ y) (joinJoinH xsss) ⟩
+    ≅⟨ hcong′ (Vec t) (*-assoc n m o) (λ y → join xss ++ y) (joinJoinH xsss) ⟩
       join xss ++ join (map join xsss)
     h∎
