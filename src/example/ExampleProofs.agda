@@ -148,12 +148,12 @@ module example.ExampleProofs where
   hcong′ _ refl _ Heq.refl = Heq.refl
 
   -- lemmas
-  ++-assoc : {n m o : ℕ} → {t : Set} → (xs : Vec t n) → (ys : Vec t m) → (zs : Vec t o) →
+  ++-assoc : {n m o : ℕ} → {T : Set} → (xs : Vec T n) → (ys : Vec T m) → (zs : Vec T o) →
              (xs ++ ys) ++ zs ≅ xs ++ (ys ++ zs)
   ++-assoc [] ys zs = Heq.refl
   ++-assoc {suc n} {m} {o} {t} (x ∷ xs) ys zs = hcong′ (Vec t) (+-assoc n m o) (λ l → x ∷ l) (++-assoc xs ys zs)
 
-  join-++ : {n m o : ℕ} → {t : Set} → (xs₁ : Vec (Vec t o) n) → (xs₂ : Vec (Vec t o) m) →
+  join-++ : {n m o : ℕ} → {T : Set} → (xs₁ : Vec (Vec T o) n) → (xs₂ : Vec (Vec T o) m) →
             join (xs₁ ++ xs₂) ≅ join xs₁ ++ join xs₂
   join-++ [] xs₂ = Heq.refl
   join-++ {suc n} {m} {o} {t} (xs ∷ xs₁) xs₂ =
@@ -169,7 +169,7 @@ module example.ExampleProofs where
   -- But using propositional equality is not about to form the equation
   -- Uncomment to see the error
   {-
-  joinJoinP : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+  joinJoinP : {n m o : ℕ} → {T : Set} → (xsss : Vec (Vec (Vec T o) m) n) →
               join (join xsss) ≡ join (map join xsss)
   joinJoinP = ?
   -}
@@ -187,7 +187,7 @@ module example.ExampleProofs where
   -- In this case we need to form equality between different types
   -- hence we consider using heterogeneous equality
 
-  joinJoinH : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
+  joinJoinH : {n m o : ℕ} → {T : Set} → (xsss : Vec (Vec (Vec T o) m) n) →
               join (join xsss) ≅ join (map join xsss)
   joinJoinH [] = Heq.refl
   joinJoinH {suc n} {m} {o} {t} (xss ∷ xsss) =
