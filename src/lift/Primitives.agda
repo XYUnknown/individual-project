@@ -39,7 +39,7 @@ module lift.Primitives where
     ≡⟨ cong (_+ n) (+-comm m 1) ⟩
       refl
 
-  {-# REWRITE *zero *id +zero +suc #-}
+  {-# REWRITE *zero +zero +suc *id #-}
 
   {- cast a vector, adapted from cast in Fin -}
   cast : {t : Set} → {m n : ℕ} → .(_ : m ≡ n) → Vec t m → Vec t n
