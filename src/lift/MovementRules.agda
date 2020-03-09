@@ -205,14 +205,14 @@ module lift.MovementRules where
       fill o []
     ≡⟨ map-join-fill-empty o {m} [] ⟩
       refl
-  joinBeforeTranspose {.(suc _)} {zero} {o} ([] ∷ xsss) =
+  joinBeforeTranspose {suc n} {zero} {o} ([] ∷ xsss) =
     begin
       transpose (join xsss)
     ≡⟨ joinBeforeTranspose xsss ⟩
       map join (transpose (map transpose xsss))
     ≡⟨ map-join-suc (transpose (map transpose xsss)) (transpose (map transpose ([] ∷ xsss))) ⟩
       refl
-  joinBeforeTranspose {.(suc _)} {suc m} {zero} (xss ∷ xsss) = refl
+  joinBeforeTranspose {suc n} {suc m} {zero} (xss ∷ xsss) = refl
   joinBeforeTranspose {suc n} {suc m} {suc o} xsss =
     begin
       map head (join xsss) ∷ transpose (map tail (join xsss))
