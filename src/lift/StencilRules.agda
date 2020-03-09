@@ -17,6 +17,7 @@ module lift.StencilRules where
   open import lift.Primitives using (map; id; take; drop; split;
     join; fill; head; tail; transpose; slide-lem; slide; cast)
   open import lift.Helpers
+  open import lift.MovementRules using (mapMapFBeforeJoin)
 
   {- Tiling -}
   -- u = sz + n * (suc sp)
@@ -41,8 +42,8 @@ module lift.StencilRules where
          take sz {suc (sp + (n + (n + m * suc n)) * suc sp)} (cast (lem₁ n (suc m) sz sp) xs) ∷
          slide {n + (n + m * suc n)} sz sp (drop (suc sp) {sz + (n + (n + m * suc n)) * suc sp}
          (cast (slide-lem (n + (n + m * suc n)) sz sp ) (cast (lem₁ n (suc m) sz sp) xs)))
-  lem₄ {zero} {m} sz sp xs = ?
-  lem₄ {suc n} {m} sz sp xs = ?
+  lem₄ {zero} {m} sz sp xs = {!!}
+  lem₄ {suc n} {m} sz sp xs = {!!}
 
   -- Adapted from paper https://www.lift-project.org/publications/2018/hagedorn18Stencils.pdf
   slideJoin : {n m : ℕ} → {t : Set} → (sz : ℕ) → (sp : ℕ) → (xs : Vec t (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
@@ -67,3 +68,38 @@ module lift.StencilRules where
       slide {n + m * suc n} sz sp (cast (lem₁ n m sz sp) (drop (suc (n + sp + n * sp)) (cast (lem₃ n m sz sp) xs)))
     ≡⟨ lem₄ {n} {m} sz sp xs ⟩
       refl
+
+  map-λ : {n m : ℕ} → {s t : Set} → (sz : ℕ) → (sp : ℕ) → (f : Vec s sz → Vec t sz) →
+          (xs : Vec s (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
+          map (λ (tile : Vec s (sz + n * (suc sp))) →
+          map f (slide {n} sz sp tile)) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs) ≡
+          map (map f) ((map (λ (tile : Vec s (sz + n * (suc sp))) →
+          slide {n} sz sp tile)) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs))
+  map-λ {n} {zero} sz sp f xs = refl
+  map-λ {n} {suc m} sz sp f xs =
+    begin
+      map f (slide sz sp (take (sz + n * suc sp) xs)) ∷
+      map (λ tile → map f (slide sz sp tile))
+      (slide (sz + n * suc sp) (n + sp + n * sp)
+      (drop (suc (n + sp + n * sp)) (cast _ xs)))
+    ≡⟨ cong (map f (slide sz sp (take (sz + n * suc sp) xs)) ∷_) (map-λ sz sp f (drop (suc (n + sp + n * sp)) (cast _ xs))) ⟩
+      refl
+
+  tiling : {n m : ℕ} → {s t : Set} → (sz : ℕ) → (sp : ℕ) → (f : Vec s sz → Vec t sz) →
+           (xs : Vec s (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
+           join (map (λ (tile : Vec s (sz + n * (suc sp))) →
+           map f (slide {n} sz sp tile)) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≡
+           map f (slide {n + m * (suc n)} sz sp (cast (lem₁ n m sz sp) xs))
+  tiling {n} {m} {s} {t} sz sp f xs =
+    begin
+      join (map (λ (tile : Vec s (sz + n * (suc sp))) →
+      map f (slide {n} sz sp tile)) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs))
+    ≡⟨ cong join (map-λ {n} {m} sz sp f xs) ⟩
+      join (map (map f)
+      (map (slide {n} sz sp) (slide {m} (sz + n * suc sp) (n + sp + n * sp) xs)))
+    ≡⟨ mapMapFBeforeJoin f (map (slide {n} sz sp) (slide {m} (sz + n * suc sp) (n + sp + n * sp) xs)) ⟩
+      map f (join (map (slide {n} sz sp) (slide {m} (sz + n * suc sp) (n + sp + n * sp) xs)))
+    ≡⟨ cong (map f) (slideJoin {n} {m} sz sp xs) ⟩
+      refl
+
+
