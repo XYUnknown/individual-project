@@ -85,7 +85,7 @@ module lift.StencilRules where
     ≡⟨ cong (map f (slide sz sp (take (sz + n * suc sp) xs)) ∷_) (map-λ sz sp f (drop (suc (n + sp + n * sp)) (cast _ xs))) ⟩
       refl
 
-  tiling : {n m : ℕ} → {s t : Set} → (sz : ℕ) → (sp : ℕ) → (f : Vec s sz → Vec t sz) →
+  tiling : {n m : ℕ} → {s t : Set} → (sz sp : ℕ) → (f : Vec s sz → Vec t sz) →
            (xs : Vec s (sz + n * (suc sp) + m * suc (n + sp + n * sp))) →
            join (map (λ (tile : Vec s (sz + n * (suc sp))) →
            map f (slide {n} sz sp tile)) (slide {m} (sz + n * (suc sp)) (n + sp + n * sp) xs)) ≡
@@ -102,4 +102,12 @@ module lift.StencilRules where
     ≡⟨ cong (map f) (slideJoin {n} {m} sz sp xs) ⟩
       refl
 
+  {- What is u v
+  tiling₂ : {n m : ℕ} → {s t : Set} → (sz sp : ℕ) → (f : Vec s sz → Vec t sz) →
+            (xs : Vec (Vec s (sz + n * (suc sp))) (sz + m * (suc sp))) →
+            map₂ f slide₂ sz sp xs ≡
+            map join (join (map transpose
+            (map₂ (λ (tile : Vec (Vec s (sz + n * (suc sp))) (sz + m * (suc sp))) → map₂ f (slide₂ sz sp tile))
+            (slide₂ u v xs))))
+  -}
 
