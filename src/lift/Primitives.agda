@@ -114,7 +114,7 @@ module lift.Primitives where
   slide : {n : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec t (sz + n * (suc sp)) →
           Vec (Vec t sz) (suc n)
   slide {zero} sz sp xs = [ xs ]
-  slide {suc n} sz sp {t} xs =
+  slide {suc n} sz sp xs =
     take sz {(suc n) * (suc sp)} xs ∷ slide {n} sz sp (drop (suc sp) (cast (slide-lem n sz sp) xs))
 
   slide₂ : {n m : ℕ} → (sz : ℕ) → (sp : ℕ)→ {t : Set} → Vec (Vec t (sz + n * (suc sp))) (sz + m * (suc sp)) →
