@@ -167,12 +167,8 @@ module lift.Primitives where
   padCst : {n : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n + r)
   padCst l r x xs = padCstʳ r x (padCstˡ l x xs)
 
-  repeat : {t : Set} → t → (n : ℕ) → Vec t n
-  repeat x zero = []
-  repeat x (suc n) = x ∷ (repeat x n)
-
   padCst₂ : {n m : ℕ} → (l r : ℕ) → {t : Set} → t → Vec (Vec t n) m → Vec (Vec t (l + n + r)) (l + m + r)
-  padCst₂ {n} l r x xs = map (padCst l r x) (padCst l r (repeat x n) xs)
+  padCst₂ {n} l r x xs = map (padCst l r x) (padCst l r (fill n x) xs)
 
   {- this breaks agda, issues fixed in agda v2.6.1 -}
   -- padCst : {n : ℕ} → (l r : ℕ) → {t : Set} → t → Vec t n → Vec t (l + n + r)
