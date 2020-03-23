@@ -338,7 +338,7 @@ module lift.AlgorithmicRules where
                       partRed n M xs ≡ [ reduce M xs ]
   partialReduction₁ zero M [] = refl
   partialReduction₁ (suc n) M xs = refl
-
+  {-
   partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
                       (join ∘ map (partRed n {zero} M) ∘ split n {suc m}) xs ≡ partRed n {m} M xs
   partialReduction₂ {zero} zero M [] = refl
@@ -363,4 +363,14 @@ module lift.AlgorithmicRules where
       partRed (suc n) {suc m} M (join {suc n} (split (suc n) {suc (suc m)} xs))
     ≡⟨ cong (partRed (suc n) M) (simplification₁ (suc n) {suc (suc m)} xs) ⟩
       refl
+  -}
 
+  partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
+                      (join ∘ map (partRed n {zero} M) ∘ split n {suc m}) xs ≡ partRed n {m} M xs
+  partialReduction₂ {m} n M xs =
+    begin
+      join (map (partRed n {zero} M) (split n {suc m} xs))
+    ≡⟨ map-join-partRed {m} n M  (split n {suc m} xs) ⟩
+      partRed n M (join (split n {suc m} xs))
+    ≡⟨ cong (partRed n M) (simplification₁ n {suc m} xs) ⟩
+      refl
