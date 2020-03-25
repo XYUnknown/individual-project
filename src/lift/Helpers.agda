@@ -125,20 +125,12 @@ module lift.Helpers where
   map-head : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s (suc m)) n) →
              map f (map head xss) ≡ map head (map (map f) xss)
   map-head f [] = refl
-  map-head f ((x ∷ xs) ∷ xss) =
-    begin
-      f x ∷ map f (map head xss)
-    ≡⟨ cong (f x ∷_) (map-head f xss) ⟩
-      refl
+  map-head f ((x ∷ xs) ∷ xss) = cong (f x ∷_) (map-head f xss)
 
   map-tail : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s (suc m)) n) →
              map (map f) (map tail xss) ≡ map tail (map (map f) xss)
   map-tail f [] = refl
-  map-tail f ((x ∷ xs) ∷ xss) =
-    begin
-      map f xs ∷ map (map f) (map tail xss)
-    ≡⟨ cong (map f xs ∷_) (map-tail f xss) ⟩
-      refl
+  map-tail f ((x ∷ xs) ∷ xss) = cong (map f xs ∷_) (map-tail f xss)
 
   head-take : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t (suc (n + m))) →
               head xs ≡ head (take (suc n) {m} xs)
