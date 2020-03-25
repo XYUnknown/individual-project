@@ -108,11 +108,7 @@ module lift.Helpers where
   map-take : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
              map f (take n {m} xs) ≡ (take n {m} (map f xs))
   map-take zero f xs = refl
-  map-take (suc n) {m} f (x ∷ xs) =
-    begin
-      f x ∷ map f (take n {m} xs)
-    ≡⟨ cong (f x ∷_) (map-take n {m} f xs) ⟩
-      refl
+  map-take (suc n) {m} f (x ∷ xs) = cong (f x ∷_) (map-take n {m} f xs)
 
   map-drop : (n : ℕ) → {m : ℕ} → {s t : Set} → (f : s → t) → (xs : Vec s (n + m)) →
              map f (drop n {m} xs) ≡ (drop n {m} (map f xs))
