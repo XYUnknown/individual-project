@@ -32,11 +32,7 @@ module lift.MovementRules where
   map-fill-empty : {s t : Set} → (m : ℕ) → (f : s → t) →
                    map (map f) (fill m []) ≡ fill m []
   map-fill-empty zero f = refl
-  map-fill-empty (suc m) f =
-    begin
-      [] ∷ map (map f) (fill m [])
-    ≡⟨ cong ([] ∷_) (map-fill-empty m f) ⟩
-      refl
+  map-fill-empty (suc m) f = cong ([] ∷_) (map-fill-empty m f)
 
   map-join-fill-empty : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t zero) →
                         fill n xs ≡ map (join {m}) (fill n [])
@@ -122,11 +118,7 @@ module lift.MovementRules where
   {- Transpose -}
   mapMapFBeforeTranspose : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s m) n) →
                            map (map f) (transpose xss) ≡ transpose (map (map f) xss)
-  mapMapFBeforeTranspose {zero} {m} f [] =
-    begin
-      map (map f) (fill m [])
-    ≡⟨ map-fill-empty m f ⟩
-      refl
+  mapMapFBeforeTranspose {zero} {m} f [] = map-fill-empty m f
   mapMapFBeforeTranspose {suc n} {zero} f xss = refl
   mapMapFBeforeTranspose {suc n} {suc m} f ((x ∷ xs) ∷ xss) =
     begin
