@@ -42,37 +42,21 @@ module lift.Helpers where
   map-++ : {n m : ℕ} → {s t : Set} → (f : s → t) → (xs₁ : Vec s n) → (xs₂ : Vec s m) →
            map f (xs₁ ++ xs₂) ≡ map f xs₁ ++ map f xs₂
   map-++ f [] xs₂ = refl
-  map-++ f (x ∷ xs₁) xs₂ =
-    begin
-      f x ∷ map f (xs₁ ++ xs₂)
-    ≡⟨ cong (f x  ∷_) (map-++ f xs₁ xs₂) ⟩
-      refl
+  map-++ f (x ∷ xs₁) xs₂ = cong (f x  ∷_) (map-++ f xs₁ xs₂)
 
   take-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t n) → (xs₁ : Vec t m) →
             take n {m} (xs ++ xs₁) ≡ xs
   take-++ zero [] xs₁ = refl
-  take-++ (suc n) {m} (x ∷ xs) xs₁ =
-    begin
-      x ∷ take n {m} (xs ++ xs₁)
-    ≡⟨ cong (x ∷_) (take-++ n {m} xs xs₁) ⟩
-      refl
+  take-++ (suc n) {m} (x ∷ xs) xs₁ = cong (x ∷_) (take-++ n {m} xs xs₁)
 
   drop-++ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t n) → (xs₁ : Vec t m) →
             drop n (xs ++ xs₁) ≡ xs₁
   drop-++ zero [] xs₁ = refl
-  drop-++ (suc n) (x ∷ xs) xs₁ =
-    begin
-      drop n (xs ++ xs₁)
-    ≡⟨ drop-++ n xs xs₁ ⟩
-      refl
+  drop-++ (suc n) (x ∷ xs) xs₁ = drop-++ n xs xs₁
 
   transpose-++ : {n m : ℕ} → {t : Set} → (xs : Vec (Vec t zero) n) → (ys : Vec (Vec t zero) m) →
                  transpose (xs ++ ys) ≡ []
-  transpose-++ [] ys =
-    begin
-      transpose ys
-    ≡⟨ empty (transpose ys) ⟩
-      refl
+  transpose-++ [] ys = empty (transpose ys)
   transpose-++ (x ∷ xs) ys = refl
 
   ++-assoc : {n m o : ℕ} → {t : Set} → (xs : Vec t n) → (ys : Vec t m) → (zs : Vec t o) →
