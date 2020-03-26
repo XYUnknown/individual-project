@@ -248,12 +248,13 @@ module lift.MovementRules where
   map-tail-split n [] = refl
   map-tail-split n (xs ∷ xss) = cong (split n (drop n xs) ∷_) (map-tail-split n xss)
 
-  lem₃ : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (suc m * n)) q) →
-         map transpose (transpose (map (λ xs → take n {m * n} xs ∷ split n {m} (drop n xs)) xsss)) ≡
-         transpose (map (take n {m * n}) xsss) ∷ map transpose (transpose (map (split n) (map (drop n) xsss)))
-  lem₃ n [] = refl
-  lem₃ n (xss ∷ xsss) = cong₂ (λ x y → transpose (take n xss ∷ x) ∷ map transpose (transpose (split n (drop n xss) ∷ y)))
-                        (map-head-split n xsss) (map-tail-split n xsss)
+  decompose-lem₁ : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (suc m * n)) q) →
+                  map transpose (transpose (map (split n {suc m}) xsss)) ≡
+                  transpose (map (take n {m * n}) xsss) ∷ map transpose (transpose (map (split n) (map (drop n) xsss)))
+  decompose-lem₁ n [] = refl
+  decompose-lem₁ n (xss ∷ xsss) = cong₂ (λ x y → transpose (take n xss ∷ x) ∷
+                                 map transpose (transpose (split n (drop n xss) ∷ y)))
+                                 (map-head-split n xsss) (map-tail-split n xsss)
 
   transposeBeforeSplit : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (m * n)) q) →
                          split n {m} (transpose xsss) ≡ map transpose (transpose (map (split n {m}) xsss))
@@ -262,12 +263,12 @@ module lift.MovementRules where
   transposeBeforeSplit {suc m} n xsss =
     begin
       take n (transpose xsss) ∷ split n (drop n (transpose xsss))
-    ≡⟨ cong (_∷ split n (drop n (transpose xsss))) (take-transpose n xsss) ⟩
-      transpose (map (take n) xsss) ∷ split n (drop n (transpose xsss))
-    ≡⟨ cong (λ y → transpose (map (take n) xsss) ∷ split n y) (drop-transpose n xsss) ⟩
+    ≡⟨ cong₂ (λ x y → x ∷ split n y) (take-transpose n xsss) (drop-transpose n xsss) ⟩
       transpose (map (take n) xsss) ∷ split n (transpose (map (drop n) xsss))
     ≡⟨ cong (transpose (map (take n) xsss) ∷_) (transposeBeforeSplit n (map (drop n) xsss)) ⟩
-      sym (lem₃ n xsss)
+      transpose (map (take n) xsss) ∷ map transpose (transpose (map (split n) (map (drop n) xsss)))
+    ≡⟨ sym (decompose-lem₁ n xsss) ⟩
+      refl
 
   sym-lem₄ : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) (m * n)) q) →
              map transpose (split n (transpose xsss)) ≡ transpose (map (split n {m}) xsss)
@@ -284,7 +285,7 @@ module lift.MovementRules where
   mapSplitBeforeTranspose n xsss = sym (sym-lem₄ n xsss)
 
   sym-lem₅ : {m p q : ℕ} → {t : Set} → (n : ℕ) → (xsss : Vec (Vec (Vec t p) q) (m * n)) →
-             transpose (map transpose (split n xsss)) ≡  map (split n {m}) (transpose xsss)
+             transpose (map transpose (split n xsss)) ≡ map (split n {m}) (transpose xsss)
   sym-lem₅ n xsss =
     begin
       transpose (map transpose (split n xsss))

@@ -195,11 +195,7 @@ module lift.Helpers where
   drop-transpose : (n : ℕ) → {m p : ℕ} → {t : Set} → (xs : Vec (Vec t (n + m)) p) →
                    drop n {m} (transpose xs) ≡ transpose (map (drop n {m}) xs)
   drop-transpose n {m} {zero} [] = drop-fill n []
-  drop-transpose zero {m} {suc p} xs =
-    begin
-      transpose xs
-    ≡⟨ cong transpose (sym (map-id xs)) ⟩
-      refl
+  drop-transpose zero {m} {suc p} xs = cong transpose (sym (map-id xs))
   drop-transpose (suc n) {m} {suc p} ((x ∷ xs₁) ∷ xs) =
     begin
       drop n (transpose (xs₁ ∷ map tail xs))
