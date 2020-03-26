@@ -344,7 +344,7 @@ module lift.MovementRules where
   transposeBeforeSlide {suc n} sz sp xsss = let ys = map (cast (slide-lem n sz sp)) xsss in
     begin
       take sz (transpose xsss) ∷ slide sz sp (drop (suc sp) (cast _ (transpose xsss)))
-    ≡⟨ cong (λ y → take sz (transpose xsss) ∷ slide sz sp (drop (suc sp) y)) (transpose-cast (slide-lem n sz sp) xsss)  ⟩
+    ≡⟨ cong (λ y → take sz (transpose xsss) ∷ slide sz sp (drop (suc sp) y)) (transpose-cast (slide-lem n sz sp) xsss) ⟩
       take sz (transpose xsss) ∷ slide sz sp (drop (suc sp) (transpose ys))
     ≡⟨ cong₂ (λ x y → x ∷ slide sz sp y) (take-transpose sz xsss) (drop-transpose (suc sp) ys) ⟩
       transpose (map (take sz) xsss) ∷ slide sz sp (transpose (map (drop (suc sp)) ys))
