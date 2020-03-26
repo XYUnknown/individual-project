@@ -313,13 +313,13 @@ module lift.MovementRules where
   map-tail-slide {n} sz sp (xss₁ ∷ xss) = let yss = cast (slide-lem n sz sp) xss₁ in
     cong (slide sz sp (drop (suc sp) yss) ∷_) (map-tail-slide sz sp xss)
 
-  lem₄ : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (suc (sz + (sp + n * suc sp)))) m) →
-         map transpose (transpose (map (λ xs → take sz {suc (sp + n * suc sp)} xs ∷
-         slide {n} sz sp (drop (suc sp) (cast (slide-lem n sz sp) xs))) xsss)) ≡
-         transpose (map (take sz {suc (sp + n * suc sp)}) xsss) ∷
-         map transpose (transpose (map (slide sz sp) (map (drop (suc sp)) (map (cast (slide-lem n sz sp)) xsss))))
-  lem₄ sz sp [] = refl
-  lem₄ {n} sz sp (xss ∷ xsss) = let yss = cast (slide-lem n sz sp) xss in
+  decompose-lem₂ : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (suc (sz + (sp + n * suc sp)))) m) →
+                   map transpose (transpose (map (λ xs → take sz {suc (sp + n * suc sp)} xs ∷
+                   slide {n} sz sp (drop (suc sp) (cast (slide-lem n sz sp) xs))) xsss)) ≡
+                   transpose (map (take sz {suc (sp + n * suc sp)}) xsss) ∷
+                   map transpose (transpose (map (slide sz sp) (map (drop (suc sp)) (map (cast (slide-lem n sz sp)) xsss))))
+  decompose-lem₂ sz sp [] = refl
+  decompose-lem₂ {n} sz sp (xss ∷ xsss) = let yss = cast (slide-lem n sz sp) xss in
     begin
       transpose (take sz {suc (sp + n * suc sp)} xss ∷ map head (map (slide sz sp) xsss)) ∷
       transpose (head (slide {n} sz sp (drop (suc sp) yss)) ∷ map head (map tail (map (slide sz sp) xsss))) ∷
@@ -343,16 +343,14 @@ module lift.MovementRules where
   transposeBeforeSlide {zero} sz sp (xss ∷ xsss) = cong (λ y → transpose (xss ∷ y) ∷ []) (sym (map-head-id xsss))
   transposeBeforeSlide {suc n} sz sp xsss = let ys = map (cast (slide-lem n sz sp)) xsss in
     begin
-      take sz (transpose xsss) ∷
-      slide sz sp (drop (suc sp) (cast _ (transpose xsss)))
+      take sz (transpose xsss) ∷ slide sz sp (drop (suc sp) (cast _ (transpose xsss)))
     ≡⟨ cong (λ y → take sz (transpose xsss) ∷ slide sz sp (drop (suc sp) y)) (transpose-cast (slide-lem n sz sp) xsss)  ⟩
       take sz (transpose xsss) ∷ slide sz sp (drop (suc sp) (transpose ys))
     ≡⟨ cong₂ (λ x y → x ∷ slide sz sp y) (take-transpose sz xsss) (drop-transpose (suc sp) ys) ⟩
       transpose (map (take sz) xsss) ∷ slide sz sp (transpose (map (drop (suc sp)) ys))
     ≡⟨ cong (transpose (map (take sz) xsss) ∷_) (transposeBeforeSlide sz sp (map (drop (suc sp)) ys)) ⟩
-      transpose (map (take sz) xsss) ∷
-      map transpose (transpose (map (slide sz sp) (map (drop (suc sp)) ys)))
-    ≡⟨ sym (lem₄ sz sp xsss) ⟩
+      transpose (map (take sz) xsss) ∷ map transpose (transpose (map (slide sz sp) (map (drop (suc sp)) ys)))
+    ≡⟨ sym (decompose-lem₂ sz sp xsss) ⟩
       refl
 
   sym-lem₅ : {n m o : ℕ} → {t : Set} → (sz sp : ℕ) → (xsss : Vec (Vec (Vec t o) (sz + n * (suc sp))) m) →
