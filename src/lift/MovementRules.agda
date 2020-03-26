@@ -29,38 +29,30 @@ module lift.MovementRules where
     ≡⟨ cong₂ (λ x y → x ∷ y) (identity₃ xss) (double-map-transpose xsss) ⟩
       refl
 
-  map-fill-empty : {s t : Set} → (m : ℕ) → (f : s → t) →
-                   map (map f) (fill m []) ≡ fill m []
-  map-fill-empty zero f = refl
-  map-fill-empty (suc m) f = cong ([] ∷_) (map-fill-empty m f)
+  fill-[]₁ : {s t : Set} → (m : ℕ) → (f : s → t) →
+             map (map f) (fill m []) ≡ fill m []
+  fill-[]₁ zero f = refl
+  fill-[]₁ (suc m) f = cong ([] ∷_) (fill-[]₁ m f)
 
-  map-join-fill-empty : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t zero) →
-                        fill n xs ≡ map (join {m}) (fill n [])
-  map-join-fill-empty zero [] = refl
-  map-join-fill-empty (suc n) [] =
-    begin
-      [] ∷ fill n []
-    ≡⟨ cong ([] ∷_) (map-join-fill-empty n []) ⟩
-      refl
+  fill-[]₂ : (n : ℕ) → {m : ℕ} → {t : Set} → (xs : Vec t zero) →
+             fill n xs ≡ map (join {m}) (fill n [])
+  fill-[]₂ zero [] = refl
+  fill-[]₂ (suc n) [] = cong ([] ∷_) (fill-[]₂ n [])
 
   join-[] : {n : ℕ} → {t : Set} → (xs : Vec (Vec t zero) n) → (ys : Vec (Vec t zero) (suc n)) →
             join xs ≡ join ys
   join-[] [] ([] ∷ []) = refl
-  join-[] ([] ∷ xs) ([] ∷ ys) =
-    begin
-      join xs
-    ≡⟨ join-[] xs ys ⟩
-      refl
+  join-[] ([] ∷ xs) ([] ∷ ys) = join-[] xs ys
 
-  map-join-suc : {n m : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t zero) n) m) → (ysss : Vec (Vec (Vec t zero) (suc n)) m) →
+  map-join-[] : {n m : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t zero) n) m) → (ysss : Vec (Vec (Vec t zero) (suc n)) m) →
                  map join xsss ≡ map join ysss
-  map-join-suc [] [] = refl
-  map-join-suc (xss ∷ xsss) (yss ∷ ysss) =
+  map-join-[] [] [] = refl
+  map-join-[] (xss ∷ xsss) (yss ∷ ysss) =
     begin
       join xss ∷ map join xsss
     ≡⟨ cong (_∷ map join xsss) (join-[] xss yss) ⟩
       join yss ∷ map join xsss
-    ≡⟨ cong (join yss ∷_) (map-join-suc xsss ysss) ⟩
+    ≡⟨ cong (join yss ∷_) (map-join-[] xsss ysss) ⟩
       refl
 
   map-head-transpose : {n m : ℕ} → {t : Set} → (xs : Vec t m) → (xss : Vec (Vec t (suc m)) n) →
@@ -95,30 +87,22 @@ module lift.MovementRules where
     ≡⟨ cong (map head xss ∷_) (map-tail-transpose xs xss) ⟩
       refl
 
-  lem₁ : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t (suc o)) (suc m)) (suc n)) →
-         map (map head) xsss ≡ map head (map (λ xss → map head xss ∷ transpose (map tail xss)) xsss)
-  lem₁ {zero} (xss₁ ∷ []) = refl
-  lem₁ {suc n} (xss₁ ∷ xsss) =
-    begin
-      map head xss₁ ∷ map (map head) xsss
-    ≡⟨ cong (map head xss₁ ∷_) (lem₁ xsss) ⟩
-      refl
+  map-map-head : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t (suc o)) (suc m)) (suc n)) →
+                 map (map head) xsss ≡ map head (map (λ xss → map head xss ∷ transpose (map tail xss)) xsss)
+  map-map-head {zero} (xss₁ ∷ []) = refl
+  map-map-head {suc n} (xss₁ ∷ xsss) = cong (map head xss₁ ∷_) (map-map-head xsss)
 
-  lem₂ : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t (suc o)) (suc m)) (suc n)) →
-         map transpose (map (map tail) xsss) ≡
-         map tail (map (λ xss → map head xss ∷ transpose (map tail xss)) xsss)
-  lem₂ {zero} (xss₁ ∷ []) = refl
-  lem₂ {suc n} (xss₁ ∷ xsss) =
-    begin
-      transpose (map tail xss₁) ∷ map transpose (map (map tail) xsss)
-    ≡⟨ cong (transpose (map tail xss₁) ∷_) (lem₂ xsss) ⟩
-      refl
+  map-map-tail : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t (suc o)) (suc m)) (suc n)) →
+                 map transpose (map (map tail) xsss) ≡
+                 map tail (map (λ xss → map head xss ∷ transpose (map tail xss)) xsss)
+  map-map-tail {zero} (xss₁ ∷ []) = refl
+  map-map-tail {suc n} (xss₁ ∷ xsss) = cong (transpose (map tail xss₁) ∷_) (map-map-tail xsss)
 
   {- rules -}
   {- Transpose -}
   mapMapFBeforeTranspose : {n m : ℕ} → {s t : Set} → (f : s → t) → (xss : Vec (Vec s m) n) →
                            map (map f) (transpose xss) ≡ transpose (map (map f) xss)
-  mapMapFBeforeTranspose {zero} {m} f [] = map-fill-empty m f
+  mapMapFBeforeTranspose {zero} {m} f [] = fill-[]₁ m f
   mapMapFBeforeTranspose {suc n} {zero} f xss = refl
   mapMapFBeforeTranspose {suc n} {suc m} f ((x ∷ xs) ∷ xss) =
     begin
@@ -192,35 +176,23 @@ module lift.MovementRules where
   {- Join + Transpose -}
   joinBeforeTranspose : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
                         transpose (join xsss) ≡ map join (transpose (map transpose xsss))
-  joinBeforeTranspose {zero} {m} {o} [] =
-    begin
-      fill o []
-    ≡⟨ map-join-fill-empty o {m} [] ⟩
-      refl
+  joinBeforeTranspose {zero} {m} {o} [] = fill-[]₂ o {m} []
   joinBeforeTranspose {suc n} {zero} {o} ([] ∷ xsss) =
     begin
       transpose (join xsss)
     ≡⟨ joinBeforeTranspose xsss ⟩
       map join (transpose (map transpose xsss))
-    ≡⟨ map-join-suc (transpose (map transpose xsss)) (transpose (map transpose ([] ∷ xsss))) ⟩
+    ≡⟨ map-join-[] (transpose (map transpose xsss)) (transpose (map transpose ([] ∷ xsss))) ⟩
       refl
   joinBeforeTranspose {suc n} {suc m} {zero} (xss ∷ xsss) = refl
   joinBeforeTranspose {suc n} {suc m} {suc o} xsss =
     begin
       map head (join xsss) ∷ transpose (map tail (join xsss))
-    ≡⟨ cong (_∷ transpose (map tail (join xsss))) (joinBeforeMapF head xsss) ⟩
-      join (map (map head) xsss) ∷ transpose (map tail (join xsss))
-    ≡⟨ cong (λ y → join (map (map head) xsss) ∷ transpose y)  (joinBeforeMapF tail xsss) ⟩
+    ≡⟨ cong₂ (λ x y → x ∷ transpose y) (joinBeforeMapF head xsss) (joinBeforeMapF tail xsss) ⟩
       join (map (map head) xsss) ∷ transpose (join (map (map tail) xsss))
     ≡⟨ cong (join (map (map head) xsss) ∷_) (joinBeforeTranspose (map (map tail) xsss)) ⟩
-      join (map (map head) xsss) ∷
-      map join (transpose (map transpose (map (map tail) xsss)))
-    ≡⟨ cong (λ y → join y ∷ map join (transpose (map transpose (map (map tail) xsss))))
-       (lem₁ xsss) ⟩
-      join (map head (map (λ xss → map head xss ∷ transpose (map tail xss)) xsss)) ∷
-      map join (transpose (map transpose (map (map tail) xsss)))
-    ≡⟨ cong (λ y → join (map head (map (λ xss → map head xss ∷ transpose (map tail xss)) xsss)) ∷
-       map join (transpose y)) (lem₂ xsss) ⟩
+      join (map (map head) xsss) ∷ map join (transpose (map transpose (map (map tail) xsss)))
+    ≡⟨ cong₂ (λ x y → join x ∷ map join (transpose y)) (map-map-head xsss) (map-map-tail xsss) ⟩
       refl
 
   sym-lem₁ : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t o) m) n) →
