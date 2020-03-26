@@ -39,12 +39,13 @@ module lift.MovementRules where
   fill-[]₂ zero [] = refl
   fill-[]₂ (suc n) [] = cong ([] ∷_) (fill-[]₂ n [])
 
-  join-[] : {n : ℕ} → {t : Set} → (xs : Vec (Vec t zero) n) → (ys : Vec (Vec t zero) (suc n)) →
+  join-[] : {n₁ n₂ : ℕ} → {t : Set} → (xs : Vec (Vec t zero) n₁) → (ys : Vec (Vec t zero) n₂) →
             join xs ≡ join ys
-  join-[] [] ([] ∷ []) = refl
-  join-[] ([] ∷ xs) ([] ∷ ys) = join-[] xs ys
+  join-[] [] [] = refl
+  join-[] [] ([] ∷ ys₁) = join-[] [] ys₁
+  join-[] ([] ∷ xs₁) ys = join-[] xs₁ ys
 
-  map-join-[] : {n m : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t zero) n) m) → (ysss : Vec (Vec (Vec t zero) (suc n)) m) →
+  map-join-[] : {n₁ n₂ m : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t zero) n₁) m) → (ysss : Vec (Vec (Vec t zero) n₂) m) →
                  map join xsss ≡ map join ysss
   map-join-[] [] [] = refl
   map-join-[] (xss ∷ xsss) (yss ∷ ysss) =
