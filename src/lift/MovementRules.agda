@@ -88,13 +88,12 @@ module lift.MovementRules where
       refl
 
   map-map-head : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t (suc o)) (suc m)) (suc n)) →
-                 map (map head) xsss ≡ map head (map (λ xss → map head xss ∷ transpose (map tail xss)) xsss)
+                 map (map head) xsss ≡ map head (map transpose xsss)
   map-map-head {zero} (xss₁ ∷ []) = refl
   map-map-head {suc n} (xss₁ ∷ xsss) = cong (map head xss₁ ∷_) (map-map-head xsss)
 
   map-map-tail : {n m o : ℕ} → {t : Set} → (xsss : Vec (Vec (Vec t (suc o)) (suc m)) (suc n)) →
-                 map transpose (map (map tail) xsss) ≡
-                 map tail (map (λ xss → map head xss ∷ transpose (map tail xss)) xsss)
+                 map transpose (map (map tail) xsss) ≡ map tail (map transpose xsss)
   map-map-tail {zero} (xss₁ ∷ []) = refl
   map-map-tail {suc n} (xss₁ ∷ xsss) = cong (transpose (map tail xss₁) ∷_) (map-map-tail xsss)
 
