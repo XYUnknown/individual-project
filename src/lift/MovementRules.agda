@@ -298,7 +298,7 @@ module lift.MovementRules where
 
   {- Transpose + Slide -}
   map-head-id : {n m : ℕ} → {t : Set} → (xss : Vec (Vec t m) n) →
-                map head (map (λ xs → [ xs ]) xss) ≡ xss
+                map head (map (λ xs → xs ∷ []) xss) ≡ xss
   map-head-id [] = refl
   map-head-id (xss₁ ∷ xss) = cong (xss₁ ∷_) (map-head-id xss)
 
