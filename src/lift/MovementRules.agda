@@ -298,7 +298,7 @@ module lift.MovementRules where
 
   {- Transpose + Slide -}
   map-head-id : {n m : ℕ} → {t : Set} → (xss : Vec (Vec t m) n) →
-                map head (map (λ xs → xs ∷ []) xss) ≡ xss
+                map head (map (λ xs → [ xs ]) xss) ≡ xss
   map-head-id [] = refl
   map-head-id (xss₁ ∷ xss) = cong (xss₁ ∷_) (map-head-id xss)
 
@@ -308,7 +308,8 @@ module lift.MovementRules where
   map-head-slide sz sp (xss₁ ∷ xss) = cong (take sz xss₁ ∷_) (map-head-slide sz sp xss)
 
   map-tail-slide : {n m : ℕ} → {t : Set} → (sz sp : ℕ) → (xss : Vec (Vec t (suc (sz + (sp + n * suc sp)))) m) →
-                   map tail (map (slide {suc n} sz sp) xss) ≡ map (slide sz sp) (map (drop (suc sp)) (map (cast (slide-lem n sz sp)) xss))
+                   map tail (map (slide {suc n} sz sp) xss) ≡
+                   map (slide sz sp) (map (drop (suc sp)) (map (cast (slide-lem n sz sp)) xss))
   map-tail-slide sz sp [] = refl
   map-tail-slide {n} sz sp (xss₁ ∷ xss) = let yss = cast (slide-lem n sz sp) xss₁ in
     cong (slide sz sp (drop (suc sp) yss) ∷_) (map-tail-slide sz sp xss)
