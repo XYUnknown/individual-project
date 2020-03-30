@@ -114,8 +114,6 @@ module lift.AlgorithmicRules where
               (f ∘ map id) xs ≡ f xs
   identity₁ f xs =
     begin
-      (f ∘ map id) xs
-    ≡⟨⟩
       f (map id xs)
     ≡⟨ cong f (map-id xs) ⟩
       f xs
@@ -285,8 +283,6 @@ module lift.AlgorithmicRules where
               (join ∘ map (map f) ∘ split n {m}) xs ≡ map f xs
   splitJoin {m} n f xs =
     begin
-      (join ∘ map (map f) ∘ split n {m}) xs
-    ≡⟨⟩
       join (map (map f) (split n {m} xs))
     ≡⟨ cong join (map-split n {m} f xs) ⟩
       join (split n {m} (map f xs))
@@ -299,22 +295,16 @@ module lift.AlgorithmicRules where
               (reduce M ∘ partRed n {m} M) xs ≡ reduce M xs
   reduction {zero} zero M [] = let _⊕_ = _⊕_ M; ε = ε M in
     begin
-      reduce M [ ε ]
-    ≡⟨⟩
       ε ⊕ ε
     ≡⟨ idʳ M ε ⟩
       refl
   reduction {zero} (suc n) M xs = let _⊕_ = _⊕_ M; ε = ε M in
     begin
-      reduce M [ reduce M xs ]
-    ≡⟨⟩
       (reduce M xs) ⊕ ε
     ≡⟨ idʳ M (reduce M xs) ⟩
       refl
   reduction {suc m} zero M [] = let _⊕_ = _⊕_ M; ε = ε M in
     begin
-      reduce M (ε ∷ partRed zero {m} M [])
-    ≡⟨⟩
       reduceSeq _⊕_ (ε ⊕ ε) (partRed zero {m} M [])
     ≡⟨ cong (λ y → reduceSeq _⊕_ y (partRed zero {m} M [])) (idʳ M ε) ⟩
       reduce M (partRed zero {m} M [])
@@ -325,10 +315,8 @@ module lift.AlgorithmicRules where
       reduce M ([ reduce M (take (suc n) {suc (n + (m * suc n))} xs) ] ++ partRed (suc n) {m} M (drop (suc n) xs))
     ≡⟨ sym (reduce-++ M [ reduce M (take (suc n) {suc (n + (m * suc n))} xs) ] (partRed (suc n) {m} M (drop (suc n) xs))) ⟩
       reduce M [ reduce M (take (suc n) {suc (n + (m * suc n))} xs) ] ⊕ reduce M (partRed (suc n) {m} M (drop (suc n) xs))
-    ≡⟨ cong (_⊕ reduce M (partRed (suc n) {m} M (drop (suc n) xs)))
-       (idʳ M (reduce M (take (suc n) {suc (n + (m * suc n))} xs))) ⟩
-      reduce M (take (suc n) {suc (n + (m * suc n))} xs) ⊕ reduce M (partRed (suc n) {m} M (drop (suc n) xs))
-    ≡⟨ cong (reduce M (take (suc n) {suc (n + (m * suc n))} xs) ⊕_) (reduction {m} (suc n) M (drop (suc n) xs)) ⟩
+    ≡⟨ cong₂ (λ x y → x ⊕ y) (idʳ M (reduce M (take (suc n) {suc (n + (m * suc n))} xs)))
+       (reduction {m} (suc n) M (drop (suc n) xs)) ⟩
       reduce M (take (suc n) {suc (n + (m * suc n))} xs) ⊕ reduce M (drop (suc n) {suc (n + (m * suc n))} xs)
     ≡⟨ sym (reduce-take-drop (suc n) {suc (n + (m * suc n))} M xs) ⟩
       refl
@@ -338,32 +326,6 @@ module lift.AlgorithmicRules where
                       partRed n M xs ≡ [ reduce M xs ]
   partialReduction₁ zero M [] = refl
   partialReduction₁ (suc n) M xs = refl
-  {-
-  partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
-                      (join ∘ map (partRed n {zero} M) ∘ split n {suc m}) xs ≡ partRed n {m} M xs
-  partialReduction₂ {zero} zero M [] = refl
-  partialReduction₂ {zero} (suc n) M xs =
-    begin
-      [ reduce M (take (suc n) {zero} xs) ]
-    ≡⟨ cong (λ ys → [ (reduce M) ys ]) (take-all (suc n) xs ) ⟩
-      refl
-  partialReduction₂ {suc m} zero M [] = let _⊕_ = _⊕_ M; ε = ε M in
-    begin
-      join (map (partRed zero {zero} M) (split zero {suc (suc m)} []))
-    ≡⟨⟩
-      ε ∷ join (map (partRed zero {zero} M) (split zero {suc m} []))
-    ≡⟨ cong (λ ys → (ε ∷ ys)) (map-join-partRed {m} zero M (split zero {suc m} [])) ⟩
-      ε ∷ partRed zero {m} M (join {zero} {suc m} (split zero []))
-    ≡⟨ cong (λ ys → (ε ∷ partRed zero {m} M ys)) (simplification₁ zero {m} []) ⟩
-      refl
-  partialReduction₂ {suc m} (suc n) M xs =
-    begin
-      join (map (partRed (suc n) {zero} M) (split (suc n) {suc (suc m)} xs))
-    ≡⟨ map-join-partRed {suc m} (suc n) M (split (suc n) {suc (suc m)} xs) ⟩
-      partRed (suc n) {suc m} M (join {suc n} (split (suc n) {suc (suc m)} xs))
-    ≡⟨ cong (partRed (suc n) M) (simplification₁ (suc n) {suc (suc m)} xs) ⟩
-      refl
-  -}
 
   partialReduction₂ : {m : ℕ} → {t : Set} → (n : ℕ) → (M : CommAssocMonoid t) → (xs : Vec t (suc m * n)) →
                       (join ∘ map (partRed n {zero} M) ∘ split n {suc m}) xs ≡ partRed n {m} M xs
