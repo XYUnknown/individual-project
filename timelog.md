@@ -206,7 +206,7 @@
 * *0.5 hour* adding declaration for `slideBeforeSplit`
 * *0.5 hours* adding documentations and cleanning up code
 
-### Week 17
+## Week 17
 ### 10 Feb 2020
 * *2 hours* Adding proofs for lemmas for proving tiling rule
 

@@ -23,7 +23,22 @@ module lift.StencilRules where
   -- u = sz + n * (suc sp)
   -- suc v = (suc n) * (suc sp)
   -- sz - suc sp ≡ u - suc v
-  postulate lem₁ : (n m sz sp : ℕ) → sz + n * suc sp + m * suc (n + sp + n * sp) ≡ sz + (n + m * suc n) * suc sp
+  lem₁ : (n m sz sp : ℕ) → sz + n * suc sp + m * suc (n + sp + n * sp) ≡ sz + (n + m * suc n) * suc sp
+  lem₁ n m sz sp =
+    begin
+      sz + n * suc sp + m * (suc n + sp + n * sp)
+    ≡⟨ cong (λ y → sz + n * suc sp + m * y) (+-assoc (suc n) sp (n * sp)) ⟩
+      sz + n * suc sp + m * (suc n + (sp + n * sp))
+    ≡⟨ cong (λ y → sz + n * suc sp + m * y) (cong (suc n +_) (sym (*-distribʳ-+ sp 1 n))) ⟩
+      sz + n * suc sp + m * (suc n + (1 + n) * sp)
+    ≡⟨ cong (λ y →  sz + n * suc sp + m * (suc n + y * sp)) (+-comm 1 n) ⟩
+      sz + n * suc sp + m * (suc n + (suc n) * sp)
+    ≡⟨ cong (λ y → sz + n * suc sp + m * y) (sym (*-distribˡ-+ (suc n) 1 sp)) ⟩
+      sz + n * suc sp + m * (suc n * suc sp)
+    ≡⟨ cong (λ y → sz + n * suc sp + y) (sym (*-assoc m (suc n) (suc sp))) ⟩
+      sz + n * suc sp + m * suc n * suc sp
+    ≡⟨ +-assoc sz (n * suc sp) (m * suc n * suc sp) ⟩
+      cong (sz +_) (sym (*-distribʳ-+ (suc sp) n (m * suc n)))
 
   lem₂ : {n sz sp : ℕ} → {t : Set} → (xs : Vec t (sz + n * suc sp)) → xs ≡ cast (lem₁ n zero sz sp) xs
   lem₂ {zero} {zero} {sp} [] = refl
@@ -31,9 +46,16 @@ module lift.StencilRules where
   lem₂ {suc n} {zero} {sp} (x ∷ xs) = cong (x ∷_) (lem₂ {n} {sp} {sp} xs)
   lem₂ {suc n} {suc sz} {sp} (x ∷ xs) = cong (x ∷_) (lem₂ {suc n} {sz} {sp} xs)
 
-  postulate lem₃ : (n m sz sp : ℕ) →
-                   suc (sz + n * suc sp + (n + sp + n * sp + m * suc (n + sp + n * sp))) ≡
-                   suc (n + sp + n * sp + (sz + n * suc sp + m * suc (n + sp + n * sp)))
+  lem₃ : (n m sz sp : ℕ) →
+         suc (sz + n * suc sp + (n + sp + n * sp + m * suc (n + sp + n * sp))) ≡
+         suc (n + sp + n * sp + (sz + n * suc sp + m * suc (n + sp + n * sp)))
+  lem₃ n m sz sp = let a = sz + n * suc sp; b = n + sp + n * sp; c = m * suc (n + sp + n * sp) in
+    begin
+      suc (a + (b + c))
+    ≡⟨ cong suc (sym (+-assoc a b c))⟩
+      suc (a + b + c)
+    ≡⟨ cong suc (cong (_+ c) (+-comm a b))⟩
+      cong suc (+-assoc b a c)
 
   lem₄ : {n m : ℕ} → {t : Set} → (sz sp : ℕ) →
          (xs : Vec t (suc (sz + n * suc sp + (n + sp + n * sp + m * suc (n + sp + n * sp))))) →
