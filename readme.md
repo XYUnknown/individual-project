@@ -1,27 +1,24 @@
-# Guidance
-This is a suggested template for a project. You can modify it as you please, but
-but remember to keep:
+# Level Four Individual project: Proving the Correctness of Rewrite Rules in LIFT's Rewrite-Based System
+Website: https://xyunknown.github.io/individual-project/
 
-* a timelog, updated regularly in the `timelog.md` format;
-* all source under version control;
-* data well organised and with appropriate ethical approval (for human subject data);
-
-Here's an overview of the structure as it stands:
+## Overview
 
 * `timelog.md` The time log for your project.
 * `plan.md` A skeleton week-by-week plan for the project. 
 * `src/` source code for your project
 * `status_report/` the status report submitted in December
-* `docs/meetings/` Records of the meetings you have during the project.
-* `docs/proposal/` the project proposal
+* `miscellanies/meetings/` Records of the meetings you have during the project.
+* `miscellanies/proposal/` the project proposal
+* `docs/` the GitHub page of the project
 * `dissertation/` source and for your project dissertation
 * `presentation/` your presentation
 
-* Make sure you add a `.gitignore` or similar for your VCS for the tools you are using!
-* Add any appropriate continuous integration (e.g. Travis CI) in this directory.
+## Dependencies
+* Agda version: v2.6.1
+* Agda standard library version: agda-stdlib-1.2
+* Agda official website: [The Agda Wiki](https://wiki.portal.chalmers.se/agda/pmwiki.php)
+* Agda installation instruction: [installing Agda](https://agda.readthedocs.io/en/latest/getting-started/installation.html)
 
-* Remove this `readme.md` file from any repository and replace it with something more appropriate!
-
-## Important
-* It should be easy to rebuild and run your project and your dissertation
-        * Include clear instructions in the relevant directories to make this possible
+## Use this project as Agda library:
+* in ~/.agda/defaults add: lift
+* in ~/.agda/libraries add: YOURLOCATION/individual-project/lift.agda-lib
