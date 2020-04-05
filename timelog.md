@@ -215,3 +215,33 @@
 
 ### 12 Feb 2020
 * *0.5 hours* Updating time log
+
+## Week 18 (17 Feb 2020 - 21 Feb 2020)
+* *1 hour* meeting with supervisor
+* *3 hours* fixing type system soundness
+
+## Week 19 (24 Feb 2020 - 29 Feb 2020)
+* *1 hour* meeting with supervisor
+
+## Week 20 (02 Mar 2020 - 06 Mar 2020)
+* *1 hour* meeting with supervisor
+
+## Week 21 (09 Mar 2020 - 13 Mar 2020)
+* *1 hour* meeting with supervisor
+* *10 hours* writing dissertation
+
+## Week 22 (16 Mar 2020 - 20 Mar 2020)
+* *1 hour* meeting with supervisor
+* *3 hours* clean up code
+* *15 hours* writing dissertation
+
+## Week 23 (23 Mar 2020 - 27 Mar 2020)
+* *1 hour* meeting with supervisor
+* *3 hours* clean up code
+* *15 hours* writing dissertation
+
+## Week 23 (30 Mar 2020 - 03 April 2020)
+* *1 hour* meeting with supervisor
+* *1 hours* clean up code
+* *5 hours* writing dissertation
+* *2 hours* recording presentation
