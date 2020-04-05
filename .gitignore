@@ -19,7 +19,7 @@ MAlonzo/**
 *.cb
 *.cb2
 .*.lb
-*.pdf
+#*.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
