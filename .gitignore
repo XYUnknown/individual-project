@@ -19,7 +19,9 @@ MAlonzo/**
 *.cb
 *.cb2
 .*.lb
-#*.pdf
+*/l4proj.pdf
+*/status_report.pdf
+*/proposal.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
