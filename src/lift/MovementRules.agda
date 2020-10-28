@@ -4,7 +4,7 @@
 module lift.MovementRules where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym; subst; cong₂)
-  open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
+  open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
   open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
   open import Data.Nat.Properties using (*-distribʳ-+; *-assoc)
   open import Data.Product using (∃₂; _,_)

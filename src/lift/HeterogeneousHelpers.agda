@@ -5,7 +5,7 @@ and https://stackoverflow.com/questions/24139810/stuck-on-proof-with-heterogeneo
 module lift.HeterogeneousHelpers where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; refl; cong; sym; subst; cong₂)
-  open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
+  open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
   import Relation.Binary.HeterogeneousEquality as Heq
   open Heq using (_≅_) renaming (sym to hsym; trans to htrans; cong to hcong; subst to hsubst)
   open Heq.≅-Reasoning using (_≅⟨_⟩_) renaming (begin_ to hbegin_; _≡⟨⟩_ to _h≡⟨⟩_; _≡⟨_⟩_ to _h≡⟨_⟩_; _∎ to _h∎)

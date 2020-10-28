@@ -5,7 +5,7 @@
 module lift.Primitives where
   import Relation.Binary.PropositionalEquality as Eq
   open Eq using (_≡_; _≢_; refl; cong; sym; subst)
-  open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; _≡⟨_⟩_; _∎)
+  open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
   open import Data.Nat using (ℕ; zero; suc; pred; _+_; _*_; _∸_)
   import Data.Product as Prod
   open Prod using (∃₂; _,_; _×_)
