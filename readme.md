@@ -1,5 +1,6 @@
 # Level Four Individual project: Proving the Correctness of Rewrite Rules in LIFT's Rewrite-Based System
 Website: https://xyunknown.github.io/individual-project/
+Report: https://xyunknown.github.io/individual-project/2335466q.pdf
 
 ## Overview
 
